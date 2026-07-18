@@ -48,182 +48,26 @@ $('btn-enter').addEventListener('click',()=>{
   initBabylon();
 });
 
-// ─── PROCEDURAL TEXTURE HELPERS ───────────────────────────────────────────────
-function makeStoneWallTexture(scene, size=512){
-  const tex = new BABYLON.DynamicTexture('stoneTex', size, scene, false);
-  const ctx = tex.getContext();
-  // Base purple-mauve plaster
-  ctx.fillStyle = '#1e2a32';
-  ctx.fillRect(0,0,size,size);
-  // Stone block grid
-  const bw=80, bh=50;
-  ctx.strokeStyle='#1a0828'; ctx.lineWidth=2;
-  for(let r=0;r<size/bh+1;r++){
-    const offset=(r%2)*40;
-    for(let c=-1;c<size/bw+1;c++){
-      const x=c*bw+offset, y=r*bh;
-      ctx.strokeRect(x+2,y+2,bw-4,bh-4);
-      // Mortar fill per block — slight colour variation
-      const v=Math.random()*18-9;
-      ctx.fillStyle=`rgba(${38+v},${52+v},${65+v},0.5)`;
-      ctx.fillRect(x+3,y+3,bw-6,bh-6);
-    }
-  }
-  // Noise grain overlay
-  const imgData=ctx.getImageData(0,0,size,size);
-  const d=imgData.data;
-  for(let i=0;i<d.length;i+=4){
-    const n=(Math.random()-0.5)*22;
-    d[i]  =Math.max(0,Math.min(255,d[i]+n));
-    d[i+1]=Math.max(0,Math.min(255,d[i+1]+n));
-    d[i+2]=Math.max(0,Math.min(255,d[i+2]+n));
-  }
-  ctx.putImageData(imgData,0,0);
-  // Cracks
-  ctx.strokeStyle='rgba(10,4,18,0.5)'; ctx.lineWidth=1;
-  for(let k=0;k<6;k++){
-    ctx.beginPath();
-    let cx=Math.random()*size, cy=Math.random()*size;
-    ctx.moveTo(cx,cy);
-    for(let s=0;s<8;s++){ cx+=Math.random()*20-10; cy+=Math.random()*15; ctx.lineTo(cx,cy); }
-    ctx.stroke();
-  }
-  tex.update();
-  return tex;
-}
-
-function makeWoodFloorTexture(scene, size=512){
-  const tex = new BABYLON.DynamicTexture('woodTex', size, scene, false);
-  const ctx = tex.getContext();
-  ctx.fillStyle='#141e26'; ctx.fillRect(0,0,size,size);
-  const plankW=size/4;
-  for(let col=0;col<4;col++){
-    // Each plank column — staggered
-    const x=col*plankW;
-    for(let row=0;row<3;row++){
-      const pY=row*(size/3+(Math.random()*20-10));
-      // Plank base colour
-      const b=10+Math.floor(Math.random()*18);
-      ctx.fillStyle=`rgb(${28+b},${38+b},${48+b})`;
-      ctx.fillRect(x+1,pY,plankW-2,size/3-1);
-      // Wood grain lines
-      ctx.strokeStyle=`rgba(0,0,0,0.18)`; ctx.lineWidth=1;
-      for(let g=0;g<6;g++){
-        const gy=pY+Math.random()*(size/3);
-        ctx.beginPath(); ctx.moveTo(x,gy);
-        for(let s=0;s<5;s++) ctx.lineTo(x+(s+1)*plankW/5, gy+(Math.random()-0.5)*4);
-        ctx.stroke();
-      }
-      // Nail dots
-      ctx.fillStyle='#0e0805';
-      ctx.beginPath(); ctx.arc(x+10,pY+12,2,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x+plankW-10,pY+12,2,0,Math.PI*2); ctx.fill();
-    }
-  }
-  // Noise
-  const imgData=ctx.getImageData(0,0,size,size);
-  const d=imgData.data;
-  for(let i=0;i<d.length;i+=4){
-    const n=(Math.random()-0.5)*12;
-    d[i]=Math.max(0,Math.min(255,d[i]+n));
-    d[i+1]=Math.max(0,Math.min(255,d[i+1]+n));
-    d[i+2]=Math.max(0,Math.min(255,d[i+2]+n));
-  }
-  ctx.putImageData(imgData,0,0);
-  tex.update(); return tex;
-}
-
-function makeBeamCeilingTexture(scene, size=512){
-  const tex = new BABYLON.DynamicTexture('ceilTex', size, scene, false);
-  const ctx = tex.getContext();
-  // Dark ceiling field
-  ctx.fillStyle='#0d0616'; ctx.fillRect(0,0,size,size);
-  // Exposed timber beams
-  const beamW=60, gap=120;
-  for(let bx=0;bx<size;bx+=gap){
-    ctx.fillStyle='#1e0e06';
-    ctx.fillRect(bx,0,beamW,size);
-    // Beam grain
-    ctx.strokeStyle='rgba(0,0,0,0.25)'; ctx.lineWidth=1.5;
-    for(let g=0;g<8;g++){
-      const gx=bx+5+g*(beamW/8);
-      ctx.beginPath(); ctx.moveTo(gx,0);
-      for(let s=0;s<6;s++) ctx.lineTo(gx+(Math.random()-0.5)*5, (s+1)*size/6);
-      ctx.stroke();
-    }
-    // Beam edge shadow
-    const grad=ctx.createLinearGradient(bx,0,bx+beamW,0);
-    grad.addColorStop(0,'rgba(0,0,0,0.4)');
-    grad.addColorStop(0.5,'rgba(0,0,0,0)');
-    grad.addColorStop(1,'rgba(0,0,0,0.35)');
-    ctx.fillStyle=grad; ctx.fillRect(bx,0,beamW,size);
-  }
-  // Cobweb hints in corners
-  ctx.strokeStyle='rgba(80,50,100,0.35)'; ctx.lineWidth=0.8;
-  for(let w=0;w<4;w++){
-    const wx=w%2===0?0:size, wy=w<2?0:size;
-    for(let r=0;r<6;r++){
-      ctx.beginPath(); ctx.moveTo(wx,wy);
-      ctx.lineTo(wx+(wx?-1:1)*(40+r*10), wy+(wy?-1:1)*(30+r*8));
-      ctx.stroke();
-    }
-  }
-  tex.update(); return tex;
-}
-
-function makeStoneFireplaceTexture(scene, size=256){
-  const tex = new BABYLON.DynamicTexture('fpTex', size, scene, false);
-  const ctx = tex.getContext();
-  ctx.fillStyle='#0e1418'; ctx.fillRect(0,0,size,size);
-  // Rough stone blocks
-  const bw=50, bh=38;
-  for(let r=0;r<size/bh+1;r++){
-    const off=(r%2)*25;
-    for(let c=-1;c<size/bw+1;c++){
-      const x=c*bw+off, y=r*bh;
-      const v=Math.random()*15-7;
-      ctx.fillStyle=`rgb(${28+v},${36+v},${44+v})`;
-      ctx.fillRect(x+2,y+2,bw-4,bh-4);
-      ctx.strokeStyle='#120e1a'; ctx.lineWidth=2;
-      ctx.strokeRect(x+2,y+2,bw-4,bh-4);
-    }
-  }
-  // Soot smear near firebox
-  const sg=ctx.createRadialGradient(size/2,size,10,size/2,size,120);
-  sg.addColorStop(0,'rgba(0,0,0,0.7)'); sg.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=sg; ctx.fillRect(0,0,size,size);
-  tex.update(); return tex;
-}
-
-function makeBookSpineTexture(scene, size=64, colHex='#7a1a1a'){
-  const tex = new BABYLON.DynamicTexture('bookTex_'+Math.random().toString(36).slice(2), size, scene, false);
-  const ctx = tex.getContext();
-  ctx.fillStyle=colHex; ctx.fillRect(0,0,size,size);
-  // Spine line
-  ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(4,0); ctx.lineTo(4,size); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(size-4,0); ctx.lineTo(size-4,size); ctx.stroke();
-  // Gold title band
-  ctx.fillStyle='rgba(180,140,40,0.35)';
-  ctx.fillRect(6,size*0.3,size-12,size*0.15);
-  tex.update(); return tex;
-}
-
-function makeDirtFloorTexture(scene, size=256){
-  const tex = new BABYLON.DynamicTexture('dirtTex', size, scene, false);
-  const ctx = tex.getContext();
-  ctx.fillStyle='#1a0e08'; ctx.fillRect(0,0,size,size);
-  const imgData=ctx.getImageData(0,0,size,size);
-  const d=imgData.data;
-  for(let i=0;i<d.length;i+=4){
-    const n=Math.random()*30;
-    d[i]=Math.max(0,20+n); d[i+1]=Math.max(0,10+n*0.5); d[i+2]=Math.max(0,4+n*0.3); d[i+3]=255;
-  }
-  ctx.putImageData(imgData,0,0);
-  tex.update(); return tex;
-}
+// ─── REAL TEXTURE URLS (CC0 — PolyHaven) ─────────────────────────────────────
+const TEX = {
+  stone_d:   'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_wall/stone_wall_diff_1k.jpg',
+  stone_n:   'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_wall/stone_wall_nor_gl_1k.jpg',
+  plaster_d: 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_stone_wall/plastered_stone_wall_diff_1k.jpg',
+  plaster_n: 'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/plastered_stone_wall/plastered_stone_wall_nor_gl_1k.jpg',
+  wood_d:    'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks_dirt/wood_planks_dirt_diff_1k.jpg',
+  wood_n:    'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks_dirt/wood_planks_dirt_nor_gl_1k.jpg',
+  darkwood_d:'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_cabinet_worn_long/wood_cabinet_worn_long_diff_1k.jpg',
+  darkwood_n:'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_cabinet_worn_long/wood_cabinet_worn_long_nor_gl_1k.jpg',
+  rock_d:    'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_wall_07/rock_wall_07_diff_1k.jpg',
+  rock_n:    'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_wall_07/rock_wall_07_nor_gl_1k.jpg',
+  beam_d:    'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks/wood_planks_diff_1k.jpg',
+  beam_n:    'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks/wood_planks_nor_gl_1k.jpg',
+  mstone_d:  'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_02/medieval_blocks_02_diff_1k.jpg',
+  mstone_n:  'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_02/medieval_blocks_02_nor_gl_1k.jpg',
+};
 
 // ─── BABYLON INIT ─────────────────────────────────────────────────────────────
+
 function initBabylon(){
   const engine = new BABYLON.Engine($('game-canvas'), true, { antialias:true });
   const scene  = new BABYLON.Scene(engine);
@@ -231,6 +75,28 @@ function initBabylon(){
   scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
   scene.fogColor   = new BABYLON.Color3(0.06,0.12,0.18);
   scene.fogDensity = 0.025;
+
+  // ─── REAL TEXTURE MATERIAL BUILDER ──────────────────────────────────────────
+  function pbr(name, diffUrl, norUrl, usc=2, vsc=2, tint=null, alpha=1.0) {
+    const m = new BABYLON.StandardMaterial(name, scene);
+    // Diffuse texture
+    const dt = new BABYLON.Texture(diffUrl, scene);
+    dt.uScale = usc; dt.vScale = vsc;
+    m.diffuseTexture = dt;
+    // Normal map (bump)
+    const nt = new BABYLON.Texture(norUrl, scene);
+    nt.uScale = usc; nt.vScale = vsc;
+    m.bumpTexture = nt;
+    m.invertNormalMapX = false; m.invertNormalMapY = false;
+    // Specular — low for rough surfaces
+    m.specularColor = new BABYLON.Color3(0.06, 0.06, 0.08);
+    m.specularPower  = 12;
+    if (tint) m.diffuseColor = tint;
+    if (alpha < 1) { m.alpha = alpha; m.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND; }
+    return m;
+  }
+
+
 
   // ── CAMERA ─────────────────────────────────────────────────────────────────
   const camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0,1.7,0), scene);
@@ -324,46 +190,40 @@ function initBabylon(){
   window.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); if(e.key==='r'||e.key==='R') recentreView(); },{passive:true});
 
   // ── TEXTURES ───────────────────────────────────────────────────────────────
-  const stoneTex    = makeStoneWallTexture(scene);
-  stoneTex.uScale=4; stoneTex.vScale=3;
-  const woodTex     = makeWoodFloorTexture(scene);
-  woodTex.uScale=6; woodTex.vScale=4;
-  const ceilTex     = makeBeamCeilingTexture(scene);
-  ceilTex.uScale=5; ceilTex.vScale=3;
-  const fpTex       = makeStoneFireplaceTexture(scene);
-  const dirtTex     = makeDirtFloorTexture(scene);
 
   // ── MATERIALS ──────────────────────────────────────────────────────────────
   function mat(name){ const m=new BABYLON.StandardMaterial(name,scene); m.specularColor=new BABYLON.Color3(0.04,0.04,0.04); return m; }
 
-  const wallM = mat('wallM');
-  wallM.diffuseTexture = stoneTex;
-  wallM.diffuseColor   = new BABYLON.Color3(0.28, 0.36, 0.42); // cold stone grey-teal
-  wallM.specularColor  = new BABYLON.Color3(0.02,0.01,0.03);
+  // Real stone wall texture with normal map
+  const wallM = pbr('wallM', TEX.stone_d, TEX.stone_n, 4, 3,
+    new BABYLON.Color3(0.32, 0.40, 0.48)); // cold blue-grey tint over stone
 
-  const floorM = mat('floorM');
-  floorM.diffuseTexture = woodTex;
-  floorM.specularColor  = new BABYLON.Color3(0.08,0.1,0.12); floorM.diffuseColor = new BABYLON.Color3(0.2,0.26,0.32);
+  const floorM = pbr('floorM', TEX.wood_d, TEX.wood_n, 6, 5, new BABYLON.Color3(0.38,0.28,0.18));
+  floorM.specularColor = new BABYLON.Color3(0.08,0.06,0.03); floorM.specularPower = 28;
 
-  const ceilM = mat('ceilM');
-  ceilM.diffuseTexture = ceilTex;
+  // Real wood beam ceiling
+  const ceilM = pbr('ceilM', TEX.beam_d, TEX.beam_n, 5, 3,
+    new BABYLON.Color3(0.18, 0.12, 0.07));
 
-  const fpStoneM = mat('fpStoneM');
-  fpStoneM.diffuseTexture = fpTex;
+  // Real rock/stone for fireplace
+  const fpStoneM = pbr('fpStoneM', TEX.rock_d, TEX.rock_n, 2, 2,
+    new BABYLON.Color3(0.3, 0.36, 0.4));
 
-  const woodTrimM = mat('woodTrimM');
-  woodTrimM.diffuseColor = new BABYLON.Color3(0.22,0.26,0.3);
+  // Real dark wood trim
+  const woodTrimM = pbr('woodTrimM', TEX.darkwood_d, TEX.darkwood_n, 8, 1,
+    new BABYLON.Color3(0.4, 0.3, 0.18));
 
   const goldM = mat('goldM');
   goldM.diffuseColor  = new BABYLON.Color3(0.28,0.38,0.32);
   goldM.specularColor = new BABYLON.Color3(0.4,0.55,0.45);
   goldM.specularPower = 48;
 
-  const darkWoodM = mat('darkWoodM');
-  darkWoodM.diffuseColor = new BABYLON.Color3(0.18,0.22,0.28);
+  // Real dark wood for bookshelf/clock
+  const darkWoodM = pbr('darkWoodM', TEX.darkwood_d, TEX.darkwood_n, 3, 6,
+    new BABYLON.Color3(0.3, 0.22, 0.12));
 
   const dirtM = mat('dirtM');
-  dirtM.diffuseTexture = dirtTex;
+  dirtM.diffuseColor = new BABYLON.Color3(0.12, 0.09, 0.06);
 
   function emitM(name,r,g,b,ei=0.8){ const m=mat(name); m.diffuseColor=new BABYLON.Color3(r,g,b); m.emissiveColor=new BABYLON.Color3(r*ei,g*ei,b*ei); return m; }
 
@@ -377,8 +237,8 @@ function initBabylon(){
   // Ceiling
   const ceil=BABYLON.MeshBuilder.CreatePlane('ceil',{width:W,height:D},scene);
   ceil.position.y=H; ceil.rotation.x=Math.PI/2;
-  const ceilMI=ceilM.clone('ceilMI'); ceilMI.backFaceCulling=false;
-  ceil.material=ceilMI;
+  ceilM.backFaceCulling=false;
+  ceil.material=ceilM;
 
   // Walls
   function wall(name,w,h,pos,rotY){
@@ -481,7 +341,7 @@ function initBabylon(){
 
 
   // ── GRAND STAIRCASE (right of centre, curving up to landing) ──────────────
-  const stairM=mat('stairM'); stairM.diffuseColor=new BABYLON.Color3(0.2,0.14,0.06); stairM.specularColor=new BABYLON.Color3(0.08,0.06,0.03);
+  const stairM=pbr('stairM', TEX.darkwood_d, TEX.darkwood_n, 4, 1, new BABYLON.Color3(0.32,0.22,0.1));
   const railM=mat('railM'); railM.diffuseColor=new BABYLON.Color3(0.28,0.18,0.08); railM.specularColor=new BABYLON.Color3(0.15,0.1,0.04); railM.specularPower=16;
   const balM=mat('balM'); balM.diffuseColor=new BABYLON.Color3(0.22,0.15,0.07); balM.specularColor=new BABYLON.Color3(0.12,0.08,0.03);
 
@@ -664,7 +524,8 @@ function initBabylon(){
 
 
   // ── STONE STATUE (flanking staircase foot — gothic manor style) ──────────
-  const statM=mat('statM'); statM.diffuseColor=new BABYLON.Color3(0.24,0.3,0.34); statM.specularColor=new BABYLON.Color3(0.06,0.07,0.08); statM.emissiveColor=new BABYLON.Color3(0.01,0.015,0.02);
+  const statM=pbr('statM', TEX.mstone_d, TEX.mstone_n, 1, 1, new BABYLON.Color3(0.35,0.42,0.48));
+  statM.emissiveColor=new BABYLON.Color3(0.01,0.015,0.02);
   const statX=1.0, statZ=4.2;
   // Plinth
   const plinth=BABYLON.MeshBuilder.CreateBox('plinth',{width:0.44,height:0.5,depth:0.44},scene);
