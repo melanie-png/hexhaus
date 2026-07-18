@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HEXHAUS</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f; --panel: #12111a; --border: #2a2535;
+    --accent: #7b4fa6; --gold: #c9a84c; --text: #c8bfdc;
+    --muted: #6b6280; --white: #ede8f5; --glow: rgba(123,79,166,0.3);
+  }
+  html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
+    font-family:'Crimson Text',Georgia,serif; overflow:hidden; user-select:none; }
+  .screen { display:none; width:100%; height:100%; position:absolute; top:0; left:0; }
+  .screen.active { display:flex; }
+
+  /* TITLE */
+  #title-screen { flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(ellipse at 50% 30%, #1a0d2e 0%, #0a0a0f 70%); text-align:center; }
+  .title-eyebrow { font-family:'Cinzel',serif; font-size:clamp(0.6rem,1.5vw,0.85rem);
+    letter-spacing:6px; color:var(--muted); text-transform:uppercase; margin-bottom:16px; }
+  .title-main { font-family:'Cinzel',serif; font-size:clamp(3.5rem,12vw,8rem); font-weight:700;
+    color:var(--white); letter-spacing:8px; line-height:1;
+    text-shadow:0 0 60px var(--glow),0 0 120px rgba(123,79,166,0.15); margin-bottom:8px; }
+  .title-sub { font-style:italic; color:var(--muted); letter-spacing:2px; margin-bottom:48px;
+    font-size:clamp(0.9rem,2.5vw,1.2rem); }
+  .title-lore { max-width:480px; font-size:clamp(0.9rem,2vw,1.05rem); line-height:1.7;
+    color:#9a8fb0; margin-bottom:48px; padding:0 24px; font-style:italic; }
+  .btn-start { font-family:'Cinzel',serif; font-size:clamp(0.85rem,2vw,1rem);
+    letter-spacing:4px; text-transform:uppercase; color:var(--white); background:transparent;
+    border:1px solid var(--accent); padding:16px 48px; cursor:pointer; transition:all 0.3s; }
+  .btn-start:hover { background:var(--accent); box-shadow:0 0 30px var(--glow); }
+  .cf { position:absolute; animation:flicker 3s ease-in-out infinite; font-size:2.5rem; }
+  .cf:nth-child(1){top:15%;left:8%;} .cf:nth-child(2){top:20%;right:10%;animation-delay:1.2s;}
+  .cf:nth-child(3){bottom:20%;left:12%;animation-delay:0.7s;font-size:2rem;}
+  .cf:nth-child(4){bottom:15%;right:8%;animation-delay:1.8s;}
+  @keyframes flicker {
+    0%,100%{opacity:0.6;transform:scale(1) rotate(-2deg);}
+    25%{opacity:1;transform:scale(1.05) rotate(1deg);}
+    50%{opacity:0.5;transform:scale(0.97) rotate(-1deg);}
+    75%{opacity:0.9;transform:scale(1.02) rotate(2deg);}
+  }
+
+  /* GAME */
+  #game-screen { flex-direction:column; }
+  .top-bar { background:var(--panel); border-bottom:1px solid var(--border);
+    padding:10px 20px; display:flex; align-items:center; justify-content:space-between;
+    flex-shrink:0; }
+  .room-name { font-family:'Cinzel',serif; font-size:clamp(0.75rem,2vw,0.95rem);
+    color:var(--gold); letter-spacing:2px; text-transform:uppercase; }
+  .top-actions { display:flex; gap:10px; }
+  .icon-btn { background:transparent; border:1px solid var(--border); color:var(--muted);
+    width:36px; height:36px; border-radius:4px; cursor:pointer; font-size:1.1rem;
+    transition:all 0.2s; display:flex; align-items:center; justify-content:center; }
+  .icon-btn:hover { border-color:var(--accent); color:var(--white); }
+  .game-area { flex:1; display:flex; overflow:hidden; position:relative; }
+  .room-viewport { flex:1; position:relative; overflow:hidden; }
+
+  /* Room art */
+  .hall-art { width:100%; height:100%; position:relative;
+    background:linear-gradient(180deg,#0f0c1a 0%,#1a1228 40%,#12111a 100%); overflow:hidden; }
+  .hall-art::before { content:''; position:absolute; bottom:0; left:0; right:0; height:35%;
+    background:linear-gradient(180deg,#1a1020 0%,#100c18 100%); border-top:2px solid #2a1f3d; }
+  .hall-art::after { content:''; position:absolute; top:0; left:0; right:0; height:12%;
+    background:repeating-linear-gradient(90deg,#0d0b15 0px,#0d0b15 80px,#151120 80px,#151120 120px);
+    border-bottom:2px solid #2a1f3d; }
+
+  /* Objects */
+  .room-object { position:absolute; cursor:pointer; transition:filter 0.2s,transform 0.2s;
+    display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .room-object:hover { filter:brightness(1.4) drop-shadow(0 0 8px var(--accent)); transform:scale(1.05); }
+  .room-object .obj-label { font-family:'Cinzel',serif; font-size:clamp(0.5rem,1.2vw,0.65rem);
+    color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; opacity:0;
+    transition:opacity 0.2s; white-space:nowrap; text-shadow:0 0 6px #000; pointer-events:none; }
+  .room-object:hover .obj-label { opacity:1; }
+  .room-object.collected { opacity:0.25; pointer-events:none; }
+  .obj-icon { font-size:clamp(2rem,6vw,3.5rem); line-height:1; }
+  .portrait-frame { width:clamp(55px,9vw,85px); height:clamp(70px,12vw,110px);
+    border:3px solid #4a3a1a; background:linear-gradient(160deg,#1a0f0a,#2a1a0f);
+    display:flex; align-items:center; justify-content:center; font-size:clamp(1.8rem,5vw,3rem);
+    position:relative; box-shadow:0 0 20px rgba(0,0,0,0.8); overflow:hidden; }
+  .portrait-frame::after { content:'👁 👁'; position:absolute; bottom:20%;
+    font-size:clamp(0.6rem,1.5vw,0.9rem); letter-spacing:6px;
+    animation:eye-shift 4s ease-in-out infinite; }
+  @keyframes eye-shift { 0%,100%{transform:translateX(-4px);} 50%{transform:translateX(4px);} }
+  .candle-obj { animation:cflicker 2s ease-in-out infinite; }
+  @keyframes cflicker {
+    0%,100%{filter:drop-shadow(0 0 8px #ff9920);} 50%{filter:drop-shadow(0 0 3px #ff7700);}
+  }
+
+  /* Sidebar */
+  .sidebar { width:clamp(150px,20vw,220px); background:var(--panel);
+    border-left:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
+  .sidebar-title { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:3px;
+    text-transform:uppercase; color:var(--muted); padding:14px 16px 10px;
+    border-bottom:1px solid var(--border); }
+  .inventory-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+    padding:12px; overflow-y:auto; flex:1; }
+  .inv-slot { aspect-ratio:1; border:1px solid var(--border); border-radius:6px;
+    background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center;
+    font-size:clamp(1.2rem,3vw,1.6rem); transition:all 0.2s; position:relative; }
+  .inv-slot.filled { border-color:var(--accent); background:rgba(123,79,166,0.1); cursor:pointer; }
+  .inv-slot.filled:hover { border-color:var(--gold); transform:scale(1.05);
+    box-shadow:0 0 12px var(--glow); }
+  .inv-count { padding:10px 16px; border-top:1px solid var(--border);
+    font-size:0.75rem; color:var(--muted); font-style:italic; }
+
+  /* Message bar */
+  .msg-bar { background:#0d0b15; border-top:1px solid var(--border);
+    padding:14px 20px; min-height:60px; display:flex; align-items:center; flex-shrink:0; }
+  .msg-text { font-style:italic; font-size:clamp(0.85rem,2vw,1rem); color:var(--text);
+    line-height:1.5; flex:1; }
+  .msg-text .hl { color:var(--gold); font-style:normal; }
+
+  /* Modal */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8);
+    z-index:100; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal-box { background:var(--panel); border:1px solid var(--border); max-width:420px;
+    width:100%; padding:28px 24px; position:relative;
+    box-shadow:0 0 60px rgba(0,0,0,0.9); }
+  .modal-box::before { content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent); }
+  .modal-icon { font-size:2.8rem; text-align:center; margin-bottom:12px; }
+  .modal-title { font-family:'Cinzel',serif; font-size:1rem; color:var(--gold);
+    letter-spacing:2px; text-align:center; margin-bottom:14px; text-transform:uppercase; }
+  .modal-desc { font-size:1rem; line-height:1.7; color:var(--text);
+    text-align:center; margin-bottom:20px; font-style:italic; }
+  .modal-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .modal-btn { font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:2px;
+    text-transform:uppercase; border:1px solid var(--border); background:transparent;
+    color:var(--text); padding:10px 20px; cursor:pointer; transition:all 0.2s; }
+  .modal-btn:hover { border-color:var(--accent); color:var(--white); }
+  .modal-btn.primary { border-color:var(--gold); color:var(--gold); }
+  .modal-btn.primary:hover { background:rgba(201,168,76,0.15); }
+  .modal-close { position:absolute; top:10px; right:12px; background:none; border:none;
+    color:var(--muted); font-size:1.2rem; cursor:pointer; }
+  .modal-close:hover { color:var(--white); }
+
+  /* Whisper */
+  .whisper-overlay { position:fixed; inset:0; pointer-events:none; z-index:200;
+    display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.5s; }
+  .whisper-overlay.show { opacity:1; }
+  .whisper-text { font-family:'Cinzel',serif; font-size:clamp(1rem,3vw,1.5rem);
+    color:rgba(123,79,166,0.9); letter-spacing:4px; text-align:center;
+    text-shadow:0 0 30px var(--accent); padding:0 20px;
+    animation:wpulse 2.5s ease-in-out forwards; }
+  @keyframes wpulse {
+    0%{opacity:0;transform:scale(0.95);} 20%{opacity:1;transform:scale(1);}
+    80%{opacity:1;} 100%{opacity:0;}
+  }
+
+  @media(max-width:600px){
+    .game-area{flex-direction:column;}
+    .room-viewport{flex:1;min-height:0;}
+    .sidebar{width:100%;height:110px;border-left:none;border-top:1px solid var(--border);
+      flex-direction:row;align-items:center;}
+    .sidebar-title{writing-mode:vertical-rl;border-bottom:none;border-right:1px solid var(--border);
+      height:100%;padding:12px 8px;}
+    .inventory-grid{grid-template-columns:repeat(6,1fr);padding:8px;}
+    .inv-count{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="title-screen" class="screen active">
+  <span class="cf">🕯️</span><span class="cf">🕯️</span>
+  <span class="cf">🕯️</span><span class="cf">🕯️</span>
+  <p class="title-eyebrow">you should not have come here</p>
+  <h1 class="title-main">HEXHAUS</h1>
+  <p class="title-sub">a witch's house · room by room</p>
+  <p class="title-lore">
+    The house at the end of Hollow Lane has been empty for two hundred years.<br>
+    Everyone says so.<br><br>
+    Everyone is wrong.
+  </p>
+  <button class="btn-start" onclick="startGame()">Enter</button>
+</div>
+
+<div id="game-screen" class="screen">
+  <div class="top-bar">
+    <span class="room-name" id="room-label">The Entrance Hall</span>
+    <div class="top-actions">
+      <button class="icon-btn" id="snd-btn" title="Sound" onclick="toggleSound()">🔊</button>
+    </div>
+  </div>
+  <div class="game-area">
+    <div class="room-viewport">
+      <div class="hall-art">
+
+        <div class="room-object" id="obj-portrait" style="left:8%;top:18%;" onclick="inspect('portrait')">
+          <div class="portrait-frame">🧙‍♀️</div>
+          <span class="obj-label">Portrait</span>
+        </div>
+
+        <div class="room-object" id="obj-cloak" style="left:27%;top:22%;" onclick="inspect('cloak')">
+          <span class="obj-icon">🧥</span>
+          <span class="obj-label">Coat Rack</span>
+        </div>
+
+        <div class="room-object" id="obj-door" style="left:50%;top:8%;transform:translateX(-50%);" onclick="inspect('door')">
+          <span class="obj-icon" style="font-size:clamp(3.5rem,10vw,6rem);">🚪</span>
+          <span class="obj-label">Inner Door</span>
+        </div>
+
+        <div class="room-object" id="obj-staff" style="right:27%;top:26%;" onclick="inspect('staff')">
+          <span class="obj-icon">🪄</span>
+          <span class="obj-label">Umbrella Stand</span>
+        </div>
+
+        <div class="room-object candle-obj" id="obj-candle" style="right:12%;top:36%;" onclick="inspect('candle')">
+          <span class="obj-icon">🕯️</span>
+          <span class="obj-label">Side Table</span>
+        </div>
+
+        <div class="room-object" id="obj-envelope" style="right:9%;top:52%;" onclick="inspect('envelope')">
+          <span class="obj-icon" style="font-size:clamp(1.2rem,3.5vw,2rem);">✉️</span>
+          <span class="obj-label">Envelope</span>
+        </div>
+
+        <div class="room-object" id="obj-mat" style="left:50%;bottom:7%;transform:translateX(-50%);" onclick="inspect('mat')">
+          <span class="obj-icon" style="font-size:clamp(1.5rem,4vw,2.5rem);">🟫</span>
+          <span class="obj-label">Doormat</span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-title">Inventory</div>
+      <div class="inventory-grid" id="inventory-grid"></div>
+      <div class="inv-count" id="inv-count">0 / 9 items</div>
+    </div>
+  </div>
+
+  <div class="msg-bar">
+    <p class="msg-text" id="msg-text">
+      The front door swings open before you touch it. Cold air rolls over your feet.
+      <span class="hl">Look around.</span>
+    </p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-icon" id="modal-icon"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-desc" id="modal-desc"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<div class="whisper-overlay" id="whisper">
+  <div class="whisper-text" id="whisper-text"></div>
+</div>
+
+<script>
+// ── AUDIO ────────────────────────────────────────────────────────
+let ctx, soundOn = true;
+function initAudio() {
+  if (ctx) return;
+  try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+}
+function tone(freq, type, dur, vol=0.07, delay=0) {
+  if (!ctx || !soundOn) return;
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type=type; o.frequency.setValueAtTime(freq,ctx.currentTime+delay);
+  o.frequency.exponentialRampToValueAtTime(freq*0.65,ctx.currentTime+delay+dur);
+  g.gain.setValueAtTime(0,ctx.currentTime+delay);
+  g.gain.linearRampToValueAtTime(vol,ctx.currentTime+delay+0.05);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+dur);
+  o.start(ctx.currentTime+delay); o.stop(ctx.currentTime+delay+dur);
+}
+function playCreak() { [120,95,80,110].forEach((f,i)=>tone(f,'sawtooth',0.4,0.06,i*0.15)); }
+function playPickup() { [440,554,659].forEach((f,i)=>tone(f,'sine',0.3,0.07,i*0.08)); }
+function playWhisper() { [200,180,160].forEach((f,i)=>tone(f,'sine',0.8,0.04,i*0.2)); }
+function playAmbient() {
+  if (!soundOn) return;
+  tone(55+Math.random()*10,'sine',4,0.03);
+  tone(110+Math.random()*5,'triangle',3,0.02,0.5);
+  setTimeout(playAmbient, 6000+Math.random()*4000);
+}
+function toggleSound() {
+  soundOn=!soundOn;
+  document.getElementById('snd-btn').textContent=soundOn?'🔊':'🔇';
+}
+
+// ── STATE ────────────────────────────────────────────────────────
+const inventory=[], collected=new Set();
+
+const OBJECTS = {
+  portrait:{
+    icon:'🖼️', title:'The Portrait',
+    desc:'A woman painted in oils — severe, still. Her eyes are different each time you look. Right now they\'re watching the door behind you. She has been in this house a very long time.',
+    clue:'A small plaque reads: <em>"Helga, 1824. She sees everything."</em>',
+    canCollect:false
+  },
+  cloak:{
+    icon:'🧥', title:'Black Cloak',
+    desc:'Heavy wool, cold to the touch. It smells of lavender and something burnt. A name is stitched into the lining in faded red thread: <em>H. Hex.</em>',
+    clue:'It would make you invisible to her familiar. Probably.',
+    canCollect:true, label:'Take Cloak', name:'Cloak', iicon:'🧥'
+  },
+  door:{
+    icon:'🚪', title:'The Inner Door',
+    desc:'The door to the rest of the house. It is locked. Seven locks, each a different metal. None of them have keyholes.',
+    clue:'You will need to earn your way through.',
+    canCollect:false
+  },
+  staff:{
+    icon:'🪄', title:'Twisted Staff',
+    desc:'Gnarled dark wood, warm despite the cold air. It hums faintly — like it wants to be used. Or like it is warning you.',
+    clue:'Something is carved at the base. A word in a language you almost recognise.',
+    canCollect:true, label:'Take Staff', name:'Staff', iicon:'🪄'
+  },
+  candle:{
+    icon:'🕯️', title:'The Side Table',
+    desc:'A single candle, lit. It should have burned out years ago. The flame does not flicker — not even when you breathe on it. An iron key sits beside the wax.',
+    clue:'The key is small and cold. It fits nothing obvious. Yet.',
+    canCollect:true, label:'Take Iron Key', name:'Iron Key', iicon:'🗝️'
+  },
+  envelope:{
+    icon:'✉️', title:'The Envelope',
+    desc:'Sealed with black wax pressed into a crescent moon. Addressed to: <em>The Next One.</em>',
+    clue:'Inside, in handwriting almost too small to read: <em>"You will not leave the way you came in. But you might leave a different way, if you are clever."</em>',
+    canCollect:true, label:'Take Letter', name:'Letter', iicon:'✉️'
+  },
+  mat:{
+    icon:'🟫', title:'The Doormat',
+    desc:'Worn down by hundreds of years of feet. In letters almost invisible, it reads: <em>"WIPE YOUR FATE."</em>',
+    clue:'Beneath the mat, wedged into the floor: a dried sprig of rosemary. Someone left it in a hurry.',
+    canCollect:true, label:'Take Rosemary', name:'Rosemary', iicon:'🌿'
+  }
+};
+
+const WHISPERS=[
+  'she knows you\'re here',
+  'the house remembers',
+  "don't touch what isn't yours",
+  'you smell like fear',
+  'two hundred years and she still waits',
+  'she is listening',
+  'the mirrors are hers'
+];
+
+let wTimeout;
+function triggerWhisper() {
+  const el=document.getElementById('whisper');
+  const txt=document.getElementById('whisper-text');
+  txt.textContent=WHISPERS[Math.floor(Math.random()*WHISPERS.length)];
+  el.classList.add('show'); playWhisper();
+  clearTimeout(wTimeout);
+  wTimeout=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// ── INVENTORY ────────────────────────────────────────────────────
+function renderInventory() {
+  const g=document.getElementById('inventory-grid'); g.innerHTML='';
+  for(let i=0;i<9;i++){
+    const s=document.createElement('div'); s.className='inv-slot';
+    if(inventory[i]){
+      s.classList.add('filled'); s.textContent=inventory[i].icon;
+      s.title=inventory[i].name;
+    }
+    g.appendChild(s);
+  }
+  document.getElementById('inv-count').textContent=`${inventory.length} / 9 items`;
+}
+function addItem(name,icon){
+  inventory.push({name,icon}); renderInventory(); playPickup();
+  setMsg(`<span class="hl">${name}</span> added to your inventory.`);
+}
+
+// ── MODAL ────────────────────────────────────────────────────────
+function inspect(key) {
+  initAudio(); playCreak();
+  const o=OBJECTS[key];
+  document.getElementById('modal-icon').textContent=o.icon;
+  document.getElementById('modal-title').textContent=o.title;
+  document.getElementById('modal-desc').innerHTML=`${o.desc}<br><br><em style="color:var(--gold);font-size:0.88rem">${o.clue}</em>`;
+  const acts=document.getElementById('modal-actions'); acts.innerHTML='';
+  if(o.canCollect && !collected.has(key)){
+    const b=document.createElement('button'); b.className='modal-btn primary';
+    b.textContent=o.label;
+    b.onclick=()=>{ collected.add(key); addItem(o.name,o.iicon);
+      document.getElementById('obj-'+key)?.classList.add('collected'); closeModal(); };
+    acts.appendChild(b);
+  }
+  const cb=document.createElement('button'); cb.className='modal-btn';
+  cb.textContent='Step Back'; cb.onclick=closeModal; acts.appendChild(cb);
+  document.getElementById('modal').classList.add('open');
+  if(Math.random()<0.4) setTimeout(triggerWhisper,1200);
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+// ── MESSAGES ─────────────────────────────────────────────────────
+function setMsg(html){ document.getElementById('msg-text').innerHTML=html; }
+
+// ── START ────────────────────────────────────────────────────────
+function startGame(){
+  initAudio();
+  document.getElementById('title-screen').classList.remove('active');
+  document.getElementById('game-screen').classList.add('active');
+  renderInventory(); playCreak();
+  setTimeout(playAmbient,1200);
+  setTimeout(triggerWhisper,9000);
+  setInterval(()=>{ if(Math.random()<0.35) triggerWhisper(); },22000);
+}
+
+document.getElementById('modal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+</script>
+</body>
+</html>
