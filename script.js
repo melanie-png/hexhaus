@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════
-   HEXHAUS — script.js
+   HEXHAUS — script.js  v2 (performance + UX)
    ═══════════════════════════════════════════ */
 
 // ─── STATE ───────────────────────────────────
@@ -12,12 +12,16 @@ const state = {
   velocity: 0,
   lastX: 0,
   lastT: 0,
-  rafId: null,
+  rafId: null,           // momentum rAF
+  panRafId: null,        // FIX 3: throttle touchmove to rAF
+  pendingX: null,
   hintDone: false,
 };
 
 const ROOM_WIDTH = 3200;
 const COLLECT_LIMIT = 5;
+const DRAG_THRESHOLD = 6; // px — below this a touch is a tap, not a drag
+let dragMoved = 0;        // track how far we've moved since touchstart
 
 // ─── ITEM DEFINITIONS ────────────────────────
 const ITEMS = {
@@ -82,10 +86,10 @@ const ITEMS = {
     desc: 'Seven arms, six lit. The seventh candle is cold and has never been burned, but there is wax on the floor beneath it.',
   },
   broom: {
-    name: 'Witch\'s Broom',
+    name: "Witch's Broom",
     icon: '🧹',
     collectible: false,
-    desc: 'Birch handle, bundled heather. It\'s upright with nothing holding it. You nudge it. It doesn\'t fall.',
+    desc: "Birch handle, bundled heather. It's upright with nothing holding it. You nudge it. It doesn't fall.",
   },
   cobweb: {
     name: 'Ancient Cobweb',
@@ -132,6 +136,7 @@ function openExamine(itemKey) {
   if (item.collectible && !alreadyHave) {
     collectBtn.style.display = 'inline-block';
     collectBtn.textContent = 'Take it';
+    collectBtn.disabled = false;
   } else if (alreadyHave) {
     collectBtn.style.display = 'inline-block';
     collectBtn.textContent = 'In your bag';
@@ -153,10 +158,7 @@ function collectItem() {
   if (!examineTarget) return;
   const key = examineTarget;
   if (state.inventory.includes(key)) return;
-  if (state.inventory.length >= COLLECT_LIMIT) {
-    toast('Your bag is full');
-    return;
-  }
+  if (state.inventory.length >= COLLECT_LIMIT) { toast('Your bag is full'); return; }
   state.inventory.push(key);
   const el = document.querySelector(`[data-item="${key}"]`);
   if (el) el.classList.add('collected');
@@ -167,31 +169,51 @@ function collectItem() {
 
 // ─── PAN MECHANICS ───────────────────────────
 function getMaxPan() {
-  const canvas = document.getElementById('room-canvas');
-  const vw = window.innerWidth;
-  return Math.max(0, ROOM_WIDTH - vw);
+  return Math.max(0, ROOM_WIDTH - window.innerWidth);
 }
 
+// FIX 3: Write transform only inside rAF
 function applyPan(x) {
   state.pan = clamp(x, 0, getMaxPan());
   document.getElementById('room-canvas').style.transform = `translateX(${-state.pan}px)`;
 }
 
 function momentumLoop() {
-  if (Math.abs(state.velocity) < 0.5) { state.velocity = 0; return; }
-  state.velocity *= 0.92;
+  if (Math.abs(state.velocity) < 0.4) { state.velocity = 0; return; }
+  state.velocity *= 0.91;
   applyPan(state.pan + state.velocity);
   state.rafId = requestAnimationFrame(momentumLoop);
 }
 
+// FIX 3: throttle move updates to animation frames
+function scheduleMove() {
+  if (state.panRafId) return;
+  state.panRafId = requestAnimationFrame(() => {
+    state.panRafId = null;
+    if (state.pendingX === null) return;
+    const clientX = state.pendingX;
+    const now = performance.now();
+    const dt = now - state.lastT || 1;
+    const dx = clientX - state.lastX;
+    state.velocity = (dx / dt) * 16;
+    state.lastX = clientX;
+    state.lastT = now;
+    applyPan(state.panAtDrag - (clientX - state.dragStartX));
+    state.pendingX = null;
+  });
+}
+
 function startDrag(clientX) {
   cancelAnimationFrame(state.rafId);
+  cancelAnimationFrame(state.panRafId);
+  state.panRafId = null;
   state.isDragging = true;
   state.dragStartX = clientX;
   state.panAtDrag = state.pan;
   state.lastX = clientX;
-  state.lastT = Date.now();
+  state.lastT = performance.now();
   state.velocity = 0;
+  dragMoved = 0;
   document.getElementById('room-canvas').classList.add('grabbing');
   if (!state.hintDone) {
     document.getElementById('drag-hint').style.display = 'none';
@@ -201,17 +223,14 @@ function startDrag(clientX) {
 
 function moveDrag(clientX) {
   if (!state.isDragging) return;
-  const now = Date.now();
-  const dt = now - state.lastT || 1;
-  const dx = clientX - state.lastX;
-  state.velocity = dx / dt * 16;
-  state.lastX = clientX;
-  state.lastT = now;
-  applyPan(state.panAtDrag - (clientX - state.dragStartX));
+  dragMoved += Math.abs(clientX - (state.lastX || clientX));
+  state.pendingX = clientX;
+  scheduleMove();
 }
 
 function endDrag() {
   state.isDragging = false;
+  state.pendingX = null;
   document.getElementById('room-canvas').classList.remove('grabbing');
   momentumLoop();
 }
@@ -220,35 +239,52 @@ function endDrag() {
 function bindEvents() {
   const canvas = document.getElementById('room-canvas');
 
-  // Mouse
+  // ── Mouse ──
   canvas.addEventListener('mousedown', e => { e.preventDefault(); startDrag(e.clientX); });
-  window.addEventListener('mousemove', e => moveDrag(e.clientX));
-  window.addEventListener('mouseup', () => endDrag());
+  window.addEventListener('mousemove', e => { if (state.isDragging) moveDrag(e.clientX); });
+  window.addEventListener('mouseup', () => { if (state.isDragging) endDrag(); });
 
-  // Touch
-  canvas.addEventListener('touchstart', e => { startDrag(e.touches[0].clientX); }, { passive: true });
-  window.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX), { passive: true });
-  window.addEventListener('touchend', () => endDrag());
+  // ── Touch — FIX 5: passive listeners so scroll never fights pan ──
+  canvas.addEventListener('touchstart', e => {
+    startDrag(e.touches[0].clientX);
+  }, { passive: true });
 
-  // Object clicks
-  canvas.addEventListener('click', e => {
-    if (Math.abs(state.velocity) > 2) return; // was a drag, not a tap
+  // FIX 5: passive touchmove — we never call preventDefault anyway
+  window.addEventListener('touchmove', e => {
+    if (state.isDragging) moveDrag(e.touches[0].clientX);
+  }, { passive: true });
+
+  window.addEventListener('touchend', () => {
+    if (state.isDragging) endDrag();
+  }, { passive: true });
+
+  // ── Object taps — FIX 6: use pointerup for crisp response ──
+  canvas.addEventListener('pointerup', e => {
+    // Only fire if this was a tap (not a drag)
+    if (dragMoved > DRAG_THRESHOLD) return;
+    if (Math.abs(state.velocity) > 2) return;
     const obj = e.target.closest('[data-item]');
     if (obj) openExamine(obj.dataset.item);
   });
 
-  // Modal
+  // ── Modal ──
   document.getElementById('ex-collect').addEventListener('click', collectItem);
   document.getElementById('ex-close').addEventListener('click', closeExamine);
-  document.getElementById('examine-modal').addEventListener('click', e => {
+  document.getElementById('examine-modal').addEventListener('pointerdown', e => {
     if (e.target === e.currentTarget) closeExamine();
   });
 
-  // Title screen
+  // ── FIX 1: Google Fonts load non-blocking — handled in HTML with display=swap ──
+  // ── Title screen ──
   document.getElementById('enter-btn').addEventListener('click', () => {
     document.getElementById('title-screen').classList.remove('active');
     document.getElementById('game-screen').classList.add('active');
     applyPan(0);
+  });
+
+  // ── Keyboard shortcut: Escape closes modal ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeExamine();
   });
 }
 
