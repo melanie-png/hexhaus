@@ -60,13 +60,37 @@
   .room-viewport { flex:1; position:relative; overflow:hidden; }
 
   /* Room art */
-  .hall-art { width:100%; height:100%; position:relative;
-    background:linear-gradient(180deg,#0f0c1a 0%,#1a1228 40%,#12111a 100%); overflow:hidden; }
-  .hall-art::before { content:''; position:absolute; bottom:0; left:0; right:0; height:35%;
-    background:linear-gradient(180deg,#1a1020 0%,#100c18 100%); border-top:2px solid #2a1f3d; }
-  .hall-art::after { content:''; position:absolute; top:0; left:0; right:0; height:12%;
-    background:repeating-linear-gradient(90deg,#0d0b15 0px,#0d0b15 80px,#151120 80px,#151120 120px);
-    border-bottom:2px solid #2a1f3d; }
+  .hall-art { width:100%; height:100%; position:relative; overflow:hidden;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(80,50,20,0.6) 0%, transparent 70%),
+      radial-gradient(ellipse 30% 50% at 20% 50%, rgba(60,30,80,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 50% at 80% 50%, rgba(60,30,80,0.3) 0%, transparent 60%),
+      linear-gradient(180deg, #1a0e0a 0%, #2a1a14 18%, #1e1428 45%, #150f1e 70%, #0e0b16 100%);
+  }
+  /* Stone wall texture using pseudo-elements */
+  .hall-art::before {
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 48px, rgba(0,0,0,0.15) 48px, rgba(0,0,0,0.15) 50px),
+      repeating-linear-gradient(90deg, transparent, transparent 78px, rgba(0,0,0,0.08) 78px, rgba(0,0,0,0.08) 80px);
+    pointer-events:none;
+  }
+  /* Floor boards at bottom */
+  .hall-art::after {
+    content:'';
+    position:absolute; bottom:0; left:0; right:0; height:32%;
+    background:
+      repeating-linear-gradient(90deg,
+        #1a0e08 0px, #1a0e08 118px,
+        #211208 118px, #211208 120px,
+        #1d1008 120px, #1d1008 238px,
+        #211208 238px, #211208 240px
+      ),
+      linear-gradient(180deg, #211408 0%, #110a04 100%);
+    border-top:2px solid #3a1f0a;
+    box-shadow: inset 0 4px 20px rgba(0,0,0,0.6);
+  }
 
   /* Objects */
   .room-object { position:absolute; cursor:pointer; transition:filter 0.2s,transform 0.2s;
@@ -191,6 +215,21 @@
   <div class="game-area">
     <div class="room-viewport">
       <div class="hall-art">
+        <!-- Wall glow patches — sconce light effect -->
+        <div style="position:absolute;top:15%;left:3%;width:120px;height:200px;
+          background:radial-gradient(ellipse at 50% 30%,rgba(255,140,40,0.18) 0%,transparent 70%);
+          pointer-events:none;"></div>
+        <div style="position:absolute;top:15%;right:3%;width:120px;height:200px;
+          background:radial-gradient(ellipse at 50% 30%,rgba(255,140,40,0.15) 0%,transparent 70%);
+          pointer-events:none;"></div>
+        <!-- Ceiling shadow vignette -->
+        <div style="position:absolute;top:0;left:0;right:0;height:20%;
+          background:linear-gradient(180deg,rgba(0,0,0,0.7) 0%,transparent 100%);
+          pointer-events:none;"></div>
+        <!-- Side vignettes -->
+        <div style="position:absolute;inset:0;
+          background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(0,0,0,0.55) 100%);
+          pointer-events:none;"></div>
 
         <div class="room-object" id="obj-portrait" style="left:8%;top:18%;" onclick="inspect('portrait')">
           <div class="portrait-frame">🧙‍♀️</div>
@@ -198,7 +237,7 @@
         </div>
 
         <div class="room-object" id="obj-cloak" style="left:27%;top:22%;" onclick="inspect('cloak')">
-          <span class="obj-icon">🧥</span>
+          <span class="obj-icon" style="filter:brightness(0.15) sepia(1) hue-rotate(240deg) saturate(0.5);">🧥</span>
           <span class="obj-label">Coat Rack</span>
         </div>
 
@@ -365,8 +404,10 @@ function renderInventory() {
   for(let i=0;i<9;i++){
     const s=document.createElement('div'); s.className='inv-slot';
     if(inventory[i]){
-      s.classList.add('filled'); s.textContent=inventory[i].icon;
-      s.title=inventory[i].name;
+      const item=inventory[i];
+      s.classList.add('filled'); s.textContent=item.icon;
+      s.title=item.name;
+      s.onclick=()=>setMsg(`${item.icon} <span class="hl">${item.name}</span> — in your possession.`);
     }
     g.appendChild(s);
   }
