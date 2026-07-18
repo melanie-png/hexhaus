@@ -6,219 +6,200 @@
 <title>HEXHAUS</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #0d0809; --panel: #120a08; --border: #2a1810;
-  --accent: #7a3a10; --gold: #c9a84c; --text: #d4c4a8;
-  --muted: #6a5840; --white: #f5ead8; --glow: rgba(180,100,20,0.35);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04080f;--panel:#060c14;--border:#0e1e2e;
+  --accent:#1a6a6a;--gold:#b89a4c;--text:#a8c4b8;
+  --muted:#3a6055;--white:#d4ede8;--glow:rgba(20,120,100,.4);
 }
-html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
-  font-family:'Crimson Text',Georgia,serif; overflow:hidden; user-select:none;
-  -webkit-tap-highlight-color:transparent; }
-.screen { display:none; width:100%; height:100%; position:absolute; top:0; left:0; flex-direction:column; }
-.screen.active { display:flex; }
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);
+  font-family:'Crimson Text',Georgia,serif;overflow:hidden;user-select:none;
+  -webkit-tap-highlight-color:transparent}
+.screen{display:none;width:100%;height:100%;position:absolute;top:0;left:0;flex-direction:column}
+.screen.active{display:flex}
 
-/* ── TITLE ── */
-#title-screen {
-  align-items:center; justify-content:center; text-align:center;
-  background:radial-gradient(ellipse at 50% 25%, #2a0e05 0%, #0d0809 65%);
+/* TITLE */
+#title-screen{align-items:center;justify-content:center;text-align:center;
+  background:radial-gradient(ellipse at 50% 25%,#041a20 0%,#04080f 65%)}
+.cf{position:absolute;animation:flicker 3s ease-in-out infinite;font-size:2.2rem;pointer-events:none}
+.cf:nth-child(1){top:12%;left:7%}.cf:nth-child(2){top:18%;right:9%;animation-delay:1.3s}
+.cf:nth-child(3){bottom:22%;left:11%;animation-delay:.8s;font-size:1.8rem}.cf:nth-child(4){bottom:16%;right:7%;animation-delay:2s}
+@keyframes flicker{0%,100%{opacity:.55;transform:scale(1) rotate(-2deg)}25%{opacity:1;transform:scale(1.06) rotate(1deg)}
+  50%{opacity:.45;transform:scale(.97) rotate(-1deg)}75%{opacity:.85;transform:scale(1.03) rotate(2deg)}}
+.t-eye{font-family:'Cinzel',serif;font-size:clamp(.6rem,1.4vw,.8rem);letter-spacing:6px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+.t-title{font-family:'Cinzel',serif;font-size:clamp(3.5rem,13vw,8rem);font-weight:700;
+  color:var(--white);letter-spacing:8px;line-height:1;
+  text-shadow:0 0 60px var(--glow),0 0 120px rgba(20,120,100,.1);margin-bottom:6px}
+.t-sub{font-style:italic;color:var(--muted);letter-spacing:2px;margin-bottom:44px;
+  font-size:clamp(.85rem,2.2vw,1.1rem)}
+.t-lore{max-width:460px;font-size:clamp(.88rem,2vw,1rem);line-height:1.75;
+  color:#608878;margin-bottom:44px;padding:0 24px;font-style:italic}
+.btn-enter{font-family:'Cinzel',serif;font-size:clamp(.8rem,2vw,.95rem);letter-spacing:4px;
+  text-transform:uppercase;color:var(--white);background:transparent;
+  border:1px solid var(--accent);padding:15px 46px;cursor:pointer;transition:all .3s}
+.btn-enter:hover{background:var(--accent);box-shadow:0 0 28px var(--glow)}
+
+/* TOP BAR */
+.top-bar{background:var(--panel);border-bottom:1px solid var(--border);padding:9px 18px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.room-label{font-family:'Cinzel',serif;font-size:clamp(.7rem,1.8vw,.88rem);
+  color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+.icon-btn{background:transparent;border:1px solid var(--border);color:var(--muted);
+  width:34px;height:34px;border-radius:4px;cursor:pointer;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;transition:all .2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--white)}
+
+/* GAME AREA */
+.game-area{flex:1;display:flex;overflow:hidden;min-height:0}
+
+/* VIEWPORT */
+.viewport-wrap{flex:1;position:relative;overflow:hidden;cursor:grab}
+.viewport-wrap.dragging{cursor:grabbing}
+.room-scroll{position:absolute;top:0;left:0;height:100%;width:3000px;will-change:transform}
+
+/* ROOM BG */
+.room-bg{
+  position:absolute;inset:0;width:3000px;
+  background:linear-gradient(180deg,
+    #020509 0%,#04090f 8%,#050c16 18%,
+    #070f1e 30%,#060d1a 48%,
+    #05091380%,#03060e 100%);
 }
-.cf { position:absolute; animation:flicker 3s ease-in-out infinite; font-size:2.2rem; pointer-events:none; }
-.cf:nth-child(1){top:12%;left:7%;} .cf:nth-child(2){top:18%;right:9%;animation-delay:1.3s;}
-.cf:nth-child(3){bottom:22%;left:11%;animation-delay:0.8s;font-size:1.8rem;}
-.cf:nth-child(4){bottom:16%;right:7%;animation-delay:2s;}
-@keyframes flicker{0%,100%{opacity:.55;transform:scale(1) rotate(-2deg);}
-  25%{opacity:1;transform:scale(1.06) rotate(1deg);}50%{opacity:.45;transform:scale(.97) rotate(-1deg);}
-  75%{opacity:.85;transform:scale(1.03) rotate(2deg);}}
-.t-eye { font-family:'Cinzel',serif; font-size:clamp(.6rem,1.4vw,.8rem); letter-spacing:6px;
-  color:var(--muted); text-transform:uppercase; margin-bottom:14px; }
-.t-title { font-family:'Cinzel',serif; font-size:clamp(3.5rem,13vw,8rem); font-weight:700;
-  color:var(--white); letter-spacing:8px; line-height:1;
-  text-shadow:0 0 60px var(--glow),0 0 120px rgba(180,100,20,.1); margin-bottom:6px; }
-.t-sub { font-style:italic; color:var(--muted); letter-spacing:2px; margin-bottom:44px;
-  font-size:clamp(.85rem,2.2vw,1.1rem); }
-.t-lore { max-width:460px; font-size:clamp(.88rem,2vw,1rem); line-height:1.75;
-  color:#9a8060; margin-bottom:44px; padding:0 24px; font-style:italic; }
-.btn-enter { font-family:'Cinzel',serif; font-size:clamp(.8rem,2vw,.95rem); letter-spacing:4px;
-  text-transform:uppercase; color:var(--white); background:transparent;
-  border:1px solid var(--accent); padding:15px 46px; cursor:pointer; transition:all .3s; }
-.btn-enter:hover { background:var(--accent); box-shadow:0 0 28px var(--glow); }
-
-/* ── TOP BAR ── */
-.top-bar { background:var(--panel); border-bottom:1px solid var(--border); padding:9px 18px;
-  display:flex; align-items:center; justify-content:space-between; flex-shrink:0; z-index:10; }
-.room-label { font-family:'Cinzel',serif; font-size:clamp(.7rem,1.8vw,.88rem);
-  color:var(--gold); letter-spacing:2px; text-transform:uppercase; }
-.icon-btn { background:transparent; border:1px solid var(--border); color:var(--muted);
-  width:34px; height:34px; border-radius:4px; cursor:pointer; font-size:1rem;
-  display:flex; align-items:center; justify-content:center; transition:all .2s; }
-.icon-btn:hover { border-color:var(--accent); color:var(--white); }
-
-/* ── GAME AREA ── */
-.game-area { flex:1; display:flex; overflow:hidden; min-height:0; }
-
-/* ── SCROLL VIEWPORT ── */
-.viewport-wrap { flex:1; position:relative; overflow:hidden; cursor:grab; }
-.viewport-wrap.dragging { cursor:grabbing; }
-.room-scroll { position:absolute; top:0; left:0; height:100%; width:2800px; will-change:transform; }
-
-/* ── ROOM BACKGROUND ── */
-.room-bg {
-  position:absolute; inset:0; width:2800px;
-  /* Warm purple-brown mansion walls */
-  background: linear-gradient(180deg,
-    #1a0d10 0%, #2d1520 10%,
-    #3d1e28 20%, #452030 32%,
-    #3a1c28 48%, #2e1620 62%,
-    #1e0e16 78%, #120810 100%);
-}
-/* Wall panelling texture */
-.room-bg::before {
-  content:''; position:absolute; inset:0;
+/* Cold stone wall texture */
+.room-bg::before{
+  content:'';position:absolute;inset:0;
   background:
-    repeating-linear-gradient(180deg, transparent 0, transparent 70px,
-      rgba(10,4,8,.4) 70px, rgba(10,4,8,.4) 73px),
-    repeating-linear-gradient(90deg, transparent 0, transparent 110px,
-      rgba(10,4,8,.2) 110px, rgba(10,4,8,.2) 112px);
-  pointer-events:none;
+    repeating-linear-gradient(180deg,transparent 0,transparent 64px,rgba(2,6,14,.5) 64px,rgba(2,6,14,.5) 67px),
+    repeating-linear-gradient(90deg,transparent 0,transparent 104px,rgba(2,6,14,.3) 104px,rgba(2,6,14,.3) 106px);
+  pointer-events:none
 }
-/* Warm wall wash — amber light from above */
-.room-bg::after {
-  content:''; position:absolute; inset:0;
+/* Teal-blue wall wash */
+.room-bg::after{
+  content:'';position:absolute;inset:0;
   background:
-    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(180,90,20,.3) 0%, transparent 65%),
-    radial-gradient(ellipse 30% 60% at 15% 40%, rgba(160,70,15,.15) 0%, transparent 55%),
-    radial-gradient(ellipse 30% 60% at 85% 40%, rgba(160,70,15,.12) 0%, transparent 55%);
-  pointer-events:none;
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(10,60,80,.4) 0%,transparent 70%),
+    radial-gradient(ellipse 35% 70% at 8% 50%,rgba(8,45,65,.3) 0%,transparent 60%),
+    radial-gradient(ellipse 35% 70% at 92% 50%,rgba(8,45,65,.25) 0%,transparent 60%);
+  pointer-events:none
 }
 
-/* Chequered floor */
-.room-floor {
-  position:absolute; bottom:0; left:0; width:2800px; height:30%;
+/* Stone floor */
+.room-floor{
+  position:absolute;bottom:0;left:0;width:3000px;height:28%;
   background:
-    repeating-conic-gradient(#1a1018 0% 25%, #221520 0% 50%) 0 0 / 48px 48px;
-  border-top:3px solid #3a2028;
-  box-shadow:inset 0 10px 40px rgba(0,0,0,.85);
+    repeating-conic-gradient(#080c14 0% 25%,#0a1018 0% 50%) 0 0/52px 52px,
+    linear-gradient(180deg,#0c1220 0%,#040810 100%);
+  border-top:3px solid #0e1e2e;
+  box-shadow:inset 0 10px 40px rgba(0,0,0,.9);
   pointer-events:none;
-  /* Slight perspective feel via opacity gradient */
-  -webkit-mask:linear-gradient(180deg,rgba(0,0,0,.6) 0%,#000 60%);
-  mask:linear-gradient(180deg,rgba(0,0,0,.6) 0%,#000 60%);
+  -webkit-mask:linear-gradient(180deg,rgba(0,0,0,.55) 0%,#000 55%);
+  mask:linear-gradient(180deg,rgba(0,0,0,.55) 0%,#000 55%)
 }
 
-/* ── OBJECTS ── */
-.obj { position:absolute; bottom:0; display:flex; flex-direction:column;
-  align-items:center; gap:3px; cursor:pointer;
-  transition:filter .22s, transform .22s; transform-origin:bottom center; }
-.obj:hover { filter:brightness(1.5) drop-shadow(0 0 12px rgba(220,160,60,.7)); transform:scale(1.07); }
-.obj.no-collect:hover { filter:brightness(1.3) drop-shadow(0 0 7px rgba(220,160,60,.4)); transform:scale(1.04); }
-.obj.collected { opacity:.2; pointer-events:none; }
-.obj-label { font-family:'Cinzel',serif; font-size:clamp(.44rem,.95vw,.6rem); color:var(--muted);
-  letter-spacing:1.5px; text-transform:uppercase; opacity:0; transition:opacity .2s;
-  white-space:nowrap; text-shadow:0 0 8px #000; pointer-events:none; }
-.obj:hover .obj-label { opacity:1; }
+/* OBJECTS */
+.obj{position:absolute;bottom:0;display:flex;flex-direction:column;
+  align-items:center;gap:3px;cursor:pointer;
+  transition:filter .22s,transform .22s;transform-origin:bottom center}
+.obj:hover{filter:brightness(1.6) drop-shadow(0 0 14px rgba(40,200,160,.8));transform:scale(1.07)}
+.obj.no-collect:hover{filter:brightness(1.3) drop-shadow(0 0 8px rgba(40,180,140,.4));transform:scale(1.04)}
+.obj.collected{opacity:.2;pointer-events:none}
+.obj-label{font-family:'Cinzel',serif;font-size:clamp(.44rem,.95vw,.6rem);color:var(--muted);
+  letter-spacing:1.5px;text-transform:uppercase;opacity:0;transition:opacity .2s;
+  white-space:nowrap;text-shadow:0 0 8px #000;pointer-events:none}
+.obj:hover .obj-label{opacity:1}
 
-/* Portrait frame */
-.portrait-frame { border:5px solid #5a3a10; background:linear-gradient(150deg,#220e06,#341808);
-  display:flex; align-items:center; justify-content:center; position:relative;
-  box-shadow:0 0 28px rgba(0,0,0,.95),0 0 8px rgba(180,100,20,.2),inset 0 0 14px rgba(0,0,0,.7);
-  overflow:hidden; }
-.portrait-frame::after { content:'👁 👁'; position:absolute; bottom:16%;
-  font-size:.65rem; letter-spacing:5px; animation:eyeshift 5s ease-in-out infinite; }
-@keyframes eyeshift{0%,100%{transform:translateX(-6px);}50%{transform:translateX(6px);}}
+/* Portrait */
+.portrait-frame{border:4px solid #0e2a30;background:linear-gradient(150deg,#060e12,#0a1820);
+  display:flex;align-items:center;justify-content:center;position:relative;
+  box-shadow:0 0 28px rgba(0,0,0,.95),0 0 10px rgba(20,120,100,.15),inset 0 0 14px rgba(0,0,0,.8);
+  overflow:hidden}
+.portrait-frame::after{content:'👁 👁';position:absolute;bottom:16%;
+  font-size:.65rem;letter-spacing:5px;animation:eyeshift 5s ease-in-out infinite}
+@keyframes eyeshift{0%,100%{transform:translateX(-6px)}50%{transform:translateX(6px)}}
 
-/* Candle flicker */
-.cglow { animation:cglow 2.2s ease-in-out infinite; }
-@keyframes cglow{0%,100%{filter:drop-shadow(0 0 10px #ff9820);}50%{filter:drop-shadow(0 0 3px #ff6600);}}
+/* Fire */
+@keyframes fireflicker{
+  0%,100%{transform:scaleY(1) scaleX(1)}20%{transform:scaleY(1.09) scaleX(.95)}
+  40%{transform:scaleY(.92) scaleX(1.05)}60%{transform:scaleY(1.06) scaleX(.97)}
+  80%{transform:scaleY(.95) scaleX(1.04)}}
+.fire-anim{animation:fireflicker 1.2s ease-in-out infinite;transform-origin:bottom center}
+@keyframes firelight{0%,100%{opacity:.5}50%{opacity:.85}}
+.fglow{animation:firelight 1.7s ease-in-out infinite}
 
-/* ── SIDEBAR ── */
-.sidebar { width:clamp(140px,18vw,200px); background:var(--panel);
-  border-left:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
-.sidebar-title { font-family:'Cinzel',serif; font-size:.65rem; letter-spacing:3px;
-  text-transform:uppercase; color:var(--muted); padding:12px 14px 8px;
-  border-bottom:1px solid var(--border); }
-.inv-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; padding:10px; flex:1; overflow-y:auto; }
-.inv-slot { aspect-ratio:1; border:1px solid var(--border); border-radius:5px;
-  background:rgba(0,0,0,.3); display:flex; align-items:center; justify-content:center;
-  font-size:clamp(1.1rem,2.5vw,1.4rem); transition:all .2s; }
-.inv-slot.filled { border-color:var(--accent); background:rgba(122,58,16,.15); cursor:pointer; }
-.inv-slot.filled:hover { border-color:var(--gold); transform:scale(1.06); box-shadow:0 0 10px var(--glow); }
-.inv-count { padding:8px 14px; border-top:1px solid var(--border);
-  font-size:.7rem; color:var(--muted); font-style:italic; }
+/* SCROLL HINT */
+.scroll-hint{position:absolute;bottom:30%;right:24px;z-index:5;
+  font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:2px;color:var(--muted);
+  text-transform:uppercase;animation:hint 4.5s ease-in-out 1s both;pointer-events:none}
+@keyframes hint{0%{opacity:0}12%{opacity:.6}88%{opacity:.6}100%{opacity:0}}
 
-/* ── MESSAGE BAR ── */
-.msg-bar { background:#0a0608; border-top:1px solid var(--border);
-  padding:12px 18px; min-height:56px; display:flex; align-items:center; flex-shrink:0; }
-.msg-text { font-style:italic; font-size:clamp(.8rem,1.8vw,.96rem);
-  color:var(--text); line-height:1.5; flex:1; }
-.msg-text .hl { color:var(--gold); font-style:normal; font-weight:600; }
+/* SIDEBAR */
+.sidebar{width:clamp(140px,18vw,200px);background:var(--panel);
+  border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-title{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:3px;
+  text-transform:uppercase;color:var(--muted);padding:12px 14px 8px;
+  border-bottom:1px solid var(--border)}
+.inv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px;flex:1;overflow-y:auto}
+.inv-slot{aspect-ratio:1;border:1px solid var(--border);border-radius:5px;
+  background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;
+  font-size:clamp(1.1rem,2.5vw,1.4rem);transition:all .2s}
+.inv-slot.filled{border-color:var(--accent);background:rgba(20,100,80,.12);cursor:pointer}
+.inv-slot.filled:hover{border-color:var(--gold);transform:scale(1.06);box-shadow:0 0 10px var(--glow)}
+.inv-count{padding:8px 14px;border-top:1px solid var(--border);font-size:.7rem;color:var(--muted);font-style:italic}
 
-/* ── SCROLL HINT ── */
-.scroll-hint { position:absolute; bottom:32%; right:24px; z-index:5;
-  font-family:'Cinzel',serif; font-size:.58rem; letter-spacing:2px; color:var(--muted);
-  text-transform:uppercase; animation:hint 4.5s ease-in-out 1s both; pointer-events:none; }
-@keyframes hint{0%{opacity:0;}12%{opacity:.6;}88%{opacity:.6;}100%{opacity:0;}}
+/* MSG BAR */
+.msg-bar{background:#03070d;border-top:1px solid var(--border);
+  padding:12px 18px;min-height:56px;display:flex;align-items:center;flex-shrink:0}
+.msg-text{font-style:italic;font-size:clamp(.8rem,1.8vw,.96rem);color:var(--text);line-height:1.5;flex:1}
+.msg-text .hl{color:var(--gold);font-style:normal;font-weight:600}
 
-/* ── MODAL ── */
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.87);
-  z-index:100; align-items:center; justify-content:center; padding:20px; }
-.modal-overlay.open { display:flex; }
-.modal-box { background:var(--panel); border:1px solid var(--border); max-width:400px;
-  width:100%; padding:26px 22px; position:relative; box-shadow:0 0 60px rgba(0,0,0,.98); }
-.modal-box::before { content:''; position:absolute; top:0;left:0;right:0; height:2px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent); }
-.modal-icon { font-size:2.6rem; text-align:center; margin-bottom:10px; }
-.modal-title { font-family:'Cinzel',serif; font-size:.92rem; color:var(--gold);
-  letter-spacing:2px; text-align:center; margin-bottom:12px; text-transform:uppercase; }
-.modal-desc { font-size:.96rem; line-height:1.72; color:var(--text);
-  text-align:center; margin-bottom:18px; font-style:italic; }
-.modal-actions { display:flex; gap:9px; justify-content:center; flex-wrap:wrap; }
-.mbtn { font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:2px; text-transform:uppercase;
-  border:1px solid var(--border); background:transparent; color:var(--text);
-  padding:9px 18px; cursor:pointer; transition:all .2s; }
-.mbtn:hover { border-color:var(--accent); color:var(--white); }
-.mbtn.gold { border-color:var(--gold); color:var(--gold); }
-.mbtn.gold:hover { background:rgba(201,168,76,.15); }
-.modal-x { position:absolute; top:9px;right:11px; background:none; border:none;
-  color:var(--muted); font-size:1.1rem; cursor:pointer; }
-.modal-x:hover { color:var(--white); }
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);
+  z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--panel);border:1px solid var(--border);max-width:400px;
+  width:100%;padding:26px 22px;position:relative;box-shadow:0 0 60px rgba(0,0,0,.98)}
+.modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.modal-icon{font-size:2.6rem;text-align:center;margin-bottom:10px}
+.modal-title{font-family:'Cinzel',serif;font-size:.92rem;color:var(--gold);
+  letter-spacing:2px;text-align:center;margin-bottom:12px;text-transform:uppercase}
+.modal-desc{font-size:.96rem;line-height:1.72;color:var(--text);
+  text-align:center;margin-bottom:18px;font-style:italic}
+.modal-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+.mbtn{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;
+  border:1px solid var(--border);background:transparent;color:var(--text);
+  padding:9px 18px;cursor:pointer;transition:all .2s}
+.mbtn:hover{border-color:var(--accent);color:var(--white)}
+.mbtn.gold{border-color:var(--gold);color:var(--gold)}
+.mbtn.gold:hover{background:rgba(184,154,76,.15)}
+.modal-x{position:absolute;top:9px;right:11px;background:none;border:none;
+  color:var(--muted);font-size:1.1rem;cursor:pointer}
+.modal-x:hover{color:var(--white)}
 
-/* ── WHISPER ── */
-.whisper { position:fixed; inset:0; pointer-events:none; z-index:200;
-  display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .4s; }
-.whisper.show { opacity:1; }
-.whisper-txt { font-family:'Cinzel',serif; font-size:clamp(.9rem,2.5vw,1.3rem);
-  color:rgba(200,140,60,.95); letter-spacing:5px; text-align:center;
-  text-shadow:0 0 30px #a06020, 0 0 60px #602010; padding:0 20px;
-  animation:wpulse 2.8s ease-in-out forwards; }
-@keyframes wpulse{0%{opacity:0;transform:scale(.94);}18%{opacity:1;transform:scale(1);}82%{opacity:1;}100%{opacity:0;}}
+/* WHISPER */
+.whisper{position:fixed;inset:0;pointer-events:none;z-index:200;
+  display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
+.whisper.show{opacity:1}
+.whisper-txt{font-family:'Cinzel',serif;font-size:clamp(.9rem,2.5vw,1.3rem);
+  color:rgba(40,200,160,.9);letter-spacing:5px;text-align:center;
+  text-shadow:0 0 30px #14a080,0 0 60px #0a6050;padding:0 20px;
+  animation:wpulse 2.8s ease-in-out forwards}
+@keyframes wpulse{0%{opacity:0;transform:scale(.94)}18%{opacity:1;transform:scale(1)}82%{opacity:1}100%{opacity:0}}
 
-/* ── FIRE ANIMATION ── */
-@keyframes fireflicker {
-  0%,100%{transform:scaleY(1) scaleX(1);}
-  20%{transform:scaleY(1.08) scaleX(.96);}
-  40%{transform:scaleY(.93) scaleX(1.04);}
-  60%{transform:scaleY(1.05) scaleX(.97);}
-  80%{transform:scaleY(.96) scaleX(1.03);}
-}
-.fire-anim { animation:fireflicker 1.3s ease-in-out infinite; transform-origin:bottom center; }
-@keyframes firelight { 0%,100%{opacity:.5;} 50%{opacity:.8;} }
-.fglow { animation:firelight 1.8s ease-in-out infinite; }
-
-/* ── MOBILE ── */
 @media(max-width:560px){
-  .game-area { flex-direction:column; }
-  .sidebar { width:100%; height:100px; border-left:none; border-top:1px solid var(--border);
-    flex-direction:row; align-items:center; flex-shrink:0; }
-  .sidebar-title { writing-mode:vertical-rl; border-bottom:none; border-right:1px solid var(--border);
-    height:100%; padding:10px 7px; }
-  .inv-grid { grid-template-columns:repeat(7,1fr); padding:7px; overflow-x:auto; overflow-y:hidden; }
-  .inv-count { display:none; }
+  .game-area{flex-direction:column}
+  .sidebar{width:100%;height:100px;border-left:none;border-top:1px solid var(--border);
+    flex-direction:row;align-items:center;flex-shrink:0}
+  .sidebar-title{writing-mode:vertical-rl;border-bottom:none;border-right:1px solid var(--border);
+    height:100%;padding:10px 7px}
+  .inv-grid{grid-template-columns:repeat(7,1fr);padding:7px;overflow-x:auto;overflow-y:hidden}
+  .inv-count{display:none}
 }
 </style>
 </head>
 <body>
 
-<!-- TITLE -->
 <div id="title-screen" class="screen active">
   <span class="cf">🕯️</span><span class="cf">🕯️</span>
   <span class="cf">🕯️</span><span class="cf">🕯️</span>
@@ -230,11 +211,10 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
   <button class="btn-enter" onclick="startGame()">Enter</button>
 </div>
 
-<!-- GAME -->
 <div id="game-screen" class="screen">
   <div class="top-bar">
     <span class="room-label">The Entrance Hall</span>
-    <div style="display:flex;gap:8px;">
+    <div style="display:flex;gap:8px">
       <button class="icon-btn" id="snd-btn" onclick="toggleSound()">🔊</button>
     </div>
   </div>
@@ -243,420 +223,453 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
     <div class="viewport-wrap" id="vp">
       <div class="room-scroll" id="rs">
 
-        <!-- Backgrounds -->
         <div class="room-bg"></div>
         <div class="room-floor"></div>
 
-        <!-- ══════════════════════════════════
-             SVG ROOM SCENE — warm mansion
-        ══════════════════════════════════ -->
-        <svg style="position:absolute;top:0;left:0;width:2800px;height:100%;pointer-events:none;"
-             viewBox="0 0 2800 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- ══════════════════════════════════════════
+             SVG ROOM — cold stone, dual staircases,
+             teal-blue Scooby-Doo Mystery Inc aesthetic
+        ══════════════════════════════════════════ -->
+        <svg style="position:absolute;top:0;left:0;width:3000px;height:100%;pointer-events:none;"
+             viewBox="0 0 3000 620" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="chand" cx="50%" cy="10%" r="40%">
-              <stop offset="0%" stop-color="#ffcc60" stop-opacity=".35"/>
-              <stop offset="100%" stop-color="#ff8800" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="fireglow" cx="50%" cy="80%" r="55%">
-              <stop offset="0%" stop-color="#ff8800" stop-opacity=".55"/>
-              <stop offset="60%" stop-color="#ff4400" stop-opacity=".2"/>
+            <!-- Fire glow -->
+            <radialGradient id="fg" cx="50%" cy="80%" r="55%">
+              <stop offset="0%" stop-color="#ff9900" stop-opacity=".6"/>
+              <stop offset="50%" stop-color="#ff5500" stop-opacity=".2"/>
               <stop offset="100%" stop-color="#ff2200" stop-opacity="0"/>
             </radialGradient>
-            <radialGradient id="candle1" cx="50%" cy="15%" r="45%">
-              <stop offset="0%" stop-color="#ffaa30" stop-opacity=".22"/>
+            <!-- Window teal glow -->
+            <radialGradient id="wg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#40c0c0" stop-opacity=".45"/>
+              <stop offset="60%" stop-color="#20a0a0" stop-opacity=".15"/>
+              <stop offset="100%" stop-color="#106060" stop-opacity="0"/>
+            </radialGradient>
+            <!-- Sconce warm glow -->
+            <radialGradient id="sg1" cx="50%" cy="20%" r="45%">
+              <stop offset="0%" stop-color="#ffaa30" stop-opacity=".2"/>
               <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
             </radialGradient>
-            <radialGradient id="candle2" cx="50%" cy="15%" r="45%">
-              <stop offset="0%" stop-color="#ffaa30" stop-opacity=".18"/>
+            <radialGradient id="sg2" cx="50%" cy="20%" r="45%">
+              <stop offset="0%" stop-color="#ffaa30" stop-opacity=".17"/>
               <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
             </radialGradient>
-            <radialGradient id="windowglow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#6677aa" stop-opacity=".55"/>
-              <stop offset="60%" stop-color="#334488" stop-opacity=".2"/>
-              <stop offset="100%" stop-color="#112244" stop-opacity="0"/>
+            <radialGradient id="sg3" cx="50%" cy="20%" r="45%">
+              <stop offset="0%" stop-color="#ffaa30" stop-opacity=".17"/>
+              <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
             </radialGradient>
+            <!-- Vignette -->
             <radialGradient id="vig" cx="50%" cy="50%" r="65%">
-              <stop offset="20%" stop-color="transparent"/>
-              <stop offset="100%" stop-color="#000" stop-opacity=".72"/>
+              <stop offset="18%" stop-color="transparent"/>
+              <stop offset="100%" stop-color="#000" stop-opacity=".75"/>
             </radialGradient>
-            <filter id="blur6"><feGaussianBlur stdDeviation="6"/></filter>
-            <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
-            <filter id="blur12"><feGaussianBlur stdDeviation="12"/></filter>
+            <filter id="blur5"><feGaussianBlur stdDeviation="5"/></filter>
+            <filter id="blur10"><feGaussianBlur stdDeviation="10"/></filter>
+            <filter id="blur2"><feGaussianBlur stdDeviation="2"/></filter>
           </defs>
 
-          <!-- ── CEILING ── -->
-          <rect x="0" y="0" width="2800" height="55" fill="#100608" opacity=".97"/>
-          <rect x="0" y="52" width="2800" height="5" fill="#3a1c14" opacity=".8"/>
-          <rect x="0" y="57" width="2800" height="2" fill="#5a2c1a" opacity=".5"/>
-          <!-- Crown moulding detail -->
-          <path d="M0,55 Q700,48 1400,55 Q2100,62 2800,55" fill="none" stroke="#4a2010" stroke-width="3" opacity=".5"/>
+          <!-- CEILING CORNICE -->
+          <rect x="0" y="0" width="3000" height="52" fill="#02040a" opacity=".97"/>
+          <rect x="0" y="49" width="3000" height="5" fill="#0a2030" opacity=".8"/>
+          <rect x="0" y="54" width="3000" height="2" fill="#144050" opacity=".5"/>
 
-          <!-- ── WOOD PANELLING (lower wall) ── -->
-          <rect x="0" y="290" width="2800" height="80" fill="#1e0e10" opacity=".55"/>
-          <rect x="0" y="285" width="2800" height="6" fill="#4a2010" opacity=".65"/>
-          <rect x="0" y="368" width="2800" height="5" fill="#3a1808" opacity=".7"/>
-          <!-- Panel raised mouldings (every 160px) -->
-          <rect x="20"  y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="170" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="320" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="470" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="620" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="770" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="920" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="1070" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="1220" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="1370" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="1520" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="1670" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="1820" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="1970" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="2120" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="2270" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="2420" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="2570" y="295" width="130" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
-          <rect x="2650" y="295" width="120" height="68" rx="2" fill="none" stroke="#3a1a0a" stroke-width="1.5" opacity=".6"/>
+          <!-- Stone wall panels — recessed bays -->
+          <!-- Left section stone columns -->
+          <rect x="0"    y="55" width="28" height="340" fill="#040c16" stroke="#0a1e2e" stroke-width="2"/>
+          <rect x="600"  y="55" width="28" height="340" fill="#040c16" stroke="#0a1e2e" stroke-width="2"/>
+          <!-- Right section stone columns -->
+          <rect x="2372" y="55" width="28" height="340" fill="#040c16" stroke="#0a1e2e" stroke-width="2"/>
+          <rect x="3000" y="55" width="0"  height="340" fill="#040c16" stroke="#0a1e2e" stroke-width="2"/>
 
-          <!-- ══ CENTRE: STAIRCASE ══ -->
-          <!-- Back wall behind staircase -->
-          <rect x="1100" y="57" width="600" height="240" fill="#281218" opacity=".8"/>
-          <rect x="1100" y="57" width="600" height="240" fill="none" stroke="#4a2010" stroke-width="3"/>
+          <!-- Wall panelling horizontal banding -->
+          <rect x="0" y="260" width="3000" height="5" fill="#0a1e2e" opacity=".6"/>
+          <rect x="0" y="300" width="3000" height="5" fill="#081828" opacity=".5"/>
+          <rect x="0" y="340" width="3000" height="8" fill="#0a1e2e" opacity=".7"/>
+          <rect x="0" y="348" width="3000" height="3" fill="#144050" opacity=".4"/>
 
-          <!-- Arched doorway at top of stairs -->
-          <path d="M1290,170 L1290,295 L1510,295 L1510,170 Q1510,110 1400,110 Q1290,110 1290,170 Z"
-                fill="#140810" stroke="#5a2a10" stroke-width="3"/>
-          <!-- Door inside arch (open, showing beyond) -->
-          <rect x="1330" y="170" width="140" height="125" fill="#0a0408" opacity=".9"/>
-          <rect x="1330" y="170" width="140" height="125" fill="none" stroke="#3a1808" stroke-width="1.5"/>
-          <!-- Mysterious glow beyond door -->
-          <rect x="1330" y="170" width="140" height="125" fill="#1a0a06" opacity=".6"/>
-          <ellipse cx="1400" cy="260" rx="50" ry="30" fill="#4a2a08" opacity=".3" filter="url(#blur6)"/>
+          <!-- ══ LEFT WINDOW (tall, arched, teal glow outside) ══ -->
+          <rect x="80" y="65" width="110" height="195" rx="3" fill="#04101a" stroke="#0e2030" stroke-width="3"/>
+          <path d="M80,180 Q135,155 190,180" fill="#04101a" stroke="#0e2030" stroke-width="2"/>
+          <rect x="84" y="68" width="102" height="187" rx="2" fill="#061420" opacity=".9"/>
+          <line x1="135" y1="68" x2="135" y2="255" stroke="#0a1c2c" stroke-width="3"/>
+          <line x1="84"  y1="155" x2="186" y2="155" stroke="#0a1c2c" stroke-width="3"/>
+          <rect x="84" y="68" width="102" height="187" fill="url(#wg)" opacity=".8"/>
+          <!-- Lightning crack -->
+          <path d="M138,75 L130,108 L140,108 L128,145" stroke="#60c0d0" stroke-width="1.5" fill="none" opacity=".3"/>
 
-          <!-- Staircase steps -->
-          <!-- Left banister post -->
-          <rect x="1140" y="175" width="10" height="120" rx="4" fill="#3a1c0a"/>
-          <!-- Right banister post -->
-          <rect x="1650" y="175" width="10" height="120" rx="4" fill="#3a1c0a"/>
-          <!-- Banister rail -->
-          <path d="M1145,180 Q1280,165 1400,168 Q1520,171 1655,180"
-                fill="none" stroke="#4a2010" stroke-width="5" stroke-linecap="round"/>
-          <!-- Stair steps (left side) -->
-          <rect x="1140" y="294" width="120" height="10" rx="1" fill="#2a1608"/>
-          <rect x="1150" y="280" width="110" height="14" rx="1" fill="#2e1808"/>
-          <rect x="1160" y="264" width="100" height="16" rx="1" fill="#2a1608"/>
-          <rect x="1170" y="246" width="90" height="18" rx="1" fill="#2e1808"/>
-          <rect x="1180" y="226" width="80" height="20" rx="1" fill="#2a1608"/>
-          <rect x="1190" y="204" width="70" height="22" rx="1" fill="#2e1808"/>
-          <!-- Stair steps (right side mirror) -->
-          <rect x="1540" y="294" width="120" height="10" rx="1" fill="#2a1608"/>
-          <rect x="1540" y="280" width="110" height="14" rx="1" fill="#2e1808"/>
-          <rect x="1540" y="264" width="100" height="16" rx="1" fill="#2a1608"/>
-          <rect x="1540" y="246" width="90" height="18" rx="1" fill="#2e1808"/>
-          <rect x="1540" y="226" width="80" height="20" rx="1" fill="#2a1608"/>
-          <rect x="1540" y="204" width="70" height="22" rx="1" fill="#2e1808"/>
-          <!-- Landing platform -->
-          <rect x="1260" y="174" width="280" height="18" rx="2" fill="#3a1c0a"/>
-          <!-- Balustrade spindles -->
-          <rect x="1160" y="200" width="4" height="80" rx="2" fill="#3a1c0a" opacity=".8"/>
-          <rect x="1175" y="205" width="4" height="75" rx="2" fill="#3a1c0a" opacity=".8"/>
-          <rect x="1190" y="210" width="4" height="70" rx="2" fill="#3a1c0a" opacity=".7"/>
-          <rect x="1600" y="200" width="4" height="80" rx="2" fill="#3a1c0a" opacity=".8"/>
-          <rect x="1615" y="205" width="4" height="75" rx="2" fill="#3a1c0a" opacity=".8"/>
-          <rect x="1630" y="210" width="4" height="70" rx="2" fill="#3a1c0a" opacity=".7"/>
+          <!-- ══ RIGHT WINDOW (mirrored) ══ -->
+          <rect x="2810" y="65" width="110" height="195" rx="3" fill="#04101a" stroke="#0e2030" stroke-width="3"/>
+          <path d="M2810,180 Q2865,155 2920,180" fill="#04101a" stroke="#0e2030" stroke-width="2"/>
+          <rect x="2814" y="68" width="102" height="187" rx="2" fill="#061420" opacity=".9"/>
+          <line x1="2865" y1="68" x2="2865" y2="255" stroke="#0a1c2c" stroke-width="3"/>
+          <line x1="2814" y1="155" x2="2916" y2="155" stroke="#0a1c2c" stroke-width="3"/>
+          <rect x="2814" y="68" width="102" height="187" fill="url(#wg)" opacity=".8"/>
+          <path d="M2868,75 L2860,108 L2870,108 L2858,145" stroke="#60c0d0" stroke-width="1.5" fill="none" opacity=".3"/>
 
-          <!-- ══ WINDOW (left of staircase) ── -->
-          <!-- Storm window — lightning blue-grey -->
-          <rect x="930" y="75" width="120" height="180" rx="3" fill="#0a1428" stroke="#3a2010" stroke-width="3"/>
-          <rect x="935" y="80" width="110" height="170" rx="2" fill="#0d1830" opacity=".9"/>
-          <!-- Window cross -->
-          <line x1="990" y1="80" x2="990" y2="250" stroke="#2a1808" stroke-width="3"/>
-          <line x1="935" y1="160" x2="1045" y2="160" stroke="#2a1808" stroke-width="3"/>
-          <!-- Storm glow outside window -->
-          <rect x="935" y="80" width="110" height="170" fill="url(#windowglow)" opacity=".7"/>
-          <!-- Lightning flash hint -->
-          <path d="M995,90 L980,130 L992,130 L975,175" stroke="#8899cc" stroke-width="1.5" fill="none" opacity=".25"/>
+          <!-- ══ SECOND WINDOWS mid-section ══ -->
+          <rect x="350" y="80" width="90" height="165" rx="3" fill="#04101a" stroke="#0e2030" stroke-width="2.5"/>
+          <rect x="353" y="83" width="84" height="159" rx="2" fill="#06141e" opacity=".9"/>
+          <line x1="395" y1="83" x2="395" y2="245" stroke="#0a1c2c" stroke-width="2.5"/>
+          <line x1="353" y1="163" x2="437" y2="163" stroke="#0a1c2c" stroke-width="2.5"/>
+          <rect x="353" y="83" width="84" height="159" fill="url(#wg)" opacity=".6"/>
 
-          <!-- ══ CHANDELIER ══ -->
-          <g opacity=".92">
-            <!-- Chain -->
-            <rect x="1397" y="0" width="6" height="35" rx="3" fill="#3a1c0a"/>
-            <!-- Main body -->
-            <ellipse cx="1400" cy="65" rx="55" ry="12" fill="#2a1408" stroke="#5a2a10" stroke-width="2"/>
-            <ellipse cx="1400" cy="68" rx="45" ry="8"  fill="#1e1006"/>
-            <!-- Arms -->
-            <path d="M1345,65 Q1340,58 1335,50" fill="none" stroke="#3a1c0a" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M1360,63 Q1352,55 1348,44" fill="none" stroke="#3a1c0a" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M1455,65 Q1460,58 1465,50" fill="none" stroke="#3a1c0a" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M1440,63 Q1448,55 1452,44" fill="none" stroke="#3a1c0a" stroke-width="3.5" stroke-linecap="round"/>
-            <path d="M1400,55 Q1400,46 1400,38" fill="none" stroke="#3a1c0a" stroke-width="3.5" stroke-linecap="round"/>
-            <!-- Candle stubs -->
-            <rect x="1332" y="42" width="6" height="11" rx="2" fill="#e8e0b8"/>
-            <rect x="1345" y="36" width="6" height="11" rx="2" fill="#e8e0b8"/>
-            <rect x="1397" y="30" width="6" height="11" rx="2" fill="#e8e0b8"/>
-            <rect x="1449" y="36" width="6" height="11" rx="2" fill="#e8e0b8"/>
-            <rect x="1462" y="42" width="6" height="11" rx="2" fill="#e8e0b8"/>
-            <!-- Flames -->
-            <path d="M1335,42 Q1338,34 1341,42" fill="#ffcc30" opacity=".9"/>
-            <path d="M1348,36 Q1351,28 1354,36" fill="#ffcc30" opacity=".9"/>
-            <path d="M1400,30 Q1403,22 1406,30" fill="#ffcc30" opacity=".95"/>
-            <path d="M1452,36 Q1455,28 1458,36" fill="#ffcc30" opacity=".9"/>
-            <path d="M1465,42 Q1468,34 1471,42" fill="#ffcc30" opacity=".9"/>
-            <!-- Pendant drops -->
-            <ellipse cx="1370" cy="78" rx="5" ry="8" fill="#3a2010" opacity=".8"/>
-            <ellipse cx="1400" cy="80" rx="5" ry="8" fill="#3a2010" opacity=".8"/>
-            <ellipse cx="1430" cy="78" rx="5" ry="8" fill="#3a2010" opacity=".8"/>
-            <!-- Chandelier warm glow -->
-            <rect x="1200" y="0" width="400" height="300" fill="url(#chand)" opacity=".85"/>
-          </g>
+          <rect x="2560" y="80" width="90" height="165" rx="3" fill="#04101a" stroke="#0e2030" stroke-width="2.5"/>
+          <rect x="2563" y="83" width="84" height="159" rx="2" fill="#06141e" opacity=".9"/>
+          <line x1="2605" y1="83" x2="2605" y2="245" stroke="#0a1c2c" stroke-width="2.5"/>
+          <line x1="2563" y1="163" x2="2647" y2="163" stroke="#0a1c2c" stroke-width="2.5"/>
+          <rect x="2563" y="83" width="84" height="159" fill="url(#wg)" opacity=".6"/>
 
-          <!-- ══ FIREPLACE (right section) ══ -->
-          <!-- Mantel surround -->
-          <rect x="2050" y="192" width="380" height="22" rx="3" fill="#2e1a0a" stroke="#4a2810" stroke-width="2"/>
-          <rect x="2038" y="175" width="404" height="20" rx="2" fill="#221408" stroke="#3a2008" stroke-width="1.5"/>
-          <!-- Side pillars stone -->
-          <rect x="2060" y="212" width="36" height="115" rx="2" fill="#1e1210" stroke="#2e1c0e" stroke-width="1.5"/>
-          <rect x="2384" y="212" width="36" height="115" rx="2" fill="#1e1210" stroke="#2e1c0e" stroke-width="1.5"/>
-          <!-- Stone textures on pillars -->
-          <rect x="2063" y="230" width="30" height="12" rx="1" fill="#221410" opacity=".7"/>
-          <rect x="2063" y="252" width="30" height="12" rx="1" fill="#1e1010" opacity=".7"/>
-          <rect x="2063" y="274" width="30" height="12" rx="1" fill="#221410" opacity=".7"/>
-          <rect x="2063" y="296" width="30" height="12" rx="1" fill="#1e1010" opacity=".7"/>
-          <rect x="2387" y="230" width="30" height="12" rx="1" fill="#221410" opacity=".7"/>
-          <rect x="2387" y="252" width="30" height="12" rx="1" fill="#1e1010" opacity=".7"/>
-          <rect x="2387" y="274" width="30" height="12" rx="1" fill="#221410" opacity=".7"/>
-          <rect x="2387" y="296" width="30" height="12" rx="1" fill="#1e1010" opacity=".7"/>
-          <!-- Fireplace arch opening -->
-          <path d="M2096,327 L2096,245 Q2096,212 2240,212 Q2384,212 2384,245 L2384,327 Z"
-                fill="#0e0608" stroke="#2a1408" stroke-width="2"/>
+          <!-- ══ BACK WALL CENTRE (behind staircases) ══ -->
+          <rect x="940" y="55" width="1120" height="295" fill="#02060e" opacity=".8"/>
+          <rect x="940" y="55" width="1120" height="295" fill="none" stroke="#0a1e2e" stroke-width="3"/>
+
+          <!-- Back wall teal ambient glow -->
+          <ellipse cx="1500" cy="200" rx="320" ry="150" fill="#0a3040" opacity=".25" filter="url(#blur10)"/>
+
+          <!-- ══ DUAL CURVED STAIRCASES ══ -->
+          <!-- LEFT staircase — curves from bottom-left up to central landing -->
+          <!-- Banister rail (curved arc) -->
+          <path d="M 700,355 Q 800,320 920,255 Q 1040,195 1200,180"
+                fill="none" stroke="#0e2a2a" stroke-width="7" stroke-linecap="round"/>
+          <!-- Banister post left base -->
+          <rect x="696" y="310" width="10" height="48" rx="4" fill="#0c2020"/>
+          <!-- Steps left staircase (7 steps sweeping up-right) -->
+          <rect x="640" y="348" width="140" height="12" rx="1" fill="#08141e" stroke="#0e2030" stroke-width="1"/>
+          <rect x="660" y="332" width="130" height="16" rx="1" fill="#091520" stroke="#0e2030" stroke-width="1"/>
+          <rect x="690" y="314" width="118" height="18" rx="1" fill="#08141e" stroke="#0e2030" stroke-width="1"/>
+          <rect x="730" y="294" width="105" height="20" rx="1" fill="#091520" stroke="#0e2030" stroke-width="1"/>
+          <rect x="780" y="272" width="92" height="22" rx="1" fill="#08141e" stroke="#0e2030" stroke-width="1"/>
+          <rect x="840" y="248" width="80" height="24" rx="1" fill="#091520" stroke="#0e2030" stroke-width="1"/>
+          <rect x="906" y="222" width="70" height="26" rx="1" fill="#08141e" stroke="#0e2030" stroke-width="1"/>
+          <!-- Balustrade spindles left -->
+          <rect x="665" y="295" width="4" height="54" rx="2" fill="#0c2020" opacity=".8"/>
+          <rect x="685" y="280" width="4" height="52" rx="2" fill="#0c2020" opacity=".8"/>
+          <rect x="710" y="264" width="4" height="50" rx="2" fill="#0c2020" opacity=".75"/>
+          <rect x="740" y="248" width="4" height="48" rx="2" fill="#0c2020" opacity=".75"/>
+          <rect x="774" y="230" width="4" height="44" rx="2" fill="#0c2020" opacity=".7"/>
+          <rect x="814" y="212" width="4" height="40" rx="2" fill="#0c2020" opacity=".7"/>
+          <rect x="860" y="196" width="4" height="36" rx="2" fill="#0c2020" opacity=".65"/>
+          <rect x="910" y="182" width="4" height="30" rx="2" fill="#0c2020" opacity=".65"/>
+
+          <!-- RIGHT staircase — mirror -->
+          <path d="M 2300,355 Q 2200,320 2080,255 Q 1960,195 1800,180"
+                fill="none" stroke="#0e2a2a" stroke-width="7" stroke-linecap="round"/>
+          <rect x="2294" y="310" width="10" height="48" rx="4" fill="#0c2020"/>
+          <rect x="2220" y="348" width="140" height="12" rx="1" fill="#08141e" stroke="#0e2030" stroke-width="1"/>
+          <rect x="2210" y="332" width="130" height="16" rx="1" fill="#091520" stroke="#0e2030" stroke-width="1"/>
+          <rect x="2192" y="314" width="118" height="18" rx="1" fill="#08141e" stroke="#0e2030" stroke-width="1"/>
+          <rect x="2165" y="294" width="105" height="20" rx="1" fill="#091520" stroke="#0e2030" stroke-width="1"/>
+          <rect x="2128" y="272" width="92" height="22" rx="1" fill="#08141e" stroke="#0e2030" stroke-width="1"/>
+          <rect x="2080" y="248" width="80" height="24" rx="1" fill="#091520" stroke="#0e2030" stroke-width="1"/>
+          <rect x="2024" y="222" width="70" height="26" rx="1" fill="#08141e" stroke="#0e2030" stroke-width="1"/>
+          <rect x="2331" y="295" width="4" height="54" rx="2" fill="#0c2020" opacity=".8"/>
+          <rect x="2311" y="280" width="4" height="52" rx="2" fill="#0c2020" opacity=".8"/>
+          <rect x="2286" y="264" width="4" height="50" rx="2" fill="#0c2020" opacity=".75"/>
+          <rect x="2256" y="248" width="4" height="48" rx="2" fill="#0c2020" opacity=".75"/>
+          <rect x="2222" y="230" width="4" height="44" rx="2" fill="#0c2020" opacity=".7"/>
+          <rect x="2182" y="212" width="4" height="40" rx="2" fill="#0c2020" opacity=".7"/>
+          <rect x="2136" y="196" width="4" height="36" rx="2" fill="#0c2020" opacity=".65"/>
+          <rect x="2086" y="182" width="4" height="30" rx="2" fill="#0c2020" opacity=".65"/>
+
+          <!-- CENTRAL LANDING PLATFORM -->
+          <rect x="1180" y="172" width="640" height="22" rx="2" fill="#0c2020" stroke="#14303a" stroke-width="2"/>
+          <!-- Landing rail -->
+          <path d="M1185,178 Q1500,165 1815,178" fill="none" stroke="#0e2a2a" stroke-width="5"/>
+          <!-- Landing spindles -->
+          <rect x="1220" y="160" width="4" height="16" rx="1" fill="#0c2020" opacity=".7"/>
+          <rect x="1260" y="157" width="4" height="17" rx="1" fill="#0c2020" opacity=".7"/>
+          <rect x="1300" y="155" width="4" height="18" rx="1" fill="#0c2020" opacity=".65"/>
+          <rect x="1380" y="153" width="4" height="18" rx="1" fill="#0c2020" opacity=".65"/>
+          <rect x="1460" y="152" width="4" height="18" rx="1" fill="#0c2020" opacity=".65"/>
+          <rect x="1540" y="152" width="4" height="18" rx="1" fill="#0c2020" opacity=".65"/>
+          <rect x="1620" y="153" width="4" height="18" rx="1" fill="#0c2020" opacity=".65"/>
+          <rect x="1700" y="155" width="4" height="18" rx="1" fill="#0c2020" opacity=".65"/>
+          <rect x="1740" y="157" width="4" height="17" rx="1" fill="#0c2020" opacity=".7"/>
+          <rect x="1776" y="160" width="4" height="16" rx="1" fill="#0c2020" opacity=".7"/>
+
+          <!-- ══ CENTRAL FIREPLACE (glowing back wall) ══ -->
+          <!-- Mantel -->
+          <rect x="1330" y="96" width="340" height="20" rx="2" fill="#0c1e20" stroke="#14303a" stroke-width="2"/>
+          <rect x="1318" y="80" width="364" height="18" rx="2" fill="#08181e" stroke="#102830" stroke-width="1.5"/>
+          <!-- Side columns stone -->
+          <rect x="1340" y="114" width="34" height="90" rx="2" fill="#080e14" stroke="#0e1c24" stroke-width="1.5"/>
+          <rect x="1626" y="114" width="34" height="90" rx="2" fill="#080e14" stroke="#0e1c24" stroke-width="1.5"/>
+          <!-- Arch -->
+          <path d="M1374,204 L1374,140 Q1374,112 1500,112 Q1626,112 1626,140 L1626,204 Z"
+                fill="#040810" stroke="#0e1c24" stroke-width="2"/>
           <!-- Grate bars -->
-          <rect x="2128" y="275" width="4" height="52" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2142" y="272" width="4" height="55" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2156" y="270" width="4" height="57" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2170" y="268" width="4" height="59" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2184" y="267" width="4" height="60" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2198" y="268" width="4" height="59" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2212" y="267" width="4" height="60" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2226" y="268" width="4" height="59" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2240" y="267" width="4" height="60" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2254" y="268" width="4" height="59" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2268" y="270" width="4" height="57" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2282" y="272" width="4" height="55" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2296" y="275" width="4" height="52" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2310" y="278" width="4" height="49" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2324" y="280" width="4" height="47" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2338" y="282" width="4" height="45" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2352" y="284" width="4" height="43" rx="2" fill="#181010" opacity=".9"/>
-          <rect x="2124" y="303" width="240" height="4" rx="2" fill="#1c1010" opacity=".9"/>
-          <!-- FIRE (animated) -->
+          <rect x="1405" y="165" width="3" height="40" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1418" y="162" width="3" height="43" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1431" y="160" width="3" height="45" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1444" y="158" width="3" height="47" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1457" y="157" width="3" height="48" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1470" y="156" width="3" height="49" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1483" y="157" width="3" height="48" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1496" y="156" width="3" height="49" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1509" y="157" width="3" height="48" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1522" y="158" width="3" height="47" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1535" y="160" width="3" height="45" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1548" y="162" width="3" height="43" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1561" y="165" width="3" height="40" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1574" y="168" width="3" height="37" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1587" y="170" width="3" height="35" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1600" y="173" width="3" height="32" rx="1" fill="#0a1018" opacity=".9"/>
+          <rect x="1403" y="188" width="206" height="3" rx="1" fill="#0c1218" opacity=".9"/>
+          <!-- FIRE -->
           <g class="fire-anim">
-            <path d="M2130,327 Q2155,285 2175,260 Q2190,240 2205,265 Q2215,245 2224,225 Q2233,245 2242,265 Q2257,240 2272,260 Q2292,285 2317,327 Z"
+            <path d="M1415,204 Q1440,168 1460,148 Q1475,133 1488,155 Q1497,138 1504,120 Q1511,138 1520,155 Q1533,133 1548,148 Q1568,168 1593,204 Z"
                   fill="#cc4400" opacity=".8"/>
-            <path d="M2148,327 Q2170,292 2188,272 Q2200,257 2210,278 Q2218,260 2224,242 Q2230,260 2238,278 Q2248,257 2260,272 Q2278,292 2300,327 Z"
+            <path d="M1432,204 Q1455,174 1472,158 Q1483,146 1492,164 Q1499,148 1504,133 Q1509,148 1516,164 Q1525,146 1536,158 Q1553,174 1576,204 Z"
                   fill="#ff6600" opacity=".88"/>
-            <path d="M2165,327 Q2185,300 2200,284 Q2210,270 2218,288 Q2222,273 2224,258 Q2226,273 2230,288 Q2238,270 2248,284 Q2263,300 2283,327 Z"
+            <path d="M1450,204 Q1470,178 1486,165 Q1496,154 1502,170 Q1506,156 1504,144 Q1502,156 1506,170 Q1512,154 1522,165 Q1538,178 1558,204 Z"
                   fill="#ff9900" opacity=".85"/>
-            <path d="M2185,327 Q2200,308 2212,296 Q2220,284 2224,298 Q2228,284 2236,296 Q2248,308 2263,327 Z"
+            <path d="M1470,204 Q1486,185 1498,174 Q1503,164 1504,178 Q1505,164 1510,174 Q1522,185 1538,204 Z"
                   fill="#ffcc00" opacity=".82"/>
-            <path d="M2210,327 Q2220,314 2224,305 Q2228,314 2238,327 Z"
-                  fill="#ffee88" opacity=".88"/>
-            <ellipse cx="2224" cy="327" rx="52" ry="9" fill="#ff4400" opacity=".45"/>
+            <path d="M1492,204 Q1500,192 1504,184 Q1508,192 1516,204 Z" fill="#ffee88" opacity=".88"/>
+            <ellipse cx="1504" cy="204" rx="48" ry="7" fill="#ff4400" opacity=".4"/>
           </g>
-          <!-- Fire glow on floor -->
-          <ellipse cx="2224" cy="330" rx="100" ry="22" fill="url(#fireglow)" opacity=".85" class="fglow"/>
-          <!-- Mantel items: mirror + clock -->
-          <rect x="2180" y="157" width="88" height="20" rx="2" fill="#1a1008" stroke="#2e1808" stroke-width="1"/>
-          <rect x="2190" y="159" width="68" height="16" rx="1" fill="#140c06" opacity=".8"/>
+          <!-- Fire glow cast -->
+          <ellipse cx="1504" cy="206" rx="90" ry="18" fill="url(#fg)" opacity=".9" class="fglow"/>
+          <ellipse cx="1504" cy="80" rx="220" ry="120" fill="#ff6600" opacity=".04" filter="url(#blur10)"/>
+
+          <!-- ══ STONE STATUES (flanking fireplace, like the reference) ══ -->
+          <!-- Left statue -->
+          <g opacity=".85">
+            <!-- Pedestal -->
+            <rect x="1220" y="170" width="44" height="34" rx="2" fill="#0a1420" stroke="#0e1e2a" stroke-width="1.5"/>
+            <rect x="1224" y="168" width="36" height="6" rx="1" fill="#0c1828"/>
+            <!-- Body -->
+            <rect x="1228" y="108" width="28" height="62" rx="3" fill="#091220" stroke="#0d1a28" stroke-width="1.5"/>
+            <!-- Head -->
+            <ellipse cx="1242" cy="102" rx="12" ry="14" fill="#0b1622" stroke="#0d1a28" stroke-width="1.5"/>
+            <!-- Robe folds -->
+            <line x1="1234" y1="118" x2="1232" y2="166" stroke="#0d1a28" stroke-width="1" opacity=".6"/>
+            <line x1="1242" y1="116" x2="1240" y2="168" stroke="#0d1a28" stroke-width="1" opacity=".6"/>
+            <line x1="1250" y1="118" x2="1248" y2="166" stroke="#0d1a28" stroke-width="1" opacity=".6"/>
+            <!-- Outstretched arm hint -->
+            <path d="M1228,130 Q1215,128 1208,132" stroke="#0c1620" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>
+          </g>
+          <!-- Right statue (mirrored) -->
+          <g opacity=".85">
+            <rect x="1736" y="170" width="44" height="34" rx="2" fill="#0a1420" stroke="#0e1e2a" stroke-width="1.5"/>
+            <rect x="1740" y="168" width="36" height="6" rx="1" fill="#0c1828"/>
+            <rect x="1744" y="108" width="28" height="62" rx="3" fill="#091220" stroke="#0d1a28" stroke-width="1.5"/>
+            <ellipse cx="1758" cy="102" rx="12" ry="14" fill="#0b1622" stroke="#0d1a28" stroke-width="1.5"/>
+            <line x1="1750" y1="118" x2="1748" y2="166" stroke="#0d1a28" stroke-width="1" opacity=".6"/>
+            <line x1="1758" y1="116" x2="1756" y2="168" stroke="#0d1a28" stroke-width="1" opacity=".6"/>
+            <line x1="1766" y1="118" x2="1764" y2="166" stroke="#0d1a28" stroke-width="1" opacity=".6"/>
+            <path d="M1772,130 Q1785,128 1792,132" stroke="#0c1620" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>
+          </g>
 
           <!-- ══ WALL SCONCES ══ -->
-          <!-- Sconce 1 (far left ~x=250) -->
+          <!-- Sconce 1 (x=240) -->
           <g opacity=".88">
-            <rect x="246" y="155" width="6" height="145" rx="3" fill="#2e1808"/>
-            <ellipse cx="249" cy="302" rx="18" ry="6" fill="#1e1006"/>
-            <path d="M249,178 Q228,172 224,152" fill="none" stroke="#2e1808" stroke-width="4" stroke-linecap="round"/>
-            <path d="M249,178 Q270,172 274,152" fill="none" stroke="#2e1808" stroke-width="4" stroke-linecap="round"/>
-            <rect x="221" y="144" width="6" height="11" rx="2" fill="#ddd8b0"/>
-            <rect x="271" y="144" width="6" height="11" rx="2" fill="#ddd8b0"/>
-            <path d="M224,144 Q227,136 230,144" fill="#ffcc30" opacity=".9"/>
-            <path d="M274,144 Q277,136 280,144" fill="#ffcc30" opacity=".9"/>
-            <rect x="180" y="90" width="140" height="220" fill="url(#candle1)" opacity=".8"/>
+            <rect x="237" y="140" width="5" height="120" rx="2.5" fill="#0c2030"/>
+            <ellipse cx="240" cy="262" rx="14" ry="5" fill="#081822"/>
+            <path d="M240,162 Q222,157 218,140" fill="none" stroke="#0c2030" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M240,162 Q258,157 262,140" fill="none" stroke="#0c2030" stroke-width="3.5" stroke-linecap="round"/>
+            <rect x="215" y="132" width="5" height="10" rx="2" fill="#d8d0a8"/>
+            <rect x="259" y="132" width="5" height="10" rx="2" fill="#d8d0a8"/>
+            <path d="M218,132 Q221,124 224,132" fill="#ffcc30" opacity=".9"/>
+            <path d="M262,132 Q265,124 268,132" fill="#ffcc30" opacity=".9"/>
+            <rect x="185" y="85" width="110" height="200" fill="url(#sg1)" opacity=".8"/>
           </g>
-          <!-- Sconce 2 (~x=750) -->
+          <!-- Sconce 2 (x=720) -->
           <g opacity=".85">
-            <rect x="746" y="155" width="6" height="145" rx="3" fill="#2e1808"/>
-            <ellipse cx="749" cy="302" rx="18" ry="6" fill="#1e1006"/>
-            <path d="M749,178 Q728,172 724,152" fill="none" stroke="#2e1808" stroke-width="4" stroke-linecap="round"/>
-            <path d="M749,178 Q770,172 774,152" fill="none" stroke="#2e1808" stroke-width="4" stroke-linecap="round"/>
-            <rect x="721" y="144" width="6" height="11" rx="2" fill="#ddd8b0"/>
-            <rect x="771" y="144" width="6" height="11" rx="2" fill="#ddd8b0"/>
-            <path d="M724,144 Q727,136 730,144" fill="#ffcc30" opacity=".9"/>
-            <path d="M774,144 Q777,136 780,144" fill="#ffcc30" opacity=".9"/>
-            <rect x="680" y="90" width="140" height="220" fill="url(#candle1)" opacity=".7"/>
+            <rect x="717" y="140" width="5" height="120" rx="2.5" fill="#0c2030"/>
+            <ellipse cx="720" cy="262" rx="14" ry="5" fill="#081822"/>
+            <path d="M720,162 Q702,157 698,140" fill="none" stroke="#0c2030" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M720,162 Q738,157 742,140" fill="none" stroke="#0c2030" stroke-width="3.5" stroke-linecap="round"/>
+            <rect x="695" y="132" width="5" height="10" rx="2" fill="#d8d0a8"/>
+            <rect x="739" y="132" width="5" height="10" rx="2" fill="#d8d0a8"/>
+            <path d="M698,132 Q701,124 704,132" fill="#ffcc30" opacity=".9"/>
+            <path d="M742,132 Q745,124 748,132" fill="#ffcc30" opacity=".9"/>
+            <rect x="665" y="85" width="110" height="200" fill="url(#sg2)" opacity=".75"/>
           </g>
-          <!-- Sconce 3 (~x=1800) -->
+          <!-- Sconce 3 (x=2280) -->
           <g opacity=".85">
-            <rect x="1796" y="155" width="6" height="145" rx="3" fill="#2e1808"/>
-            <ellipse cx="1799" cy="302" rx="18" ry="6" fill="#1e1006"/>
-            <path d="M1799,178 Q1778,172 1774,152" fill="none" stroke="#2e1808" stroke-width="4" stroke-linecap="round"/>
-            <path d="M1799,178 Q1820,172 1824,152" fill="none" stroke="#2e1808" stroke-width="4" stroke-linecap="round"/>
-            <rect x="1771" y="144" width="6" height="11" rx="2" fill="#ddd8b0"/>
-            <rect x="1821" y="144" width="6" height="11" rx="2" fill="#ddd8b0"/>
-            <path d="M1774,144 Q1777,136 1780,144" fill="#ffcc30" opacity=".9"/>
-            <path d="M1824,144 Q1827,136 1830,144" fill="#ffcc30" opacity=".9"/>
-            <rect x="1730" y="90" width="140" height="220" fill="url(#candle2)" opacity=".7"/>
+            <rect x="2277" y="140" width="5" height="120" rx="2.5" fill="#0c2030"/>
+            <ellipse cx="2280" cy="262" rx="14" ry="5" fill="#081822"/>
+            <path d="M2280,162 Q2262,157 2258,140" fill="none" stroke="#0c2030" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M2280,162 Q2298,157 2302,140" fill="none" stroke="#0c2030" stroke-width="3.5" stroke-linecap="round"/>
+            <rect x="2255" y="132" width="5" height="10" rx="2" fill="#d8d0a8"/>
+            <rect x="2299" y="132" width="5" height="10" rx="2" fill="#d8d0a8"/>
+            <path d="M2258,132 Q2261,124 2264,132" fill="#ffcc30" opacity=".9"/>
+            <path d="M2302,132 Q2305,124 2308,132" fill="#ffcc30" opacity=".9"/>
+            <rect x="2225" y="85" width="110" height="200" fill="url(#sg3)" opacity=".75"/>
+          </g>
+          <!-- Sconce 4 (x=2760) -->
+          <g opacity=".88">
+            <rect x="2757" y="140" width="5" height="120" rx="2.5" fill="#0c2030"/>
+            <ellipse cx="2760" cy="262" rx="14" ry="5" fill="#081822"/>
+            <path d="M2760,162 Q2742,157 2738,140" fill="none" stroke="#0c2030" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M2760,162 Q2778,157 2782,140" fill="none" stroke="#0c2030" stroke-width="3.5" stroke-linecap="round"/>
+            <rect x="2735" y="132" width="5" height="10" rx="2" fill="#d8d0a8"/>
+            <rect x="2779" y="132" width="5" height="10" rx="2" fill="#d8d0a8"/>
+            <path d="M2738,132 Q2741,124 2744,132" fill="#ffcc30" opacity=".9"/>
+            <path d="M2782,132 Q2785,124 2788,132" fill="#ffcc30" opacity=".9"/>
+            <rect x="2705" y="85" width="110" height="200" fill="url(#sg1)" opacity=".75"/>
           </g>
 
           <!-- ══ COBWEBS ══ -->
-          <g stroke="#2a1810" stroke-width="1" opacity=".5" fill="none">
-            <path d="M0,0 Q55,28 0,75"/> <path d="M0,0 Q75,18 55,78"/>
-            <path d="M0,0 Q100,8 115,55"/> <path d="M0,0 L28,38"/>
-            <path d="M0,0 L48,33"/> <path d="M0,0 L68,25"/>
-            <path d="M14,8 Q42,22 18,44" opacity=".45"/>
-            <path d="M24,4 Q62,18 52,42" opacity=".45"/>
+          <g stroke="#0a2030" stroke-width="1" opacity=".55" fill="none">
+            <path d="M0,0 Q55,28 0,78"/><path d="M0,0 Q78,18 58,82"/>
+            <path d="M0,0 Q105,8 118,58"/><path d="M0,0 L30,40"/>
+            <path d="M0,0 L52,33"/><path d="M0,0 L72,22"/>
+            <path d="M15,8 Q44,24 20,48" opacity=".45"/>
+            <path d="M26,4 Q65,20 55,44" opacity=".45"/>
           </g>
-          <g stroke="#2a1810" stroke-width="1" opacity=".45" fill="none">
-            <path d="M2800,0 Q2745,28 2800,75"/> <path d="M2800,0 Q2725,18 2745,78"/>
-            <path d="M2800,0 Q2700,8 2685,55"/>
-            <path d="M2800,0 L2772,38"/> <path d="M2800,0 L2752,33"/>
-            <path d="M2786,8 Q2758,22 2782,44" opacity=".45"/>
+          <g stroke="#0a2030" stroke-width="1" opacity=".5" fill="none">
+            <path d="M3000,0 Q2945,28 3000,78"/><path d="M3000,0 Q2922,18 2942,82"/>
+            <path d="M3000,0 Q2895,8 2882,58"/>
+            <path d="M3000,0 L2970,40"/><path d="M3000,0 L2948,33"/>
+            <path d="M2985,8 Q2956,24 2980,48" opacity=".45"/>
           </g>
 
           <!-- ══ FLOOR PERSPECTIVE ══ -->
-          <line x1="0" y1="373" x2="1400" y2="475" stroke="#0a0406" stroke-width="2" opacity=".5"/>
-          <line x1="2800" y1="373" x2="1400" y2="475" stroke="#0a0406" stroke-width="2" opacity=".5"/>
+          <line x1="0" y1="376" x2="1500" y2="490" stroke="#020408" stroke-width="2" opacity=".5"/>
+          <line x1="3000" y1="376" x2="1500" y2="490" stroke="#020408" stroke-width="2" opacity=".5"/>
+          <line x1="0" y1="530" x2="3000" y2="530" stroke="#020408" stroke-width="1.5" opacity=".35"/>
 
           <!-- ══ VIGNETTE ══ -->
-          <rect x="0" y="0" width="2800" height="600" fill="url(#vig)" opacity=".55"/>
-          <rect x="0" y="0" width="90" height="600" fill="url(#vig)" opacity=".65"/>
-          <rect x="2710" y="0" width="90" height="600" fill="url(#vig)" opacity=".65"/>
-          <rect x="0" y="0" width="2800" height="58" fill="#000" opacity=".45"/>
+          <rect x="0" y="0" width="3000" height="620" fill="url(#vig)" opacity=".6"/>
+          <rect x="0" y="0" width="100" height="620" fill="url(#vig)" opacity=".7"/>
+          <rect x="2900" y="0" width="100" height="620" fill="url(#vig)" opacity=".7"/>
+          <rect x="0" y="0" width="3000" height="55" fill="#000" opacity=".5"/>
         </svg>
 
         <!-- ══ CLICKABLE OBJECTS ══ -->
 
-        <!-- Portrait — far left, back wall (small/far) -->
-        <div class="obj" style="left:90px; bottom:30%;" onclick="inspect('portrait')">
-          <div class="portrait-frame" style="width:48px;height:64px;font-size:1.5rem;">🧙‍♀️</div>
+        <!-- Portrait left wall (far, small) -->
+        <div class="obj" style="left:160px;bottom:31%;" onclick="inspect('portrait')">
+          <div class="portrait-frame" style="width:46px;height:62px;font-size:1.5rem;">🧙‍♀️</div>
           <span class="obj-label">Portrait</span>
         </div>
 
-        <!-- Second portrait — mid-left wall (bigger, closer) -->
-        <div class="obj no-collect" style="left:430px; bottom:30%;" onclick="inspect('portrait2')">
-          <div class="portrait-frame" style="width:62px;height:82px;font-size:2rem;">🎭</div>
-          <span class="obj-label">Old Portrait</span>
-        </div>
-
-        <!-- Coat rack + black cloak -->
-        <div class="obj" style="left:260px; bottom:28%;" onclick="inspect('cloak')">
-          <svg width="56" height="80" viewBox="0 0 56 80" fill="none">
-            <rect x="25" y="5" width="5" height="66" rx="2.5" fill="#14100c"/>
-            <rect x="11" y="68" width="34" height="5" rx="2.5" fill="#14100c"/>
-            <path d="M28,5 Q28,0 34,0 Q40,0 40,6" stroke="#201410" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <path d="M11,15 Q28,10 45,15 L51,64 Q37,74 28,72 Q19,74 5,64 Z" fill="#0c0a0e"/>
-            <path d="M11,15 Q28,10 45,15 L51,64 Q37,74 28,72 Q19,74 5,64 Z" fill="none" stroke="#1c1218" stroke-width="1"/>
-            <path d="M18,17 Q27,13 37,17 L41,57 Q28,65 15,57 Z" fill="#100e12" opacity=".5"/>
-            <path d="M18,17 Q28,21 39,17" stroke="#1c1430" stroke-width="1.5" fill="none"/>
+        <!-- Coat rack + black cloak (left section) -->
+        <div class="obj" style="left:480px;bottom:28%;" onclick="inspect('cloak')">
+          <svg width="55" height="78" viewBox="0 0 55 78" fill="none">
+            <rect x="24" y="5" width="5" height="65" rx="2.5" fill="#0c1218"/>
+            <rect x="10" y="67" width="33" height="4" rx="2" fill="#0c1218"/>
+            <path d="M27,5 Q27,0 33,0 Q39,0 39,6" stroke="#141e20" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M10,14 Q27,9 44,14 L50,62 Q36,72 27,70 Q18,72 4,62 Z" fill="#060c10"/>
+            <path d="M10,14 Q27,9 44,14 L50,62 Q36,72 27,70 Q18,72 4,62 Z" fill="none" stroke="#101820" stroke-width="1"/>
+            <path d="M17,16 Q26,12 36,16 L40,55 Q27,63 14,55 Z" fill="#0a1018" opacity=".5"/>
           </svg>
           <span class="obj-label">Coat Rack</span>
         </div>
 
-        <!-- Old mirror (mid left) -->
-        <div class="obj no-collect" style="left:600px; bottom:30%;" onclick="inspect('mirror')">
-          <svg width="48" height="65" viewBox="0 0 48 65" fill="none">
-            <rect x="2" y="2" width="44" height="61" rx="3" fill="#0e1010" stroke="#2a1808" stroke-width="2.5"/>
-            <rect x="6" y="6" width="36" height="53" rx="2" fill="#0a1018" opacity=".8"/>
-            <ellipse cx="24" cy="32" rx="10" ry="13" fill="#0d1420" opacity=".5"/>
-            <rect x="7" y="7" width="9" height="3" rx="1" fill="#1c1808" opacity=".6"/>
+        <!-- Old mirror -->
+        <div class="obj no-collect" style="left:220px;bottom:31%;" onclick="inspect('mirror')">
+          <svg width="44" height="60" viewBox="0 0 44 60" fill="none">
+            <rect x="2" y="2" width="40" height="56" rx="3" fill="#060e14" stroke="#0e1e28" stroke-width="2.5"/>
+            <rect x="5" y="5" width="34" height="50" rx="2" fill="#040c18" opacity=".9"/>
+            <ellipse cx="22" cy="30" rx="9" ry="12" fill="#061420" opacity=".5"/>
+            <rect x="6" y="6" width="8" height="3" rx="1" fill="#0e1c24" opacity=".6"/>
           </svg>
           <span class="obj-label">Old Mirror</span>
         </div>
 
-        <!-- Grandfather clock -->
-        <div class="obj no-collect" style="left:820px; bottom:28%;" onclick="inspect('clock')">
-          <svg width="56" height="124" viewBox="0 0 56 124" fill="none">
-            <rect x="8" y="2" width="40" height="122" rx="4" fill="#0e0c10" stroke="#20140c" stroke-width="2"/>
-            <rect x="12" y="6" width="32" height="48" rx="3" fill="#0a0a0e" stroke="#181008" stroke-width="1.5"/>
-            <circle cx="28" cy="30" r="13" fill="#0c0a10" stroke="#201408" stroke-width="1.5"/>
-            <line x1="28" y1="30" x2="28" y2="20" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="28" y1="30" x2="35" y2="34" stroke="#6a5030" stroke-width="1.2" stroke-linecap="round"/>
-            <rect x="20" y="58" width="16" height="56" rx="2" fill="#0a0a0e" stroke="#18100a" stroke-width="1"/>
-            <ellipse cx="28" cy="78" rx="5" ry="7" fill="none" stroke="#201408" stroke-width="1.5"/>
-            <rect x="12" y="112" width="32" height="8" rx="2" fill="#201408"/>
+        <!-- Grandfather clock (left mid) -->
+        <div class="obj no-collect" style="left:770px;bottom:28%;" onclick="inspect('clock')">
+          <svg width="54" height="120" viewBox="0 0 54 120" fill="none">
+            <rect x="7" y="2" width="40" height="118" rx="4" fill="#060c14" stroke="#0c1e28" stroke-width="2"/>
+            <rect x="11" y="6" width="32" height="46" rx="3" fill="#040a12" stroke="#0a1822" stroke-width="1.5"/>
+            <circle cx="27" cy="29" r="13" fill="#050810" stroke="#0c1820" stroke-width="1.5"/>
+            <line x1="27" y1="29" x2="27" y2="19" stroke="#b89a4c" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="27" y1="29" x2="34" y2="33" stroke="#486050" stroke-width="1.2" stroke-linecap="round"/>
+            <rect x="19" y="56" width="16" height="54" rx="2" fill="#040a12" stroke="#0a1822" stroke-width="1"/>
+            <ellipse cx="27" cy="76" rx="5" ry="7" fill="none" stroke="#0c1a28" stroke-width="1.5"/>
+            <rect x="11" y="108" width="32" height="8" rx="2" fill="#0c1828"/>
           </svg>
           <span class="obj-label">Grandfather Clock</span>
         </div>
 
-        <!-- Books -->
-        <div class="obj no-collect" style="left:790px; bottom:30%;" onclick="inspect('books')">
-          <svg width="42" height="34" viewBox="0 0 42 34" fill="none">
-            <rect x="1" y="21" width="40" height="12" rx="2" fill="#1a100e" stroke="#2a1808" stroke-width="1"/>
-            <rect x="4" y="13" width="34" height="10" rx="2" fill="#14100c" stroke="#221408" stroke-width="1"/>
-            <rect x="7" y="6"  width="28" height="9"  rx="2" fill="#100c0a" stroke="#1e1208" stroke-width="1"/>
+        <!-- Books (near clock) -->
+        <div class="obj no-collect" style="left:740px;bottom:30%;" onclick="inspect('books')">
+          <svg width="40" height="32" viewBox="0 0 40 32" fill="none">
+            <rect x="1" y="20" width="38" height="11" rx="2" fill="#0a1420" stroke="#0e1e2c" stroke-width="1"/>
+            <rect x="3" y="12" width="32" height="10" rx="2" fill="#081018" stroke="#0c1824" stroke-width="1"/>
+            <rect x="6" y="5"  width="26" height="9"  rx="2" fill="#060e16" stroke="#0a1620" stroke-width="1"/>
           </svg>
           <span class="obj-label">Old Books</span>
         </div>
 
-        <!-- Staircase (no-collect) — centre -->
-        <div class="obj no-collect" style="left:1300px; bottom:28%;" onclick="inspect('staircase')">
-          <svg width="200" height="10"><rect width="200" height="10" fill="transparent"/></svg>
-          <span class="obj-label">The Staircase</span>
+        <!-- Left staircase interaction -->
+        <div class="obj no-collect" style="left:640px;bottom:28%;" onclick="inspect('staircase')">
+          <svg width="10" height="60"><rect width="10" height="60" fill="transparent"/></svg>
+          <span class="obj-label">Grand Staircase</span>
         </div>
 
-        <!-- Chandelier (no-collect) -->
-        <div class="obj no-collect" style="left:1350px; bottom:75%;" onclick="inspect('chandelier')">
-          <svg width="120" height="10"><rect width="120" height="10" fill="transparent"/></svg>
-          <span class="obj-label">Chandelier</span>
+        <!-- Left statue (clickable) -->
+        <div class="obj no-collect" style="left:1195px;bottom:28%;" onclick="inspect('statue')">
+          <svg width="10" height="60"><rect width="10" height="60" fill="transparent"/></svg>
+          <span class="obj-label">Stone Statue</span>
         </div>
 
-        <!-- Envelope on mantel above fireplace -->
-        <div class="obj" style="left:2160px; bottom:38%;" onclick="inspect('envelope')">
-          <span style="font-size:clamp(1.2rem,2.5vw,1.6rem);">✉️</span>
-          <span class="obj-label">Sealed Letter</span>
-        </div>
-
-        <!-- Fireplace -->
-        <div class="obj no-collect" style="left:2140px; bottom:28%;" onclick="inspect('fireplace')">
+        <!-- Fireplace (centre, clickable) -->
+        <div class="obj no-collect" style="left:1400px;bottom:30%;" onclick="inspect('fireplace')">
           <svg width="140" height="10"><rect width="140" height="10" fill="transparent"/></svg>
           <span class="obj-label">Fireplace</span>
         </div>
 
-        <!-- Iron key on floor near fireplace -->
-        <div class="obj" style="left:2000px; bottom:29%;" onclick="inspect('key')">
-          <span style="font-size:clamp(1.2rem,2.5vw,1.6rem);">🗝️</span>
-          <span class="obj-label">Something on the Floor</span>
+        <!-- Envelope on mantel -->
+        <div class="obj" style="left:1550px;bottom:37%;" onclick="inspect('envelope')">
+          <span style="font-size:clamp(1.1rem,2.3vw,1.5rem);">✉️</span>
+          <span class="obj-label">Sealed Letter</span>
+        </div>
+
+        <!-- Right statue -->
+        <div class="obj no-collect" style="left:1750px;bottom:28%;" onclick="inspect('statue')">
+          <svg width="10" height="60"><rect width="10" height="60" fill="transparent"/></svg>
+          <span class="obj-label">Stone Statue</span>
+        </div>
+
+        <!-- Right staircase -->
+        <div class="obj no-collect" style="left:2220px;bottom:28%;" onclick="inspect('staircase')">
+          <svg width="10" height="60"><rect width="10" height="60" fill="transparent"/></svg>
+          <span class="obj-label">Grand Staircase</span>
         </div>
 
         <!-- Umbrella stand + staff -->
-        <div class="obj" style="left:1900px; bottom:28%;" onclick="inspect('staff')">
-          <svg width="50" height="88" viewBox="0 0 50 88" fill="none">
-            <ellipse cx="25" cy="80" rx="17" ry="6" fill="#0e0c10" stroke="#201408" stroke-width="1.5"/>
-            <rect x="21" y="18" width="8" height="62" rx="4" fill="#0e0c10" stroke="#201408" stroke-width="1.5"/>
-            <path d="M31,12 Q37,6 33,1 Q29,7 31,12 L31,80" stroke="#5a3060" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <circle cx="33" cy="1" r="4" fill="#7a4090" opacity=".9"/>
+        <div class="obj" style="left:2400px;bottom:28%;" onclick="inspect('staff')">
+          <svg width="50" height="86" viewBox="0 0 50 86" fill="none">
+            <ellipse cx="25" cy="78" rx="16" ry="6" fill="#06101a" stroke="#0c1e28" stroke-width="1.5"/>
+            <rect x="21" y="18" width="8" height="60" rx="4" fill="#06101a" stroke="#0c1e28" stroke-width="1.5"/>
+            <path d="M31,12 Q37,6 33,1 Q29,7 31,12 L31,78" stroke="#1a5060" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="33" cy="1" r="4" fill="#2a8080" opacity=".9"/>
           </svg>
           <span class="obj-label">Umbrella Stand</span>
         </div>
 
+        <!-- Iron key on floor -->
+        <div class="obj" style="left:2560px;bottom:29%;" onclick="inspect('key')">
+          <span style="font-size:clamp(1.1rem,2.2vw,1.5rem);">🗝️</span>
+          <span class="obj-label">Something on the Floor</span>
+        </div>
+
         <!-- Doormat (far right) -->
-        <div class="obj no-collect" style="left:2480px; bottom:28%;" onclick="inspect('mat')">
-          <svg width="114" height="34" viewBox="0 0 114 34" fill="none">
-            <rect x="2" y="4" width="110" height="26" rx="4" fill="#140e10" stroke="#241418" stroke-width="2"/>
-            <rect x="7" y="7" width="100" height="19" rx="3" fill="#100c0e"/>
-            <text x="57" y="21" font-size="7" text-anchor="middle" fill="#2a1a20"
+        <div class="obj no-collect" style="left:2720px;bottom:28%;" onclick="inspect('mat')">
+          <svg width="112" height="32" viewBox="0 0 112 32" fill="none">
+            <rect x="2" y="4" width="108" height="24" rx="4" fill="#060c14" stroke="#0c1c28" stroke-width="2"/>
+            <rect x="6" y="7" width="100" height="18" rx="3" fill="#04080f"/>
+            <text x="56" y="20" font-size="6.5" text-anchor="middle" fill="#0e1e2e"
                   font-family="Cinzel,serif" letter-spacing="1">WIPE YOUR FATE</text>
           </svg>
           <span class="obj-label">Doormat</span>
         </div>
 
-        <!-- Rosemary (tucked by doormat) -->
-        <div class="obj" style="left:2560px; bottom:29%;" onclick="inspect('rosemary')">
-          <span style="font-size:clamp(1rem,2vw,1.4rem);">🌿</span>
+        <!-- Rosemary -->
+        <div class="obj" style="left:2800px;bottom:29%;" onclick="inspect('rosemary')">
+          <span style="font-size:clamp(1rem,2vw,1.3rem);">🌿</span>
           <span class="obj-label">Something Green</span>
         </div>
 
-        <!-- Broken stick -->
-        <div class="obj no-collect" style="left:2680px; bottom:28%;" onclick="inspect('stick')">
-          <svg width="14" height="72" viewBox="0 0 14 72" fill="none">
-            <path d="M7,3 Q4,18 7,36 Q10,54 6,68" stroke="#2a1808" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M5,34 Q9,38 11,46" stroke="#2a1808" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Broken stick far right -->
+        <div class="obj no-collect" style="left:2900px;bottom:28%;" onclick="inspect('stick')">
+          <svg width="14" height="70" viewBox="0 0 14 70" fill="none">
+            <path d="M7,3 Q4,17 7,34 Q10,52 6,66" stroke="#0a1828" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M5,33 Q9,37 11,45" stroke="#0a1828" stroke-width="2" fill="none" stroke-linecap="round"/>
           </svg>
           <span class="obj-label">Broken Stick</span>
         </div>
@@ -666,7 +679,6 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
       </div>
     </div>
 
-    <!-- Sidebar -->
     <div class="sidebar">
       <div class="sidebar-title">Inventory</div>
       <div class="inv-grid" id="inv-grid"></div>
@@ -676,13 +688,12 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
 
   <div class="msg-bar">
     <p class="msg-text" id="msg">
-      The door opens before you touch it. The entrance hall stretches further than it should.
-      A chandelier flickers overhead. <span class="hl">Drag to explore.</span>
+      The door opens. Stone walls. Two staircases. A fire burning at the far end with no wood beneath it.
+      <span class="hl">Drag to explore.</span>
     </p>
   </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
     <button class="modal-x" onclick="closeModal()">✕</button>
@@ -696,8 +707,8 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
 <div class="whisper" id="whisper"><div class="whisper-txt" id="wtxt"></div></div>
 
 <script>
-let ctx, soundOn=true;
-function initAudio(){ if(ctx)return; try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+let ctx,soundOn=true;
+function initAudio(){if(ctx)return;try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
 function tone(f,t,d,v=.07,dl=0){
   if(!ctx||!soundOn)return;
   const o=ctx.createOscillator(),g=ctx.createGain();
@@ -709,70 +720,67 @@ function tone(f,t,d,v=.07,dl=0){
   g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dl+d);
   o.start(ctx.currentTime+dl);o.stop(ctx.currentTime+dl+d);
 }
-function playCreak(){[118,93,80,108].forEach((f,i)=>tone(f,'sawtooth',.45,.06,i*.14));}
+function playCreak(){[115,90,78,105].forEach((f,i)=>tone(f,'sawtooth',.45,.06,i*.14));}
 function playPickup(){[440,554,659].forEach((f,i)=>tone(f,'sine',.3,.07,i*.08));}
-function playWhisper(){[200,178,158].forEach((f,i)=>tone(f,'sine',.9,.04,i*.22));}
+function playWhisper(){[195,175,155].forEach((f,i)=>tone(f,'sine',.9,.04,i*.22));}
 function playAmbient(){
   if(!soundOn)return;
-  tone(48+Math.random()*8,'sine',5,.022);
-  tone(102+Math.random()*5,'triangle',3.5,.016,.65);
+  tone(46+Math.random()*8,'sine',5,.022);
+  tone(98+Math.random()*5,'triangle',3.5,.016,.65);
   setTimeout(playAmbient,7500+Math.random()*4500);
 }
 function toggleSound(){soundOn=!soundOn;document.getElementById('snd-btn').textContent=soundOn?'🔊':'🔇';}
 
 const OBJS={
   portrait:{icon:'🖼️',title:'The Portrait of Helga',
-    desc:'Painted in oils, 1824. Her expression is perfectly composed. Her eyes are not. Each time you look away and back, they have moved — slowly, like she is watching something move across the room behind you.',
-    clue:'A plaque at the bottom: <em>"Helga Hex. She sees everything."</em>',canCollect:false},
-  portrait2:{icon:'🎭',title:'An Old Portrait',
-    desc:'A man this time. Prosperous-looking. Painted in better days, judging by the coat. Someone has scratched out his eyes with something sharp.',
-    clue:'Not Helga\'s work. Someone was angry.',canCollect:false},
-  cloak:{icon:'🧥',title:'Black Cloak',
-    desc:'Heavy wool, cold even near the fire. It smells of lavender and ash — like a funeral. The lining carries a name in red thread: <em>H. Hex.</em>',
-    clue:'Her familiar will not see you if you wear it. Probably.',canCollect:true,label:'Take Cloak',iname:'Cloak',iicon:'🧥'},
+    desc:'Oils on canvas, 1824. Her expression is entirely still. Her eyes are not — they shift each time you look away. She has been watching this hall for two hundred years. She is watching it now.',
+    clue:'A plaque at the bottom, barely legible: <em>"Helga Hex. She sees everything."</em>',canCollect:false},
   mirror:{icon:'🪞',title:'The Old Mirror',
-    desc:'The silver has gone black with age. You can barely make yourself out. But in the reflection — the staircase goes up further than this house should allow. And there is a light on the upper floor.',
+    desc:'The silver backing has gone completely black. You can barely make yourself out. But the reflection shows the hall slightly differently — the staircases curve the other way, and there is something at the top of them.',
     clue:'A mirror only tells the truth when it wants to.',canCollect:false},
+  cloak:{icon:'🧥',title:'Black Cloak',
+    desc:'Heavy wool, cold even this close to the fire. It smells of lavender and old ash. A name is stitched in the lining in faded red thread: <em>H. Hex.</em>',
+    clue:'Her familiar cannot see through it. Probably.',canCollect:true,label:'Take Cloak',iname:'Cloak',iicon:'🧥'},
   clock:{icon:'🕰️',title:'Grandfather Clock',
-    desc:'Stopped at 3:17. No pendulum swings. No mechanism ticks. And yet — every few minutes, if you stand perfectly still, a single slow tick comes from somewhere inside it.',
+    desc:'Stopped at 3:17. No pendulum. No mechanism. Nothing ticks. And yet — if you stand completely still — a single, slow, deliberate tick comes from somewhere inside it every few minutes.',
     clue:'Time moves differently in this house.',canCollect:false},
   books:{icon:'📚',title:'Old Books',
-    desc:'Stacked without order. The titles are in a language that predates anything you know. One book is noticeably warmer than the others. One page is bookmarked with black ribbon.',
-    clue:'The text on that page has been crossed out.',canCollect:false},
+    desc:'Stacked without order. The titles are in a language that predates anything you know. One book is noticeably warmer than the others. Its bookmarked page is in a language you almost recognise.',
+    clue:'The warm book has had one page crossed out in red ink. Very recently.',canCollect:false},
   staircase:{icon:'🪜',title:'The Grand Staircase',
-    desc:'Sweeping up to a landing and beyond. The bannisters are carved with something — spirals and eyes. The staircase goes further than it should. The upper floor is dark, except for one room.',
-    clue:'You will need to find a way through before you go up.',canCollect:false},
-  chandelier:{icon:'🕯️',title:'The Chandelier',
-    desc:'Crystal and brass, hung from a chain that disappears into the ceiling. Every candle is lit. Every one of them has been burning since long before you arrived.',
-    clue:'The light it casts is warm. The shadows it makes are not.',canCollect:false},
+    desc:'Two staircases, each sweeping up and inward to a central landing. The stone is cold under your hand. The landing above is dark except for one closed door at the far end of the upper hall.',
+    clue:'You will need to earn your way up.',canCollect:false},
+  statue:{icon:'🗿',title:'Stone Statue',
+    desc:'Carved from the same grey stone as the walls. Robed, faceless, arms slightly extended as if offering something — or blocking the way. The stone is colder than everything else in the hall.',
+    clue:'Both statues face the fireplace. They have always faced the fireplace.',canCollect:false},
   fireplace:{icon:'🔥',title:'The Fireplace',
-    desc:'A proper stone fireplace — wide enough to stand in. The fire burns without reason: no fresh wood, no ash pile, no smoke. Just fire, exactly the same as it has been for decades.',
-    clue:'Something is inscribed in the stone above the mantel, almost invisible under the soot.',canCollect:false},
+    desc:'A wide stone fireplace burning without reason — no ash, no wood, no smoke. The fire has clearly been burning for decades. The heat is real. The fire is not.',
+    clue:'Something is inscribed above the mantel in the stone. The smoke has made it almost unreadable.',canCollect:false},
   envelope:{icon:'✉️',title:'The Sealed Letter',
-    desc:'Propped on the mantel between a small clock and a candlestick. Sealed with black wax pressed into a crescent moon. Addressed to: <em>The Next One.</em>',
-    clue:'Inside: <em>"You will not leave the way you came in. But you might leave another way — if you are clever."</em>',canCollect:true,label:'Take Letter',iname:'Letter',iicon:'✉️'},
-  key:{icon:'🗝️',title:'Iron Key',
-    desc:'Cold and small, lying on the floor as if someone dropped it mid-stride and never came back. There is no obvious lock in this room it could open.',
-    clue:'Keep it.',canCollect:true,label:'Take Iron Key',iname:'Iron Key',iicon:'🗝️'},
+    desc:'Propped on the mantel, sealed with black wax pressed into a crescent moon. Addressed to: <em>The Next One.</em> Inside: <em>"You will not leave the way you came in. But you might leave another way — if you are clever."</em>',
+    clue:'She was expecting someone.',canCollect:true,label:'Take Letter',iname:'Letter',iicon:'✉️'},
   staff:{icon:'🪄',title:'Twisted Staff',
-    desc:'Dark gnarled wood, warm despite the cold air. It hums faintly — less sound, more pressure. Like something inside it is paying attention. A word is carved at the base.',
+    desc:'Dark gnarled wood, warm despite the cold stone. It hums faintly — not sound exactly, more like pressure behind your eyes. Something is carved at the base in a language you almost recognise.',
     clue:'Old German. Or older than German.',canCollect:true,label:'Take Staff',iname:'Staff',iicon:'🪄'},
+  key:{icon:'🗝️',title:'Iron Key',
+    desc:'Small and cold, lying on the stone floor as if dropped mid-stride. There is no visible lock in this room it could open. Yet.',
+    clue:'Keep it.',canCollect:true,label:'Take Iron Key',iname:'Iron Key',iicon:'🗝️'},
   mat:{icon:'🟫',title:'The Doormat',
-    desc:'Worn smooth by centuries of feet. The letters barely visible now: <em>WIPE YOUR FATE.</em> Either a very dark joke, or a warning. Either way, someone put it here on purpose.',
-    clue:'Something is tucked under the corner.',canCollect:false},
+    desc:'Worn smooth by centuries of feet. The letters are almost gone. If you crouch and look carefully: <em>WIPE YOUR FATE.</em>',
+    clue:'Something is tucked under the corner. Something green.',canCollect:false},
   rosemary:{icon:'🌿',title:'Dried Rosemary',
-    desc:'A sprig of rosemary tied with red thread, wedged under the doormat. Still faintly fragrant despite being completely desiccated. Left deliberately — by someone leaving in a hurry.',
+    desc:'A sprig of rosemary tied with red thread, wedged under the doormat. Faintly fragrant despite being completely desiccated. Left deliberately — by someone who left in a hurry.',
     clue:'For protection. Old magic. It might slow her down.',canCollect:true,label:'Take Rosemary',iname:'Rosemary',iicon:'🌿'},
   stick:{icon:'🪵',title:'Broken Walking Stick',
-    desc:'Snapped clean through. The break looks fresh — white wood, not yet darkened. Someone dropped this here recently and did not come back to collect it.',
+    desc:'Snapped clean through. The break is fresh — white wood, not yet darkened. Whoever dropped this did not come back for it.',
     clue:'Not yours. Not useful. Deeply unsettling.',canCollect:false},
 };
 
 const WHISPERS=['she knows you\'re here','the house remembers',
   'don\'t touch what isn\'t yours','you smell like fear',
   'two hundred years and she still waits','she is listening',
-  'the mirrors are hers','did you hear that','the fire is not natural',
-  'she has been watching you since the door opened',
+  'the mirrors are hers','the statues move when you aren\'t looking',
+  'the fire is not natural','did the stairs always curve that way',
   'the clock only ticks for the dying'];
 const collected=new Set(),inventory=[];
 let wtimer;
@@ -780,16 +788,16 @@ let wtimer;
 function whisper(){
   const el=document.getElementById('whisper'),t=document.getElementById('wtxt');
   t.textContent=WHISPERS[Math.floor(Math.random()*WHISPERS.length)];
-  el.classList.add('show'); playWhisper();
-  clearTimeout(wtimer); wtimer=setTimeout(()=>el.classList.remove('show'),3200);
+  el.classList.add('show');playWhisper();
+  clearTimeout(wtimer);wtimer=setTimeout(()=>el.classList.remove('show'),3200);
 }
 
 function renderInv(){
-  const g=document.getElementById('inv-grid'); g.innerHTML='';
+  const g=document.getElementById('inv-grid');g.innerHTML='';
   for(let i=0;i<9;i++){
-    const s=document.createElement('div'); s.className='inv-slot';
+    const s=document.createElement('div');s.className='inv-slot';
     if(inventory[i]){
-      const it=inventory[i]; s.classList.add('filled'); s.textContent=it.icon; s.title=it.name;
+      const it=inventory[i];s.classList.add('filled');s.textContent=it.icon;s.title=it.name;
       s.onclick=()=>setMsg(`${it.icon} <span class="hl">${it.name}</span> — in your possession.`);
     }
     g.appendChild(s);
@@ -797,42 +805,38 @@ function renderInv(){
   document.getElementById('inv-count').textContent=`${inventory.length} / 9 items`;
 }
 function addItem(name,icon){
-  inventory.push({name,icon}); renderInv(); playPickup();
+  inventory.push({name,icon});renderInv();playPickup();
   setMsg(`<span class="hl">${name}</span> added to your inventory.`);
 }
-
 function inspect(key){
-  initAudio(); playCreak();
+  initAudio();playCreak();
   const o=OBJS[key];
   document.getElementById('m-icon').textContent=o.icon;
   document.getElementById('m-title').textContent=o.title;
   document.getElementById('m-desc').innerHTML=`${o.desc}<br><br><em style="color:var(--gold);font-size:.88rem">${o.clue}</em>`;
-  const acts=document.getElementById('m-acts'); acts.innerHTML='';
+  const acts=document.getElementById('m-acts');acts.innerHTML='';
   if(o.canCollect&&!collected.has(key)){
-    const b=document.createElement('button'); b.className='mbtn gold'; b.textContent=o.label;
-    b.onclick=()=>{
-      collected.add(key); addItem(o.iname,o.iicon);
+    const b=document.createElement('button');b.className='mbtn gold';b.textContent=o.label;
+    b.onclick=()=>{collected.add(key);addItem(o.iname,o.iicon);
       document.querySelectorAll(`[onclick="inspect('${key}')"]`).forEach(el=>el.classList.add('collected'));
-      closeModal();
-    };
+      closeModal();};
     acts.appendChild(b);
   }
-  const cb=document.createElement('button'); cb.className='mbtn'; cb.textContent='Step Back';
-  cb.onclick=closeModal; acts.appendChild(cb);
+  const cb=document.createElement('button');cb.className='mbtn';cb.textContent='Step Back';
+  cb.onclick=closeModal;acts.appendChild(cb);
   document.getElementById('modal').classList.add('open');
-  if(Math.random()<.4) setTimeout(whisper,1300);
+  if(Math.random()<.4)setTimeout(whisper,1300);
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
 function setMsg(html){document.getElementById('msg').innerHTML=html;}
 
 const vp=document.getElementById('vp'),rs=document.getElementById('rs');
-const ROOM_W=2800;
+const ROOM_W=3000;
 let scrollX=0,maxScroll=0,drag={active:false,startX:0,startScroll:0},vel=0,lastX=0,lastT=0,rafId=null;
 function updateScroll(x){scrollX=Math.max(0,Math.min(maxScroll,x));rs.style.transform=`translateX(${-scrollX}px)`;}
 function calcMax(){maxScroll=Math.max(0,ROOM_W-vp.clientWidth);}
 window.addEventListener('resize',calcMax);
-
 vp.addEventListener('mousedown',e=>{initAudio();drag.active=true;drag.startX=e.clientX;drag.startScroll=scrollX;vel=0;lastX=e.clientX;lastT=Date.now();vp.classList.add('dragging');cancelAnimationFrame(rafId);});
 window.addEventListener('mousemove',e=>{if(!drag.active)return;const now=Date.now(),dt=now-lastT||1;vel=(lastX-e.clientX)/dt*16;lastX=e.clientX;lastT=now;updateScroll(drag.startScroll+(drag.startX-e.clientX));});
 window.addEventListener('mouseup',()=>{if(!drag.active)return;drag.active=false;vp.classList.remove('dragging');momentum();});
@@ -845,7 +849,7 @@ function startGame(){
   initAudio();
   document.getElementById('title-screen').classList.remove('active');
   document.getElementById('game-screen').classList.add('active');
-  calcMax(); renderInv(); playCreak();
+  calcMax();renderInv();playCreak();
   setTimeout(playAmbient,1200);
   setTimeout(whisper,10000);
   setInterval(()=>{if(Math.random()<.3)whisper();},24000);
