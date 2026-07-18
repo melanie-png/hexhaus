@@ -8,9 +8,10 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #080a12; --panel: #0e1020; --border: #1e2238;
-  --accent: #6a42a0; --gold: #c9a84c; --text: #c0b8d8;
-  --muted: #5a5575; --white: #ede8f5; --glow: rgba(106,66,160,0.35);
+  --bg: #05060f; --panel: #08091a; --border: #1a1c35;
+  --accent: #5533cc; --gold: #c9a84c; --text: #c0b8d8;
+  --muted: #5a5580; --white: #ede8f5; --glow: rgba(85,51,204,0.4);
+  --blue: #1a1fff; --cobalt: #0a0f6a;
 }
 html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
   font-family:'Crimson Text',Georgia,serif; overflow:hidden; user-select:none;
@@ -21,21 +22,20 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
 /* ── TITLE ── */
 #title-screen {
   align-items:center; justify-content:center; text-align:center;
-  background: radial-gradient(ellipse at 50% 25%, #14082e 0%, #080a12 65%);
+  background: radial-gradient(ellipse at 50% 20%, #0d0a40 0%, #05060f 65%);
 }
 .cf { position:absolute; animation:flicker 3s ease-in-out infinite; font-size:2.2rem; pointer-events:none; }
 .cf:nth-child(1){top:12%;left:7%;} .cf:nth-child(2){top:18%;right:9%;animation-delay:1.3s;}
 .cf:nth-child(3){bottom:22%;left:11%;animation-delay:0.8s;font-size:1.8rem;}
 .cf:nth-child(4){bottom:16%;right:7%;animation-delay:2s;}
 @keyframes flicker{0%,100%{opacity:.55;transform:scale(1) rotate(-2deg);}
-  25%{opacity:1;transform:scale(1.06) rotate(1deg);}
-  50%{opacity:.45;transform:scale(.97) rotate(-1deg);}
+  25%{opacity:1;transform:scale(1.06) rotate(1deg);}50%{opacity:.45;transform:scale(.97) rotate(-1deg);}
   75%{opacity:.85;transform:scale(1.03) rotate(2deg);}}
 .t-eye { font-family:'Cinzel',serif; font-size:clamp(.6rem,1.4vw,.8rem); letter-spacing:6px;
   color:var(--muted); text-transform:uppercase; margin-bottom:14px; }
 .t-title { font-family:'Cinzel',serif; font-size:clamp(3.5rem,13vw,8rem); font-weight:700;
   color:var(--white); letter-spacing:8px; line-height:1;
-  text-shadow:0 0 60px var(--glow),0 0 120px rgba(106,66,160,.15); margin-bottom:6px; }
+  text-shadow:0 0 60px var(--glow),0 0 120px rgba(85,51,204,.15); margin-bottom:6px; }
 .t-sub { font-style:italic; color:var(--muted); letter-spacing:2px; margin-bottom:44px;
   font-size:clamp(.85rem,2.2vw,1.1rem); }
 .t-lore { max-width:460px; font-size:clamp(.88rem,2vw,1rem); line-height:1.75;
@@ -45,7 +45,7 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
   border:1px solid var(--accent); padding:15px 46px; cursor:pointer; transition:all .3s; }
 .btn-enter:hover { background:var(--accent); box-shadow:0 0 28px var(--glow); }
 
-/* ── GAME CHROME ── */
+/* ── TOP BAR ── */
 .top-bar { background:var(--panel); border-bottom:1px solid var(--border); padding:9px 18px;
   display:flex; align-items:center; justify-content:space-between; flex-shrink:0; z-index:10; }
 .room-label { font-family:'Cinzel',serif; font-size:clamp(.7rem,1.8vw,.88rem);
@@ -55,89 +55,101 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
   display:flex; align-items:center; justify-content:center; transition:all .2s; }
 .icon-btn:hover { border-color:var(--accent); color:var(--white); }
 
+/* ── GAME AREA ── */
+.game-area { flex:1; display:flex; overflow:hidden; min-height:0; }
+
 /* ── SCROLL VIEWPORT ── */
 .viewport-wrap { flex:1; position:relative; overflow:hidden; cursor:grab; }
 .viewport-wrap.dragging { cursor:grabbing; }
-.room-scroll { position:absolute; top:0; left:0; height:100%;
-  width: 2600px; /* room total width */
-  will-change:transform; transition:transform .05s linear; }
+.room-scroll { position:absolute; top:0; left:0; height:100%; width:2800px; will-change:transform; }
 
-/* ── ROOM BACKGROUND (Scooby midnight blue hand-painted style) ── */
-.room-bg {
-  position:absolute; inset:0;
+/* ── ROOM BASE ── */
+.room-base {
+  position:absolute; inset:0; width:2800px;
   background: linear-gradient(180deg,
-    #06080f 0%, #0a0e1c 10%, #0d1228 22%,
-    #101730 38%, #0d1428 54%,
-    #0b0f1e 70%, #080a14 100%);
+    #050822 0%, #080d35 8%, #0a1050 18%,
+    #0d1560 30%, #0a1250 45%,
+    #080e3a 62%, #060820 80%, #040610 100%);
 }
-/* Stone wall texture */
-.room-bg::before {
+
+/* Cobalt blue wall wash */
+.room-base::before {
   content:''; position:absolute; inset:0;
   background:
-    repeating-linear-gradient(180deg, transparent 0, transparent 56px,
-      rgba(4,6,16,.5) 56px, rgba(4,6,16,.5) 59px),
-    repeating-linear-gradient(90deg, transparent 0, transparent 92px,
-      rgba(4,6,16,.3) 92px, rgba(4,6,16,.3) 94px);
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(30,40,180,0.35) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 80% at 10% 50%, rgba(20,30,140,0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 80% at 90% 50%, rgba(20,30,140,0.2) 0%, transparent 60%);
   pointer-events:none;
 }
-/* Floor planks */
-.room-bg::after {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:31%;
+/* Stone wall texture */
+.room-base::after {
+  content:''; position:absolute; inset:0;
+  background:
+    repeating-linear-gradient(180deg, transparent 0, transparent 60px,
+      rgba(3,4,18,.45) 60px, rgba(3,4,18,.45) 63px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 95px,
+      rgba(3,4,18,.25) 95px, rgba(3,4,18,.25) 97px);
+  pointer-events:none;
+}
+
+/* ── FLOOR ── */
+.room-floor {
+  position:absolute; bottom:0; left:0; right:0; height:28%;
   background:
     repeating-linear-gradient(90deg,
-      #0a0812 0,#0a0812 2px, #0f0c18 2px,#0f0c18 140px,
-      #0c0a15 140px,#0c0a15 142px, #111018 142px,#111018 280px),
-    linear-gradient(180deg,#14101e 0%,#09060f 100%);
-  border-top:3px solid #1c1828;
-  box-shadow:inset 0 8px 28px rgba(0,0,0,.75);
+      #080610 0,#080610 2px, #0d0a18 2px,#0d0a18 150px,
+      #0a0815 150px,#0a0815 152px, #0f0d1c 152px,#0f0d1c 300px),
+    linear-gradient(180deg,#12102a 0%,#06040e 100%);
+  border-top:3px solid #1a1638;
+  box-shadow:inset 0 8px 30px rgba(0,0,0,.8);
   pointer-events:none;
 }
 
-/* ── SVG ROOM ART (atmospheric layer) ── */
-.room-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
-
-/* ── DEPTH LAYERS ── */
-.layer-far    { position:absolute; bottom:31%; transform-origin:bottom center; }
-.layer-mid    { position:absolute; bottom:31%; transform-origin:bottom center; }
-.layer-near   { position:absolute; bottom:31%; transform-origin:bottom center; }
-.layer-floor  { position:absolute; bottom:0; transform-origin:bottom center; }
-
-/* ── ROOM OBJECTS ── */
-.obj {
-  position:absolute; bottom:0; display:flex; flex-direction:column;
-  align-items:center; gap:3px; cursor:pointer; transition:filter .2s, transform .2s;
-  transform-origin:bottom center;
-}
-.obj:hover { filter:brightness(1.5) drop-shadow(0 0 10px var(--accent)); transform:scale(1.06); }
-.obj.collected { opacity:.22; pointer-events:none; }
-.obj.no-collect:hover { filter:brightness(1.3) drop-shadow(0 0 6px rgba(255,200,100,.3)); }
-.obj-label { font-family:'Cinzel',serif; font-size:clamp(.45rem,1vw,.6rem); color:var(--muted);
-  letter-spacing:1.5px; text-transform:uppercase; opacity:0; transition:opacity .2s;
-  white-space:nowrap; text-shadow:0 0 6px #000; pointer-events:none; }
-.obj:hover .obj-label { opacity:1; }
-.obj-icon { line-height:1; display:block; }
-
-/* ── PARALLAX DEPTH via size + opacity ── */
-.depth-far  { transform:scale(.55); opacity:.65; filter:brightness(.7); }
-.depth-mid  { transform:scale(.78); opacity:.82; filter:brightness(.85); }
-.depth-near { transform:scale(1);   opacity:1;   filter:brightness(1); }
-
-/* Portrait */
-.portrait-frame { border:3px solid #3a2e12; background:linear-gradient(160deg,#160e08,#221508);
-  display:flex; align-items:center; justify-content:center; position:relative;
-  box-shadow:0 0 22px rgba(0,0,0,.9), inset 0 0 12px rgba(0,0,0,.6); overflow:hidden; }
-.portrait-frame::after { content:'👁 👁'; position:absolute; bottom:18%;
-  font-size:.7rem; letter-spacing:5px; animation:eyeshift 4.5s ease-in-out infinite; }
-@keyframes eyeshift{0%,100%{transform:translateX(-5px);}50%{transform:translateX(5px);}}
-.candle-glow { animation:cglow 2.2s ease-in-out infinite; }
-@keyframes cglow{0%,100%{filter:drop-shadow(0 0 10px #ff9820);}50%{filter:drop-shadow(0 0 4px #ff6600);}}
-
-/* Scroll hint */
-.scroll-hint { position:absolute; bottom:38%; right:20px; z-index:5;
+/* ── SCROLL HINT ── */
+.scroll-hint { position:absolute; bottom:30%; right:24px; z-index:5;
   font-family:'Cinzel',serif; font-size:.6rem; letter-spacing:2px; color:var(--muted);
-  text-transform:uppercase; animation:hint 3s ease-in-out 2s both; pointer-events:none; }
-.scroll-hint::after { content:' ›'; }
-@keyframes hint{0%{opacity:0;}20%{opacity:.8;}80%{opacity:.8;}100%{opacity:0;}}
+  text-transform:uppercase; animation:hint 4s ease-in-out 1.5s both; pointer-events:none; }
+@keyframes hint{0%{opacity:0;}15%{opacity:.7;}85%{opacity:.7;}100%{opacity:0;}}
+
+/* ── FIRE ANIMATION ── */
+@keyframes fireflicker {
+  0%,100%{transform:scaleY(1) scaleX(1);}
+  20%{transform:scaleY(1.06) scaleX(.97);}
+  40%{transform:scaleY(.94) scaleX(1.03);}
+  60%{transform:scaleY(1.04) scaleX(.98);}
+  80%{transform:scaleY(.97) scaleX(1.02);}
+}
+.fire-group { animation:fireflicker 1.4s ease-in-out infinite; transform-origin:bottom center; }
+@keyframes glow-pulse {
+  0%,100%{opacity:.55;} 50%{opacity:.85;}
+}
+.firelight { animation:glow-pulse 1.8s ease-in-out infinite; }
+
+/* ── CANDLE FLICKER ── */
+@keyframes candle-anim {
+  0%,100%{filter:drop-shadow(0 0 8px #ff9820);}
+  50%{filter:drop-shadow(0 0 3px #ff6600);}
+}
+
+/* ── OBJECTS ── */
+.obj { position:absolute; bottom:0; display:flex; flex-direction:column;
+  align-items:center; gap:3px; cursor:pointer;
+  transition:filter .2s, transform .2s; transform-origin:bottom center; }
+.obj:hover { filter:brightness(1.5) drop-shadow(0 0 12px rgba(180,140,255,.7)); transform:scale(1.07); }
+.obj.no-collect:hover { filter:brightness(1.3) drop-shadow(0 0 8px rgba(255,200,100,.3)); transform:scale(1.04); }
+.obj.collected { opacity:.2; pointer-events:none; }
+.obj-label { font-family:'Cinzel',serif; font-size:clamp(.44rem,.95vw,.6rem); color:var(--muted);
+  letter-spacing:1.5px; text-transform:uppercase; opacity:0; transition:opacity .2s;
+  white-space:nowrap; text-shadow:0 0 8px #000; pointer-events:none; }
+.obj:hover .obj-label { opacity:1; }
+
+/* Portrait frame */
+.portrait-frame { border:4px solid #3a2e12; background:linear-gradient(150deg,#1a1008,#281808);
+  display:flex; align-items:center; justify-content:center; position:relative;
+  box-shadow:0 0 25px rgba(0,0,0,.9),inset 0 0 14px rgba(0,0,0,.6); overflow:hidden; }
+.portrait-frame::after { content:'👁 👁'; position:absolute; bottom:16%;
+  font-size:.65rem; letter-spacing:5px; animation:eyeshift 5s ease-in-out infinite; }
+@keyframes eyeshift{0%,100%{transform:translateX(-6px);}50%{transform:translateX(6px);}}
 
 /* ── SIDEBAR ── */
 .sidebar { width:clamp(140px,18vw,200px); background:var(--panel);
@@ -149,27 +161,24 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
 .inv-slot { aspect-ratio:1; border:1px solid var(--border); border-radius:5px;
   background:rgba(0,0,0,.3); display:flex; align-items:center; justify-content:center;
   font-size:clamp(1.1rem,2.5vw,1.4rem); transition:all .2s; }
-.inv-slot.filled { border-color:var(--accent); background:rgba(106,66,160,.12); cursor:pointer; }
+.inv-slot.filled { border-color:var(--accent); background:rgba(85,51,204,.12); cursor:pointer; }
 .inv-slot.filled:hover { border-color:var(--gold); transform:scale(1.06); box-shadow:0 0 10px var(--glow); }
 .inv-count { padding:8px 14px; border-top:1px solid var(--border);
   font-size:.7rem; color:var(--muted); font-style:italic; }
 
-/* ── GAME AREA ── */
-.game-area { flex:1; display:flex; overflow:hidden; min-height:0; }
-
 /* ── MESSAGE BAR ── */
-.msg-bar { background:#070911; border-top:1px solid var(--border);
+.msg-bar { background:#040510; border-top:1px solid var(--border);
   padding:12px 18px; min-height:56px; display:flex; align-items:center; flex-shrink:0; }
 .msg-text { font-style:italic; font-size:clamp(.8rem,1.8vw,.96rem);
   color:var(--text); line-height:1.5; flex:1; }
 .msg-text .hl { color:var(--gold); font-style:normal; font-weight:600; }
 
 /* ── MODAL ── */
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.82);
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85);
   z-index:100; align-items:center; justify-content:center; padding:20px; }
 .modal-overlay.open { display:flex; }
 .modal-box { background:var(--panel); border:1px solid var(--border); max-width:400px;
-  width:100%; padding:26px 22px; position:relative; box-shadow:0 0 55px rgba(0,0,0,.9); }
+  width:100%; padding:26px 22px; position:relative; box-shadow:0 0 60px rgba(0,0,0,.95); }
 .modal-box::before { content:''; position:absolute; top:0;left:0;right:0; height:2px;
   background:linear-gradient(90deg,transparent,var(--accent),transparent); }
 .modal-icon { font-size:2.6rem; text-align:center; margin-bottom:10px; }
@@ -193,12 +202,12 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
   display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .4s; }
 .whisper.show { opacity:1; }
 .whisper-txt { font-family:'Cinzel',serif; font-size:clamp(.9rem,2.5vw,1.3rem);
-  color:rgba(106,66,160,.95); letter-spacing:4px; text-align:center;
-  text-shadow:0 0 30px var(--accent); padding:0 20px;
+  color:rgba(100,80,220,.95); letter-spacing:5px; text-align:center;
+  text-shadow:0 0 30px #5533cc, 0 0 60px #3311aa; padding:0 20px;
   animation:wpulse 2.8s ease-in-out forwards; }
 @keyframes wpulse{0%{opacity:0;transform:scale(.94);}18%{opacity:1;transform:scale(1);}82%{opacity:1;}100%{opacity:0;}}
 
-/* ── MOBILE: sidebar goes bottom ── */
+/* ── MOBILE ── */
 @media(max-width:560px){
   .game-area { flex-direction:column; }
   .sidebar { width:100%; height:100px; border-left:none; border-top:1px solid var(--border);
@@ -236,228 +245,474 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
   </div>
 
   <div class="game-area">
-    <!-- Scrollable Room -->
     <div class="viewport-wrap" id="vp">
       <div class="room-scroll" id="rs">
 
-        <!-- Room background -->
-        <div class="room-bg" style="width:2600px;height:100%;position:absolute;top:0;left:0;"></div>
+        <!-- Room base bg -->
+        <div class="room-base"></div>
+        <div class="room-floor"></div>
 
-        <!-- SVG atmospheric art: ceiling beams, sconces, wainscoting, arch, glow -->
-        <svg class="room-svg" viewBox="0 0 2600 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- ═══════════ SVG ROOM SCENE ═══════════ -->
+        <svg style="position:absolute;top:0;left:0;width:2800px;height:100%;pointer-events:none;"
+             viewBox="0 0 2800 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="g1" cx="30%" cy="40%" r="22%"><stop offset="0%" stop-color="#ff9a30" stop-opacity=".2"/><stop offset="100%" stop-color="#ff6600" stop-opacity="0"/></radialGradient>
-            <radialGradient id="g2" cx="70%" cy="40%" r="22%"><stop offset="0%" stop-color="#ff9a30" stop-opacity=".16"/><stop offset="100%" stop-color="#ff6600" stop-opacity="0"/></radialGradient>
-            <radialGradient id="g3" cx="50%" cy="40%" r="20%"><stop offset="0%" stop-color="#ff9a30" stop-opacity=".14"/><stop offset="100%" stop-color="#ff6600" stop-opacity="0"/></radialGradient>
-            <radialGradient id="vg" cx="50%" cy="50%" r="60%"><stop offset="25%" stop-color="transparent"/><stop offset="100%" stop-color="#000" stop-opacity=".6"/></radialGradient>
+            <!-- Rose window glow -->
+            <radialGradient id="roseGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
+              <stop offset="40%" stop-color="#aaccff" stop-opacity=".7"/>
+              <stop offset="100%" stop-color="#2244cc" stop-opacity="0"/>
+            </radialGradient>
+            <!-- Fire orange glow -->
+            <radialGradient id="fireGlow" cx="50%" cy="80%" r="60%">
+              <stop offset="0%" stop-color="#ff8800" stop-opacity=".6"/>
+              <stop offset="50%" stop-color="#ff4400" stop-opacity=".25"/>
+              <stop offset="100%" stop-color="#ff2200" stop-opacity="0"/>
+            </radialGradient>
+            <!-- Candelabra glow -->
+            <radialGradient id="cGlow1" cx="50%" cy="20%" r="50%">
+              <stop offset="0%" stop-color="#ffaa30" stop-opacity=".25"/>
+              <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="cGlow2" cx="50%" cy="20%" r="50%">
+              <stop offset="0%" stop-color="#ffaa30" stop-opacity=".22"/>
+              <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
+            </radialGradient>
+            <!-- Vignette -->
+            <radialGradient id="vig" cx="50%" cy="50%" r="65%">
+              <stop offset="20%" stop-color="transparent"/>
+              <stop offset="100%" stop-color="#000" stop-opacity=".7"/>
+            </radialGradient>
+            <!-- Cobalt blue wall gradient -->
+            <linearGradient id="wallBlue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0a1260" stop-opacity=".7"/>
+              <stop offset="60%" stop-color="#060e45" stop-opacity=".5"/>
+              <stop offset="100%" stop-color="#030820" stop-opacity=".3"/>
+            </linearGradient>
+            <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
+            <filter id="blur8"><feGaussianBlur stdDeviation="8"/></filter>
+            <filter id="blur2"><feGaussianBlur stdDeviation="2"/></filter>
           </defs>
-          <!-- Ceiling beam strip -->
-          <rect x="0" y="0" width="2600" height="58" fill="#050710" opacity=".9"/>
-          <rect x="0" y="54" width="2600" height="5" fill="#1a2245" opacity=".7"/>
-          <!-- Ceiling beams (vertical) -->
-          <rect x="80"   y="0" width="16" height="58" fill="#040610" opacity=".7"/>
-          <rect x="320"  y="0" width="16" height="58" fill="#040610" opacity=".7"/>
-          <rect x="600"  y="0" width="16" height="58" fill="#040610" opacity=".7"/>
-          <rect x="900"  y="0" width="16" height="58" fill="#040610" opacity=".7"/>
-          <rect x="1200" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
-          <rect x="1500" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
-          <rect x="1800" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
-          <rect x="2100" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
-          <rect x="2400" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
-          <!-- Skirting board -->
-          <rect x="0" y="388" width="2600" height="9" fill="#0f1422" opacity=".95"/>
-          <rect x="0" y="383" width="2600" height="5" fill="#1c2440" opacity=".7"/>
-          <!-- Wainscoting panels repeated -->
-          <rect x="30"   y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="200"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="370"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="540"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="710"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="880"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="1050" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="1220" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="1390" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="1560" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="1730" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="1900" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="2070" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="2240" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <rect x="2410" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
-          <!-- Back wall arch (centre of room) -->
-          <path d="M 1180,59 L1180,295 Q1300,260 1420,295 L1420,59 Z" fill="#0a0e1e" opacity=".5"/>
-          <path d="M 1180,295 Q1300,255 1420,295" fill="none" stroke="#1a2445" stroke-width="3" opacity=".8"/>
-          <!-- Wall sconces (5 evenly spaced) -->
-          <!-- Sconce 1 -->
-          <ellipse cx="200" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
-          <path d="M193,158 Q200,147 207,158 L210,175 Q200,167 190,175 Z" fill="#28396a" opacity=".8"/>
-          <rect x="193" y="197" width="14" height="5" rx="2" fill="#18254a"/>
-          <!-- Sconce 2 -->
-          <ellipse cx="700" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
-          <path d="M693,158 Q700,147 707,158 L710,175 Q700,167 690,175 Z" fill="#28396a" opacity=".8"/>
-          <rect x="693" y="197" width="14" height="5" rx="2" fill="#18254a"/>
-          <!-- Sconce 3 -->
-          <ellipse cx="1300" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
-          <path d="M1293,158 Q1300,147 1307,158 L1310,175 Q1300,167 1290,175 Z" fill="#28396a" opacity=".8"/>
-          <rect x="1293" y="197" width="14" height="5" rx="2" fill="#18254a"/>
-          <!-- Sconce 4 -->
-          <ellipse cx="1900" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
-          <path d="M1893,158 Q1900,147 1907,158 L1910,175 Q1900,167 1890,175 Z" fill="#28396a" opacity=".8"/>
-          <rect x="1893" y="197" width="14" height="5" rx="2" fill="#18254a"/>
-          <!-- Sconce 5 -->
-          <ellipse cx="2400" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
-          <path d="M2393,158 Q2400,147 2407,158 L2410,175 Q2400,167 2390,175 Z" fill="#28396a" opacity=".8"/>
-          <rect x="2393" y="197" width="14" height="5" rx="2" fill="#18254a"/>
-          <!-- Warm glow overlays at sconces -->
-          <rect x="0" y="0" width="2600" height="600" fill="url(#g1)"/>
-          <rect x="0" y="0" width="2600" height="600" fill="url(#g2)"/>
-          <rect x="0" y="0" width="2600" height="600" fill="url(#g3)"/>
-          <!-- Floor perspective lines -->
-          <line x1="0" y1="397" x2="1300" y2="480" stroke="#0b0e1a" stroke-width="2" opacity=".5"/>
-          <line x1="2600" y1="397" x2="1300" y2="480" stroke="#0b0e1a" stroke-width="2" opacity=".5"/>
-          <line x1="0" y1="500" x2="2600" y2="500" stroke="#090b15" stroke-width="1.5" opacity=".4"/>
-          <!-- Vignette sides -->
-          <rect x="0" y="0" width="2600" height="600" fill="url(#vg)" opacity=".4"/>
-          <rect x="0" y="0" width="80" height="600" fill="url(#vg)" opacity=".8"/>
-          <rect x="2520" y="0" width="80" height="600" fill="url(#vg)" opacity=".8"/>
+
+          <!-- Wall blue wash over full room -->
+          <rect x="0" y="0" width="2800" height="420" fill="url(#wallBlue)"/>
+
+          <!-- ── CEILING CORNICE ── -->
+          <rect x="0" y="0" width="2800" height="52" fill="#050818" opacity=".95"/>
+          <rect x="0" y="48" width="2800" height="6" fill="#10184a" opacity=".8"/>
+          <rect x="0" y="54" width="2800" height="3" fill="#1a2460" opacity=".6"/>
+          <!-- Ceiling beam verticals -->
+          <rect x="90" y="0" width="14" height="52" fill="#030610" opacity=".7"/>
+          <rect x="380" y="0" width="14" height="52" fill="#030610" opacity=".7"/>
+          <rect x="700" y="0" width="14" height="52" fill="#030610" opacity=".7"/>
+          <rect x="1050" y="0" width="14" height="52" fill="#030610" opacity=".7"/>
+          <rect x="1400" y="0" width="14" height="52" fill="#030610" opacity=".7"/>
+          <rect x="1750" y="0" width="14" height="52" fill="#030610" opacity=".7"/>
+          <rect x="2100" y="0" width="14" height="52" fill="#030610" opacity=".7"/>
+          <rect x="2450" y="0" width="14" height="52" fill="#030610" opacity=".7"/>
+
+          <!-- ── SKIRTING + WAINSCOTING ── -->
+          <rect x="0" y="364" width="2800" height="10" fill="#0a0c22" opacity=".95"/>
+          <rect x="0" y="358" width="2800" height="6" fill="#151c50" opacity=".7"/>
+          <!-- Wainscot panels (every 170px) -->
+          <rect x="20"   y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="180"  y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="340"  y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="500"  y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="660"  y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="820"  y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="980"  y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="1140" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="1300" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="1460" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="1620" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="1780" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="1940" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="2100" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="2260" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="2420" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="2580" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+          <rect x="2640" y="315" width="140" height="46" rx="2" fill="none" stroke="#151c50" stroke-width="1.5" opacity=".65"/>
+
+          <!-- ══ CENTREPIECE: ROSE WINDOW + FIREPLACE (x=1400 centre) ══ -->
+
+          <!-- Rose window glow backdrop (blurred) -->
+          <circle cx="1400" cy="140" r="130" fill="#1a40ff" opacity=".18" filter="url(#blur8)"/>
+          <circle cx="1400" cy="140" r="90"  fill="#4466ff" opacity=".14" filter="url(#blur3)"/>
+
+          <!-- Rose window frame -->
+          <circle cx="1400" cy="140" r="115" fill="none" stroke="#1a2880" stroke-width="8" opacity=".9"/>
+          <circle cx="1400" cy="140" r="108" fill="#0a1545" opacity=".85"/>
+          <!-- Window glow fill -->
+          <circle cx="1400" cy="140" r="105" fill="url(#roseGlow)" opacity=".9"/>
+          <!-- Rose window spoke lines -->
+          <g stroke="#0d1c5a" stroke-width="5" opacity=".95">
+            <line x1="1400" y1="35"  x2="1400" y2="245"/>
+            <line x1="1295" y1="140" x2="1505" y2="140"/>
+            <line x1="1326" y1="66"  x2="1474" y2="214"/>
+            <line x1="1474" y1="66"  x2="1326" y2="214"/>
+            <line x1="1307" y1="103" x2="1493" y2="177"/>
+            <line x1="1493" y1="103" x2="1307" y2="177"/>
+            <line x1="1343" y1="57"  x2="1457" y2="223"/>
+            <line x1="1457" y1="57"  x2="1343" y2="223"/>
+          </g>
+          <!-- Inner ring -->
+          <circle cx="1400" cy="140" r="58" fill="none" stroke="#0d1c5a" stroke-width="5" opacity=".95"/>
+          <circle cx="1400" cy="140" r="28" fill="none" stroke="#0d1c5a" stroke-width="4" opacity=".95"/>
+          <!-- Centre orb -->
+          <circle cx="1400" cy="140" r="20" fill="#8aafff" opacity=".7"/>
+          <circle cx="1400" cy="140" r="12" fill="#ffffff" opacity=".85"/>
+          <!-- Petal circles at spoke tips -->
+          <circle cx="1400" cy="37"  r="10" fill="#0d1c5a" opacity=".95"/>
+          <circle cx="1400" cy="243" r="10" fill="#0d1c5a" opacity=".95"/>
+          <circle cx="1293" cy="140" r="10" fill="#0d1c5a" opacity=".95"/>
+          <circle cx="1507" cy="140" r="10" fill="#0d1c5a" opacity=".95"/>
+          <circle cx="1326" cy="66"  r="9"  fill="#0d1c5a" opacity=".95"/>
+          <circle cx="1474" cy="66"  r="9"  fill="#0d1c5a" opacity=".95"/>
+          <circle cx="1326" cy="214" r="9"  fill="#0d1c5a" opacity=".95"/>
+          <circle cx="1474" cy="214" r="9"  fill="#0d1c5a" opacity=".95"/>
+
+          <!-- Rose window light cast on wall (blue projection) -->
+          <ellipse cx="1400" cy="310" rx="160" ry="20" fill="#2244cc" opacity=".08" filter="url(#blur8)"/>
+
+          <!-- Fireplace mantel -->
+          <rect x="1230" y="258" width="340" height="22" rx="3" fill="#2a2a3a" stroke="#3a3a5a" stroke-width="2"/>
+          <!-- Fireplace mantel top slab -->
+          <rect x="1215" y="240" width="370" height="20" rx="2" fill="#1e1e30" stroke="#2e2e4a" stroke-width="1.5"/>
+          <!-- Fireplace surround stone blocks -->
+          <rect x="1245" y="258" width="30" height="106" rx="2" fill="#1a1a28" stroke="#252538" stroke-width="1.5"/>
+          <rect x="1525" y="258" width="30" height="106" rx="2" fill="#1a1a28" stroke="#252538" stroke-width="1.5"/>
+          <!-- Stone block texture on pillars -->
+          <rect x="1248" y="278" width="24" height="12" rx="1" fill="#1e1e2e" stroke="#222235" stroke-width="1" opacity=".7"/>
+          <rect x="1248" y="300" width="24" height="12" rx="1" fill="#1c1c2c" stroke="#222235" stroke-width="1" opacity=".7"/>
+          <rect x="1248" y="322" width="24" height="12" rx="1" fill="#1e1e2e" stroke="#222235" stroke-width="1" opacity=".7"/>
+          <rect x="1527" y="278" width="24" height="12" rx="1" fill="#1e1e2e" stroke="#222235" stroke-width="1" opacity=".7"/>
+          <rect x="1527" y="300" width="24" height="12" rx="1" fill="#1c1c2c" stroke="#222235" stroke-width="1" opacity=".7"/>
+          <rect x="1527" y="322" width="24" height="12" rx="1" fill="#1e1e2e" stroke="#222235" stroke-width="1" opacity=".7"/>
+          <!-- Fireplace arch -->
+          <path d="M1275,364 L1275,295 Q1275,260 1400,260 Q1525,260 1525,295 L1525,364 Z"
+                fill="#100e1a" stroke="#1e1c2e" stroke-width="2"/>
+          <!-- Grate bars -->
+          <rect x="1308" y="320" width="4" height="44" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1322" y="318" width="4" height="46" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1336" y="316" width="4" height="48" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1350" y="315" width="4" height="49" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1364" y="316" width="4" height="48" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1378" y="318" width="4" height="46" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1392" y="316" width="4" height="48" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1406" y="315" width="4" height="49" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1420" y="316" width="4" height="48" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1434" y="318" width="4" height="46" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1448" y="320" width="4" height="44" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1462" y="322" width="4" height="42" rx="2" fill="#1a1828" opacity=".9"/>
+          <rect x="1476" y="323" width="4" height="40" rx="2" fill="#1a1828" opacity=".9"/>
+          <!-- Horizontal grate bar -->
+          <rect x="1305" y="340" width="185" height="4" rx="2" fill="#1c1a28" opacity=".9"/>
+
+          <!-- FIRE (animated via CSS class) -->
+          <g class="fire-group">
+            <!-- Back flame (blue-white base) -->
+            <ellipse cx="1400" cy="360" rx="55" ry="18" fill="#ffee88" opacity=".12" filter="url(#blur2)"/>
+            <!-- Main flames -->
+            <path d="M1340,364 Q1355,330 1370,310 Q1380,295 1390,315 Q1395,300 1400,285 Q1405,300 1410,315 Q1420,295 1430,310 Q1445,330 1460,364 Z"
+                  fill="#ff6600" opacity=".85"/>
+            <path d="M1355,364 Q1368,335 1380,318 Q1388,305 1395,322 Q1400,308 1405,322 Q1412,305 1420,318 Q1432,335 1445,364 Z"
+                  fill="#ff9900" opacity=".9"/>
+            <path d="M1368,364 Q1378,340 1390,325 Q1397,314 1400,328 Q1403,314 1410,325 Q1422,340 1432,364 Z"
+                  fill="#ffcc00" opacity=".85"/>
+            <!-- Bright inner flame -->
+            <path d="M1385,364 Q1391,345 1400,335 Q1409,345 1415,364 Z"
+                  fill="#ffffaa" opacity=".9"/>
+            <!-- Embers glow -->
+            <ellipse cx="1400" cy="364" rx="45" ry="8" fill="#ff4400" opacity=".4"/>
+          </g>
+
+          <!-- Fire floor glow -->
+          <ellipse cx="1400" cy="368" rx="90" ry="18" fill="url(#fireGlow)" opacity=".8" class="firelight"/>
+          <!-- Fire light cast upward on mantel -->
+          <rect x="1240" y="220" width="320" height="40" fill="#ff6600" opacity=".04" filter="url(#blur8)"/>
+
+          <!-- Objects on mantel: portrait + small clock + books -->
+          <!-- Small clock on mantel -->
+          <rect x="1380" y="223" width="22" height="20" rx="2" fill="#12101e" stroke="#1e1c2e" stroke-width="1"/>
+          <circle cx="1391" cy="232" r="7" fill="#0e0c1a" stroke="#1c1a2a" stroke-width="1"/>
+          <line x1="1391" y1="232" x2="1391" y2="227" stroke="#c9a84c" stroke-width="1" stroke-linecap="round"/>
+          <line x1="1391" y1="232" x2="1394" y2="234" stroke="#888" stroke-width="1" stroke-linecap="round"/>
+
+          <!-- ── ORNATE CHAIRS (flanking fireplace) ── -->
+          <!-- Left chair -->
+          <g opacity=".92">
+            <!-- Seat -->
+            <rect x="1130" y="315" width="85" height="52" rx="4" fill="#1a1020" stroke="#2a1830" stroke-width="2"/>
+            <!-- Cushion -->
+            <rect x="1135" y="318" width="75" height="45" rx="3" fill="#3a2a10" stroke="#4a3a20" stroke-width="1"/>
+            <!-- Back rest -->
+            <rect x="1130" y="260" width="85" height="58" rx="4" fill="#1a1020" stroke="#2a1830" stroke-width="2"/>
+            <!-- Ornate back circle -->
+            <circle cx="1172" cy="289" r="22" fill="none" stroke="#2a1830" stroke-width="2.5"/>
+            <circle cx="1172" cy="289" r="14" fill="none" stroke="#221428" stroke-width="2"/>
+            <circle cx="1172" cy="289" r="6"  fill="#221428"/>
+            <!-- Spokes -->
+            <line x1="1172" y1="267" x2="1172" y2="311" stroke="#2a1830" stroke-width="1.5"/>
+            <line x1="1150" y1="289" x2="1194" y2="289" stroke="#2a1830" stroke-width="1.5"/>
+            <!-- Arms -->
+            <rect x="1120" y="310" width="16" height="8" rx="2" fill="#14100e" stroke="#2a1828" stroke-width="1"/>
+            <rect x="1209" y="310" width="16" height="8" rx="2" fill="#14100e" stroke="#2a1828" stroke-width="1"/>
+            <!-- Legs -->
+            <rect x="1132" y="365" width="8" height="20" rx="2" fill="#14100e"/>
+            <rect x="1204" y="365" width="8" height="20" rx="2" fill="#14100e"/>
+          </g>
+          <!-- Right chair (mirrored) -->
+          <g opacity=".92">
+            <rect x="1585" y="315" width="85" height="52" rx="4" fill="#1a1020" stroke="#2a1830" stroke-width="2"/>
+            <rect x="1590" y="318" width="75" height="45" rx="3" fill="#3a2a10" stroke="#4a3a20" stroke-width="1"/>
+            <rect x="1585" y="260" width="85" height="58" rx="4" fill="#1a1020" stroke="#2a1830" stroke-width="2"/>
+            <circle cx="1628" cy="289" r="22" fill="none" stroke="#2a1830" stroke-width="2.5"/>
+            <circle cx="1628" cy="289" r="14" fill="none" stroke="#221428" stroke-width="2"/>
+            <circle cx="1628" cy="289" r="6"  fill="#221428"/>
+            <line x1="1628" y1="267" x2="1628" y2="311" stroke="#2a1830" stroke-width="1.5"/>
+            <line x1="1606" y1="289" x2="1650" y2="289" stroke="#2a1830" stroke-width="1.5"/>
+            <rect x="1575" y="310" width="16" height="8" rx="2" fill="#14100e" stroke="#2a1828" stroke-width="1"/>
+            <rect x="1664" y="310" width="16" height="8" rx="2" fill="#14100e" stroke="#2a1828" stroke-width="1"/>
+            <rect x="1587" y="365" width="8" height="20" rx="2" fill="#14100e"/>
+            <rect x="1659" y="365" width="8" height="20" rx="2" fill="#14100e"/>
+          </g>
+
+          <!-- ── CANDELABRAS (tall, flanking) ── -->
+          <!-- Left candelabra (~x=900) -->
+          <g opacity=".9">
+            <rect x="895" y="130" width="6" height="235" rx="3" fill="#1a1828"/>
+            <!-- Base -->
+            <ellipse cx="898" cy="367" rx="22" ry="7" fill="#161428"/>
+            <ellipse cx="898" cy="360" rx="14" ry="5" fill="#1a1830"/>
+            <!-- Arms -->
+            <path d="M898,180 Q870,175 865,155" fill="none" stroke="#1a1828" stroke-width="4" stroke-linecap="round"/>
+            <path d="M898,180 Q926,175 931,155" fill="none" stroke="#1a1828" stroke-width="4" stroke-linecap="round"/>
+            <path d="M898,220 Q875,215 870,195" fill="none" stroke="#1a1828" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M898,220 Q921,215 926,195" fill="none" stroke="#1a1828" stroke-width="3.5" stroke-linecap="round"/>
+            <!-- Candle stubs & flames -->
+            <rect x="862" y="148" width="7" height="12" rx="2" fill="#e8e0c0"/>
+            <rect x="928" y="148" width="7" height="12" rx="2" fill="#e8e0c0"/>
+            <rect x="867" y="188" width="7" height="10" rx="2" fill="#e8e0c0"/>
+            <rect x="922" y="188" width="7" height="10" rx="2" fill="#e8e0c0"/>
+            <rect x="895" y="122" width="7" height="12" rx="2" fill="#e8e0c0"/>
+            <!-- Flames (top) -->
+            <path d="M865,148 Q868,140 871,148" fill="#ffcc00" opacity=".9"/>
+            <path d="M931,148 Q934,140 937,148" fill="#ffcc00" opacity=".9"/>
+            <path d="M870,188 Q873,181 876,188" fill="#ffaa00" opacity=".85"/>
+            <path d="M925,188 Q928,181 931,188" fill="#ffaa00" opacity=".85"/>
+            <path d="M898,122 Q901,114 904,122" fill="#ffcc00" opacity=".9"/>
+            <!-- Glow -->
+            <rect x="840" y="100" width="116" height="280" fill="url(#cGlow1)" opacity=".8"/>
+          </g>
+          <!-- Right candelabra (~x=1900) -->
+          <g opacity=".9">
+            <rect x="1897" y="130" width="6" height="235" rx="3" fill="#1a1828"/>
+            <ellipse cx="1900" cy="367" rx="22" ry="7" fill="#161428"/>
+            <ellipse cx="1900" cy="360" rx="14" ry="5" fill="#1a1830"/>
+            <path d="M1900,180 Q1872,175 1867,155" fill="none" stroke="#1a1828" stroke-width="4" stroke-linecap="round"/>
+            <path d="M1900,180 Q1928,175 1933,155" fill="none" stroke="#1a1828" stroke-width="4" stroke-linecap="round"/>
+            <path d="M1900,220 Q1877,215 1872,195" fill="none" stroke="#1a1828" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M1900,220 Q1923,215 1928,195" fill="none" stroke="#1a1828" stroke-width="3.5" stroke-linecap="round"/>
+            <rect x="1864" y="148" width="7" height="12" rx="2" fill="#e8e0c0"/>
+            <rect x="1930" y="148" width="7" height="12" rx="2" fill="#e8e0c0"/>
+            <rect x="1869" y="188" width="7" height="10" rx="2" fill="#e8e0c0"/>
+            <rect x="1924" y="188" width="7" height="10" rx="2" fill="#e8e0c0"/>
+            <rect x="1897" y="122" width="7" height="12" rx="2" fill="#e8e0c0"/>
+            <path d="M1867,148 Q1870,140 1873,148" fill="#ffcc00" opacity=".9"/>
+            <path d="M1933,148 Q1936,140 1939,148" fill="#ffcc00" opacity=".9"/>
+            <path d="M1872,188 Q1875,181 1878,188" fill="#ffaa00" opacity=".85"/>
+            <path d="M1927,188 Q1930,181 1933,188" fill="#ffaa00" opacity=".85"/>
+            <path d="M1900,122 Q1903,114 1906,122" fill="#ffcc00" opacity=".9"/>
+            <rect x="1844" y="100" width="116" height="280" fill="url(#cGlow2)" opacity=".8"/>
+          </g>
+
+          <!-- ── COBWEBS (corners) ── -->
+          <!-- Top-left -->
+          <g stroke="#2a2840" stroke-width="1" opacity=".55" fill="none">
+            <path d="M0,0 Q60,30 0,80"/>
+            <path d="M0,0 Q80,20 60,80"/>
+            <path d="M0,0 Q100,10 120,60"/>
+            <path d="M20,0 Q70,50 20,80" opacity=".4"/>
+            <!-- Radials -->
+            <path d="M0,0 L30,40"/>
+            <path d="M0,0 L50,35"/>
+            <path d="M0,0 L70,28"/>
+            <path d="M0,0 L90,18"/>
+            <!-- Curved strands -->
+            <path d="M15,10 Q45,25 20,45" opacity=".5"/>
+            <path d="M25,5  Q65,20 55,45" opacity=".5"/>
+            <path d="M10,25 Q45,35 35,65" opacity=".4"/>
+          </g>
+          <!-- Top-right -->
+          <g stroke="#2a2840" stroke-width="1" opacity=".5" fill="none">
+            <path d="M2800,0 Q2740,30 2800,80"/>
+            <path d="M2800,0 Q2720,20 2740,80"/>
+            <path d="M2800,0 Q2700,10 2680,60"/>
+            <path d="M2800,0 L2770,40"/>
+            <path d="M2800,0 L2750,35"/>
+            <path d="M2800,0 L2730,28"/>
+            <path d="M2785,10 Q2755,25 2780,45" opacity=".5"/>
+            <path d="M2775,5  Q2735,20 2745,45" opacity=".5"/>
+          </g>
+          <!-- Bottom-left cobweb -->
+          <g stroke="#1e1c30" stroke-width="1" opacity=".4" fill="none">
+            <path d="M0,600 Q40,560 0,520"/>
+            <path d="M0,600 Q60,550 80,520"/>
+            <path d="M0,600 L30,560"/>
+            <path d="M0,600 L55,545"/>
+            <path d="M15,590 Q40,565 20,540" opacity=".4"/>
+          </g>
+
+          <!-- ── FLOOR PERSPECTIVE LINES ── -->
+          <line x1="0" y1="374" x2="1400" y2="460" stroke="#08091a" stroke-width="2" opacity=".5"/>
+          <line x1="2800" y1="374" x2="1400" y2="460" stroke="#08091a" stroke-width="2" opacity=".5"/>
+          <line x1="0" y1="510" x2="2800" y2="510" stroke="#060718" stroke-width="1.5" opacity=".4"/>
+
+          <!-- ── VIGNETTE ── -->
+          <rect x="0" y="0" width="2800" height="600" fill="url(#vig)" opacity=".5"/>
+          <rect x="0" y="0" width="100" height="600" fill="url(#vig)" opacity=".7"/>
+          <rect x="2700" y="0" width="100" height="600" fill="url(#vig)" opacity=".7"/>
+          <rect x="0" y="0" width="2800" height="60" fill="#000" opacity=".4"/>
         </svg>
 
-        <!-- ═══════════════════════════════════════
-             OBJECTS  (left to right across room)
-        ═══════════════════════════════════════ -->
+        <!-- ═══ CLICKABLE OBJECTS ═══ -->
 
-        <!-- [FAR] Dusty mirror on back wall (no collect — atmosphere) -->
-        <div class="obj no-collect depth-far" style="left:480px; bottom:32%;" onclick="inspect('mirror')">
-          <svg width="48" height="66" viewBox="0 0 48 66" fill="none">
-            <rect x="2" y="2" width="44" height="62" rx="3" fill="#0e1420" stroke="#2a2a4a" stroke-width="2"/>
-            <rect x="6" y="6" width="36" height="54" rx="2" fill="#0a1828" opacity=".8"/>
-            <rect x="8" y="8" width="10" height="3" rx="1" fill="#1e2a45" opacity=".6"/>
-            <text x="24" y="38" font-size="18" text-anchor="middle" fill="#1a2840" font-family="serif">🪞</text>
-          </svg>
-          <span class="obj-label">Old Mirror</span>
-        </div>
-
-        <!-- [FAR] Portrait — left section back wall -->
-        <div class="obj depth-far" style="left:180px; bottom:32%;" onclick="inspect('portrait')">
-          <div class="portrait-frame" style="width:58px;height:78px;font-size:1.8rem;">🧙‍♀️</div>
+        <!-- Portrait (far left, back wall, small) -->
+        <div class="obj" style="left:180px; bottom:29%;" onclick="inspect('portrait')">
+          <div class="portrait-frame" style="width:52px;height:70px;font-size:1.6rem;">🧙‍♀️</div>
           <span class="obj-label">Portrait</span>
         </div>
 
-        <!-- [MID] Coat rack with SVG black cloak -->
-        <div class="obj depth-mid" style="left:340px; bottom:31%;" onclick="inspect('cloak')">
-          <svg width="68" height="96" viewBox="0 0 68 96" fill="none">
-            <rect x="31" y="8" width="5" height="78" rx="2.5" fill="#16121e"/>
-            <rect x="14" y="82" width="40" height="5" rx="2.5" fill="#16121e"/>
-            <path d="M34,8 Q34,2 41,2 Q48,2 48,9" stroke="#26203a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <path d="M14,18 Q34,13 54,18 L60,74 Q44,84 34,82 Q24,84 8,74 Z" fill="#0c0a14"/>
-            <path d="M14,18 Q34,13 54,18 L60,74 Q44,84 34,82 Q24,84 8,74 Z" fill="none" stroke="#22183a" stroke-width="1"/>
-            <path d="M22,20 Q32,16 42,20 L46,65 Q34,72 22,65 Z" fill="#141020" opacity=".55"/>
-            <path d="M22,20 Q34,25 46,20" stroke="#1e1635" stroke-width="1.5" fill="none"/>
+        <!-- Coat rack + black cloak (left section) -->
+        <div class="obj" style="left:360px; bottom:28%;" onclick="inspect('cloak')">
+          <svg width="58" height="82" viewBox="0 0 58 82" fill="none">
+            <rect x="26" y="6" width="5" height="68" rx="2.5" fill="#14101c"/>
+            <rect x="12" y="70" width="34" height="5" rx="2.5" fill="#14101c"/>
+            <path d="M29,6 Q29,1 35,1 Q41,1 41,7" stroke="#201830" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M12,16 Q29,11 46,16 L52,66 Q38,76 29,74 Q20,76 6,66 Z" fill="#0a0812"/>
+            <path d="M12,16 Q29,11 46,16 L52,66 Q38,76 29,74 Q20,76 6,66 Z" fill="none" stroke="#1a1228" stroke-width="1"/>
+            <path d="M19,18 Q28,14 38,18 L42,58 Q29,66 16,58 Z" fill="#100e1a" opacity=".5"/>
+            <path d="M19,18 Q29,22 40,18" stroke="#1c1430" stroke-width="1.5" fill="none"/>
           </svg>
           <span class="obj-label">Coat Rack</span>
         </div>
 
-        <!-- [FLOOR] Moth-eaten rug (no collect — atmosphere) -->
-        <div class="obj no-collect depth-mid" style="left:520px; bottom:31%;" onclick="inspect('rug')">
-          <svg width="110" height="28" viewBox="0 0 110 28" fill="none">
-            <ellipse cx="55" cy="14" rx="52" ry="12" fill="#1a1028" stroke="#2a1a40" stroke-width="1.5"/>
-            <ellipse cx="55" cy="14" rx="40" ry="9" fill="none" stroke="#221535" stroke-width="1"/>
-            <line x1="15" y1="14" x2="95" y2="14" stroke="#1e1330" stroke-width="1" opacity=".5"/>
+        <!-- Old mirror (mid-left) -->
+        <div class="obj no-collect" style="left:600px; bottom:29%;" onclick="inspect('mirror')">
+          <svg width="50" height="68" viewBox="0 0 50 68" fill="none">
+            <rect x="2" y="2" width="46" height="64" rx="3" fill="#0c1020" stroke="#1e2440" stroke-width="2"/>
+            <rect x="6" y="6" width="38" height="56" rx="2" fill="#0a1428" opacity=".8"/>
+            <rect x="8" y="8" width="10" height="3" rx="1" fill="#182038" opacity=".7"/>
+            <ellipse cx="25" cy="34" rx="10" ry="14" fill="#0d1830" opacity=".6"/>
           </svg>
-          <span class="obj-label">Old Rug</span>
+          <span class="obj-label">Old Mirror</span>
         </div>
 
-        <!-- [MID] Grandfather clock (no collect) -->
-        <div class="obj no-collect depth-mid" style="left:820px; bottom:31%;" onclick="inspect('clock')">
-          <svg width="58" height="130" viewBox="0 0 58 130" fill="none">
-            <rect x="8" y="2" width="42" height="128" rx="4" fill="#0e1020" stroke="#1a2035" stroke-width="2"/>
-            <rect x="12" y="6" width="34" height="50" rx="3" fill="#0a0c18" stroke="#162030" stroke-width="1.5"/>
-            <circle cx="29" cy="31" r="14" fill="#0c0e1e" stroke="#1c2a40" stroke-width="1.5"/>
-            <line x1="29" y1="31" x2="29" y2="20" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="29" y1="31" x2="37" y2="35" stroke="#8a7040" stroke-width="1.2" stroke-linecap="round"/>
-            <rect x="20" y="60" width="18" height="60" rx="2" fill="#0a0c1a" stroke="#141e30" stroke-width="1"/>
-            <ellipse cx="29" cy="80" rx="6" ry="7" fill="none" stroke="#1e2840" stroke-width="1.5"/>
-            <rect x="12" y="118" width="34" height="8" rx="2" fill="#1a2035"/>
+        <!-- Grandfather clock (mid) -->
+        <div class="obj no-collect" style="left:850px; bottom:28%;" onclick="inspect('clock')">
+          <svg width="56" height="124" viewBox="0 0 56 124" fill="none">
+            <rect x="8" y="2" width="40" height="122" rx="4" fill="#0d0f20" stroke="#181a35" stroke-width="2"/>
+            <rect x="12" y="6" width="32" height="48" rx="3" fill="#090b1a" stroke="#141630" stroke-width="1.5"/>
+            <circle cx="28" cy="30" r="13" fill="#0b0d1e" stroke="#1a1c35" stroke-width="1.5"/>
+            <line x1="28" y1="30" x2="28" y2="20" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="28" y1="30" x2="35" y2="34" stroke="#6a6050" stroke-width="1.2" stroke-linecap="round"/>
+            <rect x="20" y="58" width="16" height="56" rx="2" fill="#090b1a" stroke="#141630" stroke-width="1"/>
+            <ellipse cx="28" cy="78" rx="5" ry="7" fill="none" stroke="#181a30" stroke-width="1.5"/>
+            <rect x="12" y="112" width="32" height="8" rx="2" fill="#181a35"/>
           </svg>
           <span class="obj-label">Grandfather Clock</span>
         </div>
 
-        <!-- [FAR] Stack of old books (no collect) -->
-        <div class="obj no-collect depth-far" style="left:760px; bottom:32%;" onclick="inspect('books')">
-          <svg width="44" height="36" viewBox="0 0 44 36" fill="none">
-            <rect x="2" y="22" width="40" height="12" rx="2" fill="#1a1030" stroke="#26184a" stroke-width="1"/>
-            <rect x="5" y="14" width="34" height="10" rx="2" fill="#12102a" stroke="#1e1840" stroke-width="1"/>
-            <rect x="8" y="7"  width="28" height="9"  rx="2" fill="#0e1028" stroke="#18203a" stroke-width="1"/>
+        <!-- Books stack (near clock) -->
+        <div class="obj no-collect" style="left:820px; bottom:30%;" onclick="inspect('books')">
+          <svg width="42" height="34" viewBox="0 0 42 34" fill="none">
+            <rect x="1" y="21" width="40" height="12" rx="2" fill="#16102a" stroke="#221840" stroke-width="1"/>
+            <rect x="4" y="13" width="34" height="10" rx="2" fill="#100e28" stroke="#1c1838" stroke-width="1"/>
+            <rect x="7" y="6"  width="28" height="9"  rx="2" fill="#0e0e26" stroke="#181c36" stroke-width="1"/>
           </svg>
           <span class="obj-label">Old Books</span>
         </div>
 
-        <!-- [BACK] Locked inner door — centre back wall -->
-        <div class="obj no-collect depth-far" style="left:1200px; bottom:32%; transform:scale(.5); opacity:.7;" onclick="inspect('door')">
-          <span class="obj-icon" style="font-size:5rem;">🚪</span>
-          <span class="obj-label">Inner Door</span>
+        <!-- Left chair interaction (clickable, no-collect) -->
+        <div class="obj no-collect" style="left:1100px; bottom:28%;" onclick="inspect('chair')">
+          <svg width="10" height="60" viewBox="0 0 10 60" fill="none">
+            <rect x="0" y="0" width="10" height="60" fill="transparent"/>
+          </svg>
+          <span class="obj-label" style="opacity:0; position:absolute;">Ornate Chair</span>
         </div>
 
-        <!-- [MID] Umbrella stand with staff -->
-        <div class="obj depth-mid" style="left:1550px; bottom:31%;" onclick="inspect('staff')">
-          <svg width="52" height="90" viewBox="0 0 52 90" fill="none">
-            <ellipse cx="26" cy="82" rx="18" ry="6" fill="#0e1020" stroke="#1a2035" stroke-width="1.5"/>
-            <rect x="22" y="20" width="8" height="62" rx="4" fill="#0e1020" stroke="#1a2035" stroke-width="1.5"/>
-            <!-- Staff inside -->
-            <path d="M32,14 Q38,8 34,2 Q30,8 32,14 L32,82" stroke="#4a3060" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <circle cx="34" cy="2" r="4" fill="#6a42a0" opacity=".8"/>
+        <!-- Fireplace (centre, clickable) -->
+        <div class="obj no-collect" style="left:1340px; bottom:28%;" onclick="inspect('fireplace')">
+          <svg width="120" height="10" viewBox="0 0 120 10" fill="none">
+            <rect x="0" y="0" width="120" height="10" fill="transparent"/>
+          </svg>
+          <span class="obj-label">Fireplace</span>
+        </div>
+
+        <!-- Mantel items: envelope propped on mantel -->
+        <div class="obj" style="left:1460px; bottom:43%;" onclick="inspect('envelope')">
+          <span style="font-size:clamp(1.2rem,2.5vw,1.6rem);">✉️</span>
+          <span class="obj-label">Sealed Letter</span>
+        </div>
+
+        <!-- Right chair interaction -->
+        <div class="obj no-collect" style="left:1680px; bottom:28%;" onclick="inspect('chair')">
+          <svg width="10" height="60" viewBox="0 0 10 60" fill="none">
+            <rect x="0" y="0" width="10" height="60" fill="transparent"/>
+          </svg>
+          <span class="obj-label" style="opacity:0;">Ornate Chair</span>
+        </div>
+
+        <!-- Umbrella stand + staff (right of centre) -->
+        <div class="obj" style="left:1980px; bottom:28%;" onclick="inspect('staff')">
+          <svg width="50" height="88" viewBox="0 0 50 88" fill="none">
+            <ellipse cx="25" cy="80" rx="17" ry="6" fill="#0d0f20" stroke="#181a35" stroke-width="1.5"/>
+            <rect x="21" y="18" width="8" height="62" rx="4" fill="#0d0f20" stroke="#181a35" stroke-width="1.5"/>
+            <path d="M31,12 Q37,6 33,1 Q29,7 31,12 L31,80" stroke="#44286a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="33" cy="1" r="4" fill="#6644aa" opacity=".9"/>
           </svg>
           <span class="obj-label">Umbrella Stand</span>
         </div>
 
-        <!-- [NEAR] Side table with candle -->
-        <div class="obj candle-glow depth-near" style="left:1820px; bottom:31%;" onclick="inspect('candle')">
-          <span class="obj-icon" style="font-size:clamp(2.2rem,5vw,3rem);">🕯️</span>
-          <svg width="70" height="28" viewBox="0 0 70 28" style="margin-top:-4px;" fill="none">
-            <rect x="2" y="4" width="66" height="22" rx="3" fill="#0e1020" stroke="#1a2035" stroke-width="1.5"/>
-            <rect x="6" y="8" width="58" height="14" rx="2" fill="#0a0c18"/>
-            <line x1="8" y1="26" x2="8" y2="30" stroke="#0e1020" stroke-width="3"/>
-            <line x1="62" y1="26" x2="62" y2="30" stroke="#0e1020" stroke-width="3"/>
-          </svg>
-          <span class="obj-label">Side Table</span>
-        </div>
-
-        <!-- [NEAR] Envelope on floor near table -->
-        <div class="obj depth-near" style="left:1950px; bottom:31%;" onclick="inspect('envelope')">
-          <span class="obj-icon" style="font-size:clamp(1.4rem,3.5vw,2rem);">✉️</span>
-          <span class="obj-label">Sealed Letter</span>
-        </div>
-
-        <!-- [FLOOR/NEAR] Doormat — far right (entrance side) -->
-        <div class="obj depth-near" style="left:2250px; bottom:31%;" onclick="inspect('mat')">
-          <svg width="120" height="36" viewBox="0 0 120 36" fill="none">
-            <rect x="2" y="4" width="116" height="28" rx="4" fill="#1a1228" stroke="#2a1a3a" stroke-width="2"/>
-            <rect x="8" y="8" width="104" height="20" rx="3" fill="#14101e"/>
-            <text x="60" y="23" font-size="7.5" text-anchor="middle" fill="#2e2045" font-family="Cinzel,serif" letter-spacing="1">WIPE YOUR FATE</text>
+        <!-- Doormat (right side) -->
+        <div class="obj no-collect" style="left:2280px; bottom:28%;" onclick="inspect('mat')">
+          <svg width="114" height="34" viewBox="0 0 114 34" fill="none">
+            <rect x="2" y="4" width="110" height="26" rx="4" fill="#141025" stroke="#20183a" stroke-width="2"/>
+            <rect x="7" y="7" width="100" height="19" rx="3" fill="#100d1e"/>
+            <text x="57" y="21" font-size="7" text-anchor="middle" fill="#252045"
+                  font-family="Cinzel,serif" letter-spacing="1">WIPE YOUR FATE</text>
           </svg>
           <span class="obj-label">Doormat</span>
         </div>
 
-        <!-- [NEAR] Rosemary tucked by doormat (small, needs looking) -->
-        <div class="obj depth-near" style="left:2310px; bottom:33%;" onclick="inspect('rosemary')">
-          <span class="obj-icon" style="font-size:clamp(1rem,2.5vw,1.5rem);">🌿</span>
+        <!-- Iron key (floor near side table) -->
+        <div class="obj" style="left:2140px; bottom:29%;" onclick="inspect('candle')">
+          <span style="font-size:clamp(1.6rem,3vw,2.2rem);">🗝️</span>
+          <span class="obj-label">Something on the Floor</span>
+        </div>
+
+        <!-- Rosemary (tucked by doormat) -->
+        <div class="obj" style="left:2360px; bottom:29%;" onclick="inspect('rosemary')">
+          <span style="font-size:clamp(1rem,2vw,1.4rem);">🌿</span>
           <span class="obj-label">Something Green</span>
         </div>
 
-        <!-- [NEAR] Broken walking stick (atmosphere) -->
-        <div class="obj no-collect depth-near" style="left:2120px; bottom:31%;" onclick="inspect('stick')">
-          <svg width="16" height="80" viewBox="0 0 16 80" fill="none">
-            <path d="M8,4 Q4,20 8,40 Q12,60 7,76" stroke="#2a1f10" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M5,38 Q10,42 13,50" stroke="#2a1f10" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Broken stick (far right) -->
+        <div class="obj no-collect" style="left:2580px; bottom:28%;" onclick="inspect('stick')">
+          <svg width="14" height="72" viewBox="0 0 14 72" fill="none">
+            <path d="M7,3 Q4,18 7,36 Q10,54 6,68" stroke="#221a0e" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M5,34 Q9,38 11,46" stroke="#221a0e" stroke-width="2" fill="none" stroke-linecap="round"/>
           </svg>
           <span class="obj-label">Broken Stick</span>
         </div>
 
-      </div><!-- end room-scroll -->
+        <!-- Scroll hint -->
+        <div class="scroll-hint">drag to explore ›</div>
 
-      <div class="scroll-hint" id="scroll-hint">drag to explore</div>
+      </div><!-- end room-scroll -->
     </div><!-- end viewport-wrap -->
 
-    <!-- Inventory sidebar -->
+    <!-- Inventory -->
     <div class="sidebar">
       <div class="sidebar-title">Inventory</div>
       <div class="inv-grid" id="inv-grid"></div>
@@ -465,11 +720,10 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
     </div>
   </div>
 
-  <!-- Message bar -->
   <div class="msg-bar">
     <p class="msg-text" id="msg">
-      The door opens on its own. Cold air rushes in. The hall stretches further than it should.
-      <span class="hl">Drag to explore.</span>
+      The door opens before you touch it. The hall stretches further than it should.
+      A fire burns somewhere ahead. <span class="hl">Drag to explore.</span>
     </p>
   </div>
 </div>
@@ -491,13 +745,13 @@ html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
 <script>
 // ── AUDIO ────────────────────────────────────────────────────────
 let ctx, soundOn=true;
-function initAudio(){ if(ctx) return; try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+function initAudio(){ if(ctx)return; try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} }
 function tone(f,t,d,v=.07,dl=0){
   if(!ctx||!soundOn)return;
   const o=ctx.createOscillator(),g=ctx.createGain();
   o.connect(g);g.connect(ctx.destination);o.type=t;
   o.frequency.setValueAtTime(f,ctx.currentTime+dl);
-  o.frequency.exponentialRampToValueAtTime(f*.65,ctx.currentTime+dl+d);
+  o.frequency.exponentialRampToValueAtTime(f*.6,ctx.currentTime+dl+d);
   g.gain.setValueAtTime(0,ctx.currentTime+dl);
   g.gain.linearRampToValueAtTime(v,ctx.currentTime+dl+.05);
   g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dl+d);
@@ -508,8 +762,8 @@ function playPickup(){[440,554,659].forEach((f,i)=>tone(f,'sine',.3,.07,i*.08));
 function playWhisper(){[200,180,160].forEach((f,i)=>tone(f,'sine',.9,.04,i*.22));}
 function playAmbient(){
   if(!soundOn)return;
-  tone(52+Math.random()*8,'sine',5,.025);
-  tone(108+Math.random()*4,'triangle',3.5,.018,.6);
+  tone(50+Math.random()*8,'sine',5,.025);
+  tone(105+Math.random()*5,'triangle',3.5,.018,.6);
   setTimeout(playAmbient,7000+Math.random()*4000);
 }
 function toggleSound(){
@@ -517,60 +771,63 @@ function toggleSound(){
   document.getElementById('snd-btn').textContent=soundOn?'🔊':'🔇';
 }
 
-// ── OBJECTS DATA ─────────────────────────────────────────────────
+// ── OBJECTS ──────────────────────────────────────────────────────
 const OBJS={
   portrait:{icon:'🖼️',title:'The Portrait',
-    desc:'Painted in oils. Severe, still. The plaque reads: <em>"Helga, 1824."</em> Her eyes move. Every single time you look away and look back, they\'ve shifted.',
+    desc:'Painted in oils, 1824. The plaque beneath reads <em>"Helga."</em> Her expression is perfectly still. Her eyes are not. Each time you look away and back, they have shifted.',
     clue:'She has been watching this room for two hundred years.',canCollect:false},
   mirror:{icon:'🪞',title:'The Old Mirror',
-    desc:'Silver backing gone black with age. You can barely see yourself in it. But you can see the room — and something in the reflection is not quite where it should be.',
-    clue:'A mirror is only useful if it shows you the truth. This one might not.',canCollect:false},
+    desc:'The silver backing has gone black. You can barely make yourself out. But in the reflection — the room is slightly different. A door where there is no door.',
+    clue:'A mirror only tells the truth if you know how to look.',canCollect:false},
   cloak:{icon:'🧥',title:'Black Cloak',
-    desc:'Heavy wool, cold to the touch. Smells of lavender and something burnt — ash, maybe. Stitched into the lining in faded red thread: <em>H. Hex.</em>',
+    desc:'Heavy wool, cold to the touch. Smells of lavender and ash. The lining has a name stitched in faded red thread: <em>H. Hex.</em> Someone wore this every day for a very long time.',
     clue:'Her familiar will not see you if you wear it. Probably.',canCollect:true,label:'Take Cloak',iname:'Cloak',iicon:'🧥'},
-  rug:{icon:'🟫',title:'Moth-Eaten Rug',
-    desc:'Was ornate once. Crimson and gold thread, now faded to grey and dust. Something scurried away from it when you walked past.',
-    clue:'Atmosphere. Nothing more.',canCollect:false},
   clock:{icon:'🕰️',title:'Grandfather Clock',
-    desc:'Stopped at 3:17. No pendulum swings. No mechanism ticks. But every few minutes — if you are very quiet — you hear one single, slow tick from somewhere deep inside.',
+    desc:'Stopped at 3:17. No pendulum swings. No mechanism ticks. But if you stand very still, every few minutes you hear one slow, deliberate tick from somewhere deep inside it.',
     clue:'Time moves differently in this house.',canCollect:false},
   books:{icon:'📚',title:'Old Books',
-    desc:'Stacked without order. Titles you cannot read — the language predates anything you know. One is warmer than the others to the touch.',
-    clue:'The warmest book has a single page bookmarked in black ribbon.',canCollect:false},
-  door:{icon:'🚪',title:'The Inner Door',
-    desc:'Set deep in the back wall. Locked — but not with keys. The locks are seven different metals, and none have keyholes. They are waiting for something else entirely.',
-    clue:'You will earn your way through.',canCollect:false},
-  staff:{icon:'🪄',title:'Twisted Staff',
-    desc:'Dark, gnarled wood, warm despite the cold air. It hums faintly — not quite sound, more like pressure in your teeth. Something is carved at the base.',
-    clue:'A word you almost recognise. Old German, maybe. Or older.',canCollect:true,label:'Take Staff',iname:'Staff',iicon:'🪄'},
-  candle:{icon:'🕯️',title:'The Side Table',
-    desc:'A single candle, lit. It should have burned out years ago. The flame does not flicker, even when you breathe directly on it. Beside it: a small iron key.',
-    clue:'Cold iron. Fits nothing in this room. Yet.',canCollect:true,label:'Take Iron Key',iname:'Iron Key',iicon:'🗝️'},
+    desc:'Stacked without order. The titles are in a language you cannot read — it predates anything you know. One book is warmer than the others. Noticeably warmer.',
+    clue:'A single page is bookmarked with a black ribbon. The text on that page has been crossed out.',canCollect:false},
+  chair:{icon:'🪑',title:'Ornate Chair',
+    desc:'Dark wood, carved into spirals and circles. The cushion is a deep amber — worn smooth at the centre. Someone sat here often. The armrests are cold except for two small patches, perfectly palm-sized.',
+    clue:'Two chairs. No table between them. She was expecting company.',canCollect:false},
+  fireplace:{icon:'🔥',title:'The Fireplace',
+    desc:'A stone fireplace with a real fire burning inside it. The wood should be ash by now — it has clearly been burning for decades. The heat is genuine. The fire is not.',
+    clue:'Something is written in the stone above the mantel. The smoke has made it almost invisible.',canCollect:false},
   envelope:{icon:'✉️',title:'The Sealed Letter',
-    desc:'Black wax, pressed into a crescent moon. Addressed to: <em>The Next One.</em> Inside, in handwriting barely visible: <em>"You will not leave the way you came. But you might leave another way — if you are clever."</em>',
-    clue:'She was expecting someone.',canCollect:true,label:'Take Letter',iname:'Letter',iicon:'✉️'},
+    desc:'Propped against a small clock on the mantel. Black wax, pressed into a crescent moon. Addressed to: <em>The Next One.</em>',
+    clue:'Inside: <em>"You will not leave the way you came. But you might leave another way — if you are clever."</em>',canCollect:true,label:'Take Letter',iname:'Letter',iicon:'✉️'},
+  staff:{icon:'🪄',title:'Twisted Staff',
+    desc:'Dark gnarled wood, warm despite the cold air. It hums faintly — not quite sound, more like pressure behind your eyes. Something is carved at the base in a language you almost recognise.',
+    clue:'Old German. Or older.',canCollect:true,label:'Take Staff',iname:'Staff',iicon:'🪄'},
+  candle:{icon:'🗝️',title:'Iron Key',
+    desc:'Cold and small. Lying on the floor near the side table as though someone dropped it mid-stride. There is no lock in this room it could open. Yet.',
+    clue:'Keep it.',canCollect:true,label:'Take Iron Key',iname:'Iron Key',iicon:'🗝️'},
   mat:{icon:'🟫',title:'The Doormat',
-    desc:'Worn smooth by centuries of feet. The letters are almost gone, but if you look carefully: <em>WIPE YOUR FATE.</em>',
-    clue:'Something is tucked beneath the edge.',canCollect:false},
+    desc:'Worn smooth by hundreds of years of feet. The letters are almost gone. If you crouch and look carefully: <em>WIPE YOUR FATE.</em>',
+    clue:'Something has been tucked beneath the edge.',canCollect:false},
   rosemary:{icon:'🌿',title:'Dried Rosemary',
-    desc:'A sprig of rosemary, tied with a red thread. Still faintly fragrant despite being completely desiccated. Someone left it here deliberately — probably running.',
+    desc:'A sprig of rosemary tied with red thread. Still faintly fragrant despite being completely desiccated. Left deliberately — probably by someone running.',
     clue:'For protection. Old magic. It might slow her down.',canCollect:true,label:'Take Rosemary',iname:'Rosemary',iicon:'🌿'},
   stick:{icon:'🪵',title:'Broken Walking Stick',
-    desc:'Snapped clean in the middle. The break looks fresh — white wood, not yet yellowed. Someone dropped this in a hurry. Or was pulled away from it.',
-    clue:'Not yours. Not useful. Unnerving.',canCollect:false},
+    desc:'Snapped clean in two. The break looks fresh — white wood, not yet yellowed. Someone dropped this recently. Or was pulled away from it.',
+    clue:'Not yours. Not useful. But unsettling.',canCollect:false},
 };
 
-const WHISPERS=['she knows you\'re here','the house remembers','don\'t touch what isn\'t yours',
-  'you smell like fear','two hundred years and she still waits','she is listening',
-  'the mirrors are hers','did you hear that','it is very cold in here'];
-const collected=new Set(), inventory=[];
+const WHISPERS=['she knows you\'re here','the house remembers',
+  'don\'t touch what isn\'t yours','you smell like fear',
+  'two hundred years and she still waits','she is listening',
+  'the mirrors are hers','did you hear that','the fire is not natural',
+  'she has been watching you since the door opened'];
+const collected=new Set(),inventory=[];
 let wtimer;
 
 function whisper(){
   const el=document.getElementById('whisper'),t=document.getElementById('wtxt');
   t.textContent=WHISPERS[Math.floor(Math.random()*WHISPERS.length)];
   el.classList.add('show'); playWhisper();
-  clearTimeout(wtimer); wtimer=setTimeout(()=>el.classList.remove('show'),3000);
+  clearTimeout(wtimer);
+  wtimer=setTimeout(()=>el.classList.remove('show'),3200);
 }
 
 // ── INVENTORY ────────────────────────────────────────────────────
@@ -602,90 +859,62 @@ function inspect(key){
   const acts=document.getElementById('m-acts'); acts.innerHTML='';
   if(o.canCollect&&!collected.has(key)){
     const b=document.createElement('button'); b.className='mbtn gold'; b.textContent=o.label;
-    b.onclick=()=>{collected.add(key);addItem(o.iname,o.iicon);
+    b.onclick=()=>{
+      collected.add(key); addItem(o.iname,o.iicon);
       document.querySelectorAll(`[onclick="inspect('${key}')"]`).forEach(el=>el.classList.add('collected'));
-      closeModal();};
+      closeModal();
+    };
     acts.appendChild(b);
   }
   const cb=document.createElement('button'); cb.className='mbtn'; cb.textContent='Step Back';
   cb.onclick=closeModal; acts.appendChild(cb);
   document.getElementById('modal').classList.add('open');
-  if(Math.random()<.38) setTimeout(whisper,1300);
+  if(Math.random()<.38) setTimeout(whisper,1400);
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
-
 function setMsg(html){document.getElementById('msg').innerHTML=html;}
 
 // ── DRAG TO SCROLL ────────────────────────────────────────────────
-const vp=document.getElementById('vp');
-const rs=document.getElementById('rs');
-const ROOM_W=2600;
-let scrollX=0, maxScroll=0;
-let drag={active:false,startX:0,startScroll:0};
-let vel=0, lastX=0, lastT=0, rafId=null;
+const vp=document.getElementById('vp'), rs=document.getElementById('rs');
+const ROOM_W=2800;
+let scrollX=0,maxScroll=0,drag={active:false,startX:0,startScroll:0},vel=0,lastX=0,lastT=0,rafId=null;
 
 function updateScroll(x){
   scrollX=Math.max(0,Math.min(maxScroll,x));
   rs.style.transform=`translateX(${-scrollX}px)`;
 }
-function calcMax(){
-  maxScroll=Math.max(0,ROOM_W-vp.clientWidth);
-}
+function calcMax(){ maxScroll=Math.max(0,ROOM_W-vp.clientWidth); }
 window.addEventListener('resize',calcMax);
 
-// Mouse
 vp.addEventListener('mousedown',e=>{
-  initAudio();
-  drag.active=true; drag.startX=e.clientX; drag.startScroll=scrollX;
-  vel=0; lastX=e.clientX; lastT=Date.now();
-  vp.classList.add('dragging');
+  initAudio(); drag.active=true; drag.startX=e.clientX; drag.startScroll=scrollX;
+  vel=0; lastX=e.clientX; lastT=Date.now(); vp.classList.add('dragging');
   cancelAnimationFrame(rafId);
 });
 window.addEventListener('mousemove',e=>{
   if(!drag.active)return;
-  const now=Date.now(), dt=now-lastT||1;
-  vel=(lastX-e.clientX)/dt*16;
-  lastX=e.clientX; lastT=now;
+  const now=Date.now(),dt=now-lastT||1;
+  vel=(lastX-e.clientX)/dt*16; lastX=e.clientX; lastT=now;
   updateScroll(drag.startScroll+(drag.startX-e.clientX));
 });
-window.addEventListener('mouseup',()=>{
-  if(!drag.active)return;
-  drag.active=false;
-  vp.classList.remove('dragging');
-  momentum();
-});
+window.addEventListener('mouseup',()=>{ if(!drag.active)return; drag.active=false; vp.classList.remove('dragging'); momentum(); });
 
-// Touch
 vp.addEventListener('touchstart',e=>{
-  initAudio();
-  const t=e.touches[0];
+  initAudio(); const t=e.touches[0];
   drag.active=true; drag.startX=t.clientX; drag.startScroll=scrollX;
-  vel=0; lastX=t.clientX; lastT=Date.now();
-  cancelAnimationFrame(rafId);
+  vel=0; lastX=t.clientX; lastT=Date.now(); cancelAnimationFrame(rafId);
 },{passive:true});
 vp.addEventListener('touchmove',e=>{
-  if(!drag.active)return;
-  const t=e.touches[0], now=Date.now(), dt=now-lastT||1;
-  vel=(lastX-t.clientX)/dt*16;
-  lastX=t.clientX; lastT=now;
-  updateScroll(drag.startScroll+(drag.startX-t.clientX));
-  e.preventDefault();
+  if(!drag.active)return; const t=e.touches[0],now=Date.now(),dt=now-lastT||1;
+  vel=(lastX-t.clientX)/dt*16; lastX=t.clientX; lastT=now;
+  updateScroll(drag.startScroll+(drag.startX-t.clientX)); e.preventDefault();
 },{passive:false});
-vp.addEventListener('touchend',()=>{
-  if(!drag.active)return;
-  drag.active=false;
-  momentum();
-});
+vp.addEventListener('touchend',()=>{ if(!drag.active)return; drag.active=false; momentum(); });
 
 function momentum(){
   cancelAnimationFrame(rafId);
-  function step(){
-    if(Math.abs(vel)<.3){vel=0;return;}
-    vel*=.92;
-    updateScroll(scrollX+vel);
-    rafId=requestAnimationFrame(step);
-  }
+  function step(){ if(Math.abs(vel)<.3){vel=0;return;} vel*=.92; updateScroll(scrollX+vel); rafId=requestAnimationFrame(step); }
   rafId=requestAnimationFrame(step);
 }
 
@@ -697,9 +926,7 @@ function startGame(){
   calcMax(); renderInv(); playCreak();
   setTimeout(playAmbient,1200);
   setTimeout(whisper,10000);
-  setInterval(()=>{if(Math.random()<.3)whisper();},25000);
-  // Hide scroll hint after 5s
-  setTimeout(()=>{ const h=document.getElementById('scroll-hint'); if(h)h.style.display='none';},5500);
+  setInterval(()=>{if(Math.random()<.3)whisper();},24000);
 }
 </script>
 </body>
