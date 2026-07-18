@@ -233,8 +233,8 @@ function initBabylon(){
   scene.fogDensity = 0.025;
 
   // ── CAMERA ─────────────────────────────────────────────────────────────────
-  const camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0,1.7,-7), scene);
-  camera.setTarget(new BABYLON.Vector3(0,1.7,0));
+  const camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0,1.7,0), scene);
+  camera.setTarget(new BABYLON.Vector3(0,1.7,1));
   camera.minZ=0.1; camera.maxZ=60; camera.fov=1.1;
   camera.inputs.clear();
 
