@@ -270,3 +270,18 @@ html, body {
   font-size: 0.65rem; color: rgba(138, 104, 152, 0.45);
   letter-spacing: 0.08em; pointer-events: none; z-index: 5;
 }
+
+/* ─── RECENTRE BUTTON ─── */
+#btn-recentre {
+  font-family: Cinzel, serif;
+  font-size: 0.72rem; letter-spacing: 0.15em;
+  color: var(--text-dim); background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 2px; padding: 0.35rem 0.8rem;
+  cursor: pointer; backdrop-filter: blur(6px);
+  transition: all 0.2s; pointer-events: auto;
+  text-transform: uppercase;
+}
+#btn-recentre:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(42,13,69,0.7); }
+#btn-recentre:active { transform: scale(0.95); }
+
