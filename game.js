@@ -53,7 +53,7 @@ function makeStoneWallTexture(scene, size=512){
   const tex = new BABYLON.DynamicTexture('stoneTex', size, scene, false);
   const ctx = tex.getContext();
   // Base purple-mauve plaster
-  ctx.fillStyle = '#4a2060';
+  ctx.fillStyle = '#1e2a32';
   ctx.fillRect(0,0,size,size);
   // Stone block grid
   const bw=80, bh=50;
@@ -65,7 +65,7 @@ function makeStoneWallTexture(scene, size=512){
       ctx.strokeRect(x+2,y+2,bw-4,bh-4);
       // Mortar fill per block — slight colour variation
       const v=Math.random()*18-9;
-      ctx.fillStyle=`rgba(${50+v},${18+v},${70+v},0.4)`;
+      ctx.fillStyle=`rgba(${38+v},${52+v},${65+v},0.5)`;
       ctx.fillRect(x+3,y+3,bw-6,bh-6);
     }
   }
@@ -95,7 +95,7 @@ function makeStoneWallTexture(scene, size=512){
 function makeWoodFloorTexture(scene, size=512){
   const tex = new BABYLON.DynamicTexture('woodTex', size, scene, false);
   const ctx = tex.getContext();
-  ctx.fillStyle='#3a1c08'; ctx.fillRect(0,0,size,size);
+  ctx.fillStyle='#141e26'; ctx.fillRect(0,0,size,size);
   const plankW=size/4;
   for(let col=0;col<4;col++){
     // Each plank column — staggered
@@ -104,7 +104,7 @@ function makeWoodFloorTexture(scene, size=512){
       const pY=row*(size/3+(Math.random()*20-10));
       // Plank base colour
       const b=10+Math.floor(Math.random()*18);
-      ctx.fillStyle=`rgb(${90+b},${50+b},${15+b})`;
+      ctx.fillStyle=`rgb(${28+b},${38+b},${48+b})`;
       ctx.fillRect(x+1,pY,plankW-2,size/3-1);
       // Wood grain lines
       ctx.strokeStyle=`rgba(0,0,0,0.18)`; ctx.lineWidth=1;
@@ -174,7 +174,7 @@ function makeBeamCeilingTexture(scene, size=512){
 function makeStoneFireplaceTexture(scene, size=256){
   const tex = new BABYLON.DynamicTexture('fpTex', size, scene, false);
   const ctx = tex.getContext();
-  ctx.fillStyle='#1e1520'; ctx.fillRect(0,0,size,size);
+  ctx.fillStyle='#0e1418'; ctx.fillRect(0,0,size,size);
   // Rough stone blocks
   const bw=50, bh=38;
   for(let r=0;r<size/bh+1;r++){
@@ -182,7 +182,7 @@ function makeStoneFireplaceTexture(scene, size=256){
     for(let c=-1;c<size/bw+1;c++){
       const x=c*bw+off, y=r*bh;
       const v=Math.random()*15-7;
-      ctx.fillStyle=`rgb(${42+v},${30+v},${50+v})`;
+      ctx.fillStyle=`rgb(${28+v},${36+v},${44+v})`;
       ctx.fillRect(x+2,y+2,bw-4,bh-4);
       ctx.strokeStyle='#120e1a'; ctx.lineWidth=2;
       ctx.strokeRect(x+2,y+2,bw-4,bh-4);
@@ -227,10 +227,10 @@ function makeDirtFloorTexture(scene, size=256){
 function initBabylon(){
   const engine = new BABYLON.Engine($('game-canvas'), true, { antialias:true });
   const scene  = new BABYLON.Scene(engine);
-  scene.clearColor = new BABYLON.Color4(0.22,0.14,0.28,1);
+  scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
   scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogColor   = new BABYLON.Color3(0.28,0.18,0.38);
-  scene.fogDensity = 0.018;
+  scene.fogColor   = new BABYLON.Color3(0.06,0.12,0.18);
+  scene.fogDensity = 0.025;
 
   // ── CAMERA ─────────────────────────────────────────────────────────────────
   const camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0,1.7,-7), scene);
@@ -297,12 +297,12 @@ function initBabylon(){
 
   const wallM = mat('wallM');
   wallM.diffuseTexture = stoneTex;
-  wallM.diffuseColor   = new BABYLON.Color3(0.72, 0.52, 0.88); // warm violet-mauve
+  wallM.diffuseColor   = new BABYLON.Color3(0.28, 0.36, 0.42); // cold stone grey-teal
   wallM.specularColor  = new BABYLON.Color3(0.02,0.01,0.03);
 
   const floorM = mat('floorM');
   floorM.diffuseTexture = woodTex;
-  floorM.specularColor  = new BABYLON.Color3(0.12,0.08,0.03); floorM.diffuseColor = new BABYLON.Color3(0.5,0.38,0.2);
+  floorM.specularColor  = new BABYLON.Color3(0.08,0.1,0.12); floorM.diffuseColor = new BABYLON.Color3(0.2,0.26,0.32);
 
   const ceilM = mat('ceilM');
   ceilM.diffuseTexture = ceilTex;
@@ -311,15 +311,15 @@ function initBabylon(){
   fpStoneM.diffuseTexture = fpTex;
 
   const woodTrimM = mat('woodTrimM');
-  woodTrimM.diffuseColor = new BABYLON.Color3(0.45,0.26,0.1);
+  woodTrimM.diffuseColor = new BABYLON.Color3(0.22,0.26,0.3);
 
   const goldM = mat('goldM');
-  goldM.diffuseColor  = new BABYLON.Color3(0.5,0.36,0.1);
-  goldM.specularColor = new BABYLON.Color3(0.7,0.55,0.2);
+  goldM.diffuseColor  = new BABYLON.Color3(0.28,0.38,0.32);
+  goldM.specularColor = new BABYLON.Color3(0.4,0.55,0.45);
   goldM.specularPower = 48;
 
   const darkWoodM = mat('darkWoodM');
-  darkWoodM.diffuseColor = new BABYLON.Color3(0.38,0.22,0.08);
+  darkWoodM.diffuseColor = new BABYLON.Color3(0.18,0.22,0.28);
 
   const dirtM = mat('dirtM');
   dirtM.diffuseTexture = dirtTex;
@@ -387,11 +387,11 @@ function initBabylon(){
   // Panels sit between dado rail (y=1.05) and crown (y=H-0.06)
   // Back wall panels
   const panelMat = mat('panelMat');
-  panelMat.diffuseColor = new BABYLON.Color3(0.62, 0.44, 0.78); // slightly lighter than wall
-  panelMat.emissiveColor = new BABYLON.Color3(0.04, 0.02, 0.06);
+  panelMat.diffuseColor = new BABYLON.Color3(0.32, 0.42, 0.50); // slightly lighter stone
+  panelMat.emissiveColor = new BABYLON.Color3(0.0, 0.0, 0.0);
 
   const panelTrimMat = mat('panelTrimMat');
-  panelTrimMat.diffuseColor = new BABYLON.Color3(0.5, 0.32, 0.14); // warm wood trim
+  panelTrimMat.diffuseColor = new BABYLON.Color3(0.22, 0.28, 0.35); // dark grey stone trim
   panelTrimMat.specularColor = new BABYLON.Color3(0.12, 0.08, 0.04);
   panelTrimMat.specularPower = 16;
 
@@ -594,7 +594,7 @@ function initBabylon(){
   mirFrame.position.set(4,2.7,D/2-0.04); mirFrame.material=mfM;
 
   // ── CLOAK (hook near front door) ──────────────────────────────────────────
-  const cloakM=mat('cloakM'); cloakM.diffuseColor=new BABYLON.Color3(0.07,0.04,0.09);
+  const cloakM=mat('cloakM'); cloakM.diffuseColor=new BABYLON.Color3(0.06,0.08,0.12);
   const cloak=BABYLON.MeshBuilder.CreateBox('cloak_mesh',{width:0.6,height:1.4,depth:0.15},scene);
   cloak.position.set(-6,1.1,-D/2+0.4); cloak.material=cloakM;
   // Coat hook
@@ -606,7 +606,7 @@ function initBabylon(){
   const stM=mat('stM'); stM.diffuseColor=new BABYLON.Color3(0.24,0.14,0.06);
   const staff=BABYLON.MeshBuilder.CreateCylinder('staff_mesh',{diameterTop:0.04,diameterBottom:0.07,height:1.9,tessellation:8},scene);
   staff.position.set(-W/2+0.42,0.95,-2.5); staff.rotation.z=0.2; staff.material=stM;
-  const tipM=mat('tipM'); tipM.emissiveColor=new BABYLON.Color3(0.4,0.08,0.8); tipM.diffuseColor=new BABYLON.Color3(0.2,0.04,0.4);
+  const tipM=mat('tipM'); tipM.emissiveColor=new BABYLON.Color3(0.1,0.6,0.55); tipM.diffuseColor=new BABYLON.Color3(0.05,0.3,0.28);
   const tip=BABYLON.MeshBuilder.CreateSphere('staffTip',{diameter:0.11},scene);
   tip.position.set(-W/2+0.58,1.88,-2.6); tip.material=tipM;
 
@@ -682,47 +682,47 @@ function initBabylon(){
 
   // Gloomy overcast window light (simulates grey daylight through tall windows)
   const windowLight = new BABYLON.PointLight('winLight', new BABYLON.Vector3(0, 3.5, -D/2+1), scene);
-  windowLight.diffuse   = new BABYLON.Color3(0.55, 0.5, 0.72); // cool lavender grey
+  windowLight.diffuse   = new BABYLON.Color3(0.3, 0.5, 0.75); // cold blue moonlight
   windowLight.specular  = new BABYLON.Color3(0.1, 0.1, 0.15);
-  windowLight.intensity = 1.8;
+  windowLight.intensity = 1.4;
   windowLight.range     = 26;
 
   // Second fill — from the staircase landing (mysterious light from upstairs)
   const stairLight = new BABYLON.PointLight('stairLight', new BABYLON.Vector3(3, 4.2, 2), scene);
-  stairLight.diffuse   = new BABYLON.Color3(0.4, 0.35, 0.58);
-  stairLight.intensity = 0.9;
+  stairLight.diffuse   = new BABYLON.Color3(0.28, 0.45, 0.65);
+  stairLight.intensity = 0.6;
   stairLight.range     = 16;
 
 
   const ambient=new BABYLON.HemisphericLight('amb',new BABYLON.Vector3(0,1,0),scene);
-  ambient.intensity=0.55; ambient.diffuse=new BABYLON.Color3(0.62,0.48,0.78);
-  ambient.groundColor=new BABYLON.Color3(0.22,0.16,0.32);
+  ambient.intensity=0.45; ambient.diffuse=new BABYLON.Color3(0.38,0.52,0.68);
+  ambient.groundColor=new BABYLON.Color3(0.04,0.08,0.14);
 
   const chanLight=new BABYLON.PointLight('chanL',new BABYLON.Vector3(0,chanY-1.1,0),scene);
-  chanLight.diffuse=new BABYLON.Color3(1.0,0.82,0.5); chanLight.intensity=2.2; chanLight.range=28;
+  chanLight.diffuse=new BABYLON.Color3(0.5,0.68,0.85); chanLight.intensity=0.7; chanLight.range=22;
 
   const fireLight=new BABYLON.PointLight('fireL',new BABYLON.Vector3(fpX-0.8,0.9,fpZ),scene);
-  fireLight.diffuse=new BABYLON.Color3(1.0,0.55,0.15); fireLight.intensity=2.5; fireLight.range=16;
+  fireLight.diffuse=new BABYLON.Color3(1.0,0.6,0.18); fireLight.intensity=3.5; fireLight.range=18;
 
   // Green cauldron glow
   const cauldLight=new BABYLON.PointLight('cauldL',new BABYLON.Vector3(-3,0.7,2),scene);
-  cauldLight.diffuse=new BABYLON.Color3(0.2,0.9,0.35); cauldLight.intensity=0.55; cauldLight.range=5;
+  cauldLight.diffuse=new BABYLON.Color3(0.1,0.75,0.55); cauldLight.intensity=0.8; cauldLight.range=7;
 
   const sconceL=new BABYLON.PointLight('scL',new BABYLON.Vector3(-6,2.8,-3),scene);
-  sconceL.diffuse=new BABYLON.Color3(1.0,0.78,0.4); sconceL.intensity=1.4; sconceL.range=14;
+  sconceL.diffuse=new BABYLON.Color3(0.4,0.62,0.82); sconceL.intensity=0.5; sconceL.range=10;
   const sconceR=new BABYLON.PointLight('scR',new BABYLON.Vector3(6,2.8,-3),scene);
-  sconceR.diffuse=new BABYLON.Color3(1.0,0.78,0.4); sconceR.intensity=1.4; sconceR.range=14;
+  sconceR.diffuse=new BABYLON.Color3(0.4,0.62,0.82); sconceR.intensity=0.5; sconceR.range=10;
 
   // ── FLICKER ───────────────────────────────────────────────────────────────
   let ft=0;
   function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
   scene.registerBeforeRender(()=>{
     ft+=engine.getDeltaTime()*0.001;
-    chanLight.intensity=flk(2.2,0.3,2.1,0);
-    fireLight.intensity=flk(2.5,0.5,3.7,1.2);
+    chanLight.intensity=flk(0.7,0.12,2.1,0);
+    fireLight.intensity=flk(3.5,0.6,3.7,1.2);
     cauldLight.intensity=flk(0.55,0.18,1.8,3.0);
-    sconceL.intensity  =flk(1.4,0.22,1.8,0.6);
-    sconceR.intensity  =flk(1.4,0.22,2.4,2.1);
+    sconceL.intensity  =flk(0.5,0.1,1.8,0.6);
+    sconceR.intensity  =flk(0.5,0.1,2.4,2.1);
     // Ember pulse
     if(embers) embers.material.emissiveColor=new BABYLON.Color3(flk(0.6,0.15,3.7,0.5),flk(0.18,0.06,3.7,1.0),0.02);
     // Cauldron brew shimmer
