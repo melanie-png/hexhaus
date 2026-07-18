@@ -53,7 +53,7 @@ function makeStoneWallTexture(scene, size=512){
   const tex = new BABYLON.DynamicTexture('stoneTex', size, scene, false);
   const ctx = tex.getContext();
   // Base purple-mauve plaster
-  ctx.fillStyle = '#2a0e40';
+  ctx.fillStyle = '#4a2060';
   ctx.fillRect(0,0,size,size);
   // Stone block grid
   const bw=80, bh=50;
@@ -95,7 +95,7 @@ function makeStoneWallTexture(scene, size=512){
 function makeWoodFloorTexture(scene, size=512){
   const tex = new BABYLON.DynamicTexture('woodTex', size, scene, false);
   const ctx = tex.getContext();
-  ctx.fillStyle='#1a0c05'; ctx.fillRect(0,0,size,size);
+  ctx.fillStyle='#3a1c08'; ctx.fillRect(0,0,size,size);
   const plankW=size/4;
   for(let col=0;col<4;col++){
     // Each plank column — staggered
@@ -104,7 +104,7 @@ function makeWoodFloorTexture(scene, size=512){
       const pY=row*(size/3+(Math.random()*20-10));
       // Plank base colour
       const b=10+Math.floor(Math.random()*18);
-      ctx.fillStyle=`rgb(${30+b},${14+b},${5+b})`;
+      ctx.fillStyle=`rgb(${90+b},${50+b},${15+b})`;
       ctx.fillRect(x+1,pY,plankW-2,size/3-1);
       // Wood grain lines
       ctx.strokeStyle=`rgba(0,0,0,0.18)`; ctx.lineWidth=1;
@@ -227,10 +227,10 @@ function makeDirtFloorTexture(scene, size=256){
 function initBabylon(){
   const engine = new BABYLON.Engine($('game-canvas'), true, { antialias:true });
   const scene  = new BABYLON.Scene(engine);
-  scene.clearColor = new BABYLON.Color4(0.03,0.01,0.05,1);
+  scene.clearColor = new BABYLON.Color4(0.22,0.14,0.28,1);
   scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogColor   = new BABYLON.Color3(0.03,0.01,0.05);
-  scene.fogDensity = 0.038;
+  scene.fogColor   = new BABYLON.Color3(0.28,0.18,0.38);
+  scene.fogDensity = 0.018;
 
   // ── CAMERA ─────────────────────────────────────────────────────────────────
   const camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0,1.7,-7), scene);
@@ -297,12 +297,12 @@ function initBabylon(){
 
   const wallM = mat('wallM');
   wallM.diffuseTexture = stoneTex;
-  wallM.diffuseColor   = new BABYLON.Color3(0.55, 0.4, 0.7); // tint
+  wallM.diffuseColor   = new BABYLON.Color3(0.72, 0.52, 0.88); // warm violet-mauve
   wallM.specularColor  = new BABYLON.Color3(0.02,0.01,0.03);
 
   const floorM = mat('floorM');
   floorM.diffuseTexture = woodTex;
-  floorM.specularColor  = new BABYLON.Color3(0.06,0.04,0.02);
+  floorM.specularColor  = new BABYLON.Color3(0.12,0.08,0.03); floorM.diffuseColor = new BABYLON.Color3(0.5,0.38,0.2);
 
   const ceilM = mat('ceilM');
   ceilM.diffuseTexture = ceilTex;
@@ -311,7 +311,7 @@ function initBabylon(){
   fpStoneM.diffuseTexture = fpTex;
 
   const woodTrimM = mat('woodTrimM');
-  woodTrimM.diffuseColor = new BABYLON.Color3(0.22,0.1,0.04);
+  woodTrimM.diffuseColor = new BABYLON.Color3(0.45,0.26,0.1);
 
   const goldM = mat('goldM');
   goldM.diffuseColor  = new BABYLON.Color3(0.5,0.36,0.1);
@@ -319,7 +319,7 @@ function initBabylon(){
   goldM.specularPower = 48;
 
   const darkWoodM = mat('darkWoodM');
-  darkWoodM.diffuseColor = new BABYLON.Color3(0.14,0.07,0.03);
+  darkWoodM.diffuseColor = new BABYLON.Color3(0.38,0.22,0.08);
 
   const dirtM = mat('dirtM');
   dirtM.diffuseTexture = dirtTex;
@@ -381,6 +381,62 @@ function initBabylon(){
     bm.emissiveColor=new BABYLON.Color3(0.01,0.005,0.002);
     beam.material=bm;
   });
+
+
+  // ── WALL PANELLING (Victorian raised panels — Scooby-Doo mansion style) ──
+  // Panels sit between dado rail (y=1.05) and crown (y=H-0.06)
+  // Back wall panels
+  const panelMat = mat('panelMat');
+  panelMat.diffuseColor = new BABYLON.Color3(0.62, 0.44, 0.78); // slightly lighter than wall
+  panelMat.emissiveColor = new BABYLON.Color3(0.04, 0.02, 0.06);
+
+  const panelTrimMat = mat('panelTrimMat');
+  panelTrimMat.diffuseColor = new BABYLON.Color3(0.5, 0.32, 0.14); // warm wood trim
+  panelTrimMat.specularColor = new BABYLON.Color3(0.12, 0.08, 0.04);
+  panelTrimMat.specularPower = 16;
+
+  function makeWallPanel(name, px, py, pz, pw, ph, ry=0) {
+    // Inset panel face
+    const face = BABYLON.MeshBuilder.CreatePlane(name+'_f', {width:pw-0.12, height:ph-0.12}, scene);
+    face.position.set(px, py, pz); face.rotation.y = ry;
+    const fm = panelMat.clone(name+'_fm'); fm.backFaceCulling = false;
+    face.material = fm;
+    // Outer frame strips (top, bottom, left, right)
+    const strips = [
+      {w:pw, h:0.06, ox:0, oy:ph/2-0.03},   // top
+      {w:pw, h:0.06, ox:0, oy:-ph/2+0.03},  // bottom
+      {w:0.06, h:ph, ox:-pw/2+0.03, oy:0},  // left
+      {w:0.06, h:ph, ox:pw/2-0.03, oy:0},   // right
+    ];
+    strips.forEach((s,i) => {
+      const strip = BABYLON.MeshBuilder.CreatePlane(name+'_s'+i, {width:s.w, height:s.h}, scene);
+      strip.position.set(px+s.ox, py+s.oy, pz+(ry===0?-0.005:0.005));
+      strip.rotation.y = ry;
+      const sm = panelTrimMat.clone(name+'_sm'+i); sm.backFaceCulling = false;
+      strip.material = sm;
+    });
+  }
+
+  // Back wall — 4 panels
+  const panelH = H - 1.05 - 0.2; // from dado to crown, with margin
+  const panelY = 1.05 + panelH/2 + 0.1;
+  const panelZ = D/2 - 0.04;
+  makeWallPanel('pB0', -7,   panelY, panelZ, 3.2, panelH);
+  makeWallPanel('pB1', -2.2, panelY, panelZ, 3.2, panelH);
+  makeWallPanel('pB2',  2.2, panelY, panelZ, 3.2, panelH);
+  makeWallPanel('pB3',  7,   panelY, panelZ, 3.2, panelH);
+
+  // Left wall — 3 panels
+  const panelZL = -W/2 + 0.04;
+  makeWallPanel('pL0', panelZL, panelY, -4,  3.0, panelH, Math.PI/2);
+  makeWallPanel('pL1', panelZL, panelY,  0,  3.0, panelH, Math.PI/2);
+  makeWallPanel('pL2', panelZL, panelY,  4,  3.0, panelH, Math.PI/2);
+
+  // Right wall — 2 panels (fireplace takes up the rest)
+  const panelZR = W/2 - 0.04;
+  makeWallPanel('pR0', panelZR, panelY, -4,  3.0, panelH, -Math.PI/2);
+  makeWallPanel('pR1', panelZR, panelY, -0.5, 3.0, panelH, -Math.PI/2);
+
 
   // ── FIREPLACE (right wall) ─────────────────────────────────────────────────
   const fpX=W/2-0.12, fpZ=1.5;
@@ -623,35 +679,50 @@ function initBabylon(){
   for(let hi=0;hi<4;hi++) interactables.set('herbwall_mesh_'+hi,'herbwall');
 
   // ── LIGHTS ────────────────────────────────────────────────────────────────
+
+  // Gloomy overcast window light (simulates grey daylight through tall windows)
+  const windowLight = new BABYLON.PointLight('winLight', new BABYLON.Vector3(0, 3.5, -D/2+1), scene);
+  windowLight.diffuse   = new BABYLON.Color3(0.55, 0.5, 0.72); // cool lavender grey
+  windowLight.specular  = new BABYLON.Color3(0.1, 0.1, 0.15);
+  windowLight.intensity = 1.8;
+  windowLight.range     = 26;
+
+  // Second fill — from the staircase landing (mysterious light from upstairs)
+  const stairLight = new BABYLON.PointLight('stairLight', new BABYLON.Vector3(3, 4.2, 2), scene);
+  stairLight.diffuse   = new BABYLON.Color3(0.4, 0.35, 0.58);
+  stairLight.intensity = 0.9;
+  stairLight.range     = 16;
+
+
   const ambient=new BABYLON.HemisphericLight('amb',new BABYLON.Vector3(0,1,0),scene);
-  ambient.intensity=0.07; ambient.diffuse=new BABYLON.Color3(0.38,0.18,0.55);
-  ambient.groundColor=new BABYLON.Color3(0.04,0.02,0.06);
+  ambient.intensity=0.55; ambient.diffuse=new BABYLON.Color3(0.62,0.48,0.78);
+  ambient.groundColor=new BABYLON.Color3(0.22,0.16,0.32);
 
   const chanLight=new BABYLON.PointLight('chanL',new BABYLON.Vector3(0,chanY-1.1,0),scene);
-  chanLight.diffuse=new BABYLON.Color3(0.9,0.72,0.38); chanLight.intensity=0.85; chanLight.range=20;
+  chanLight.diffuse=new BABYLON.Color3(1.0,0.82,0.5); chanLight.intensity=2.2; chanLight.range=28;
 
   const fireLight=new BABYLON.PointLight('fireL',new BABYLON.Vector3(fpX-0.8,0.9,fpZ),scene);
-  fireLight.diffuse=new BABYLON.Color3(1,0.48,0.12); fireLight.intensity=1.2; fireLight.range=11;
+  fireLight.diffuse=new BABYLON.Color3(1.0,0.55,0.15); fireLight.intensity=2.5; fireLight.range=16;
 
   // Green cauldron glow
   const cauldLight=new BABYLON.PointLight('cauldL',new BABYLON.Vector3(-3,0.7,2),scene);
   cauldLight.diffuse=new BABYLON.Color3(0.2,0.9,0.35); cauldLight.intensity=0.55; cauldLight.range=5;
 
   const sconceL=new BABYLON.PointLight('scL',new BABYLON.Vector3(-6,2.8,-3),scene);
-  sconceL.diffuse=new BABYLON.Color3(0.85,0.62,0.32); sconceL.intensity=0.5; sconceL.range=9;
+  sconceL.diffuse=new BABYLON.Color3(1.0,0.78,0.4); sconceL.intensity=1.4; sconceL.range=14;
   const sconceR=new BABYLON.PointLight('scR',new BABYLON.Vector3(6,2.8,-3),scene);
-  sconceR.diffuse=new BABYLON.Color3(0.85,0.62,0.32); sconceR.intensity=0.5; sconceR.range=9;
+  sconceR.diffuse=new BABYLON.Color3(1.0,0.78,0.4); sconceR.intensity=1.4; sconceR.range=14;
 
   // ── FLICKER ───────────────────────────────────────────────────────────────
   let ft=0;
   function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
   scene.registerBeforeRender(()=>{
     ft+=engine.getDeltaTime()*0.001;
-    chanLight.intensity=flk(0.85,0.18,2.1,0);
-    fireLight.intensity=flk(1.2,0.38,3.7,1.2);
+    chanLight.intensity=flk(2.2,0.3,2.1,0);
+    fireLight.intensity=flk(2.5,0.5,3.7,1.2);
     cauldLight.intensity=flk(0.55,0.18,1.8,3.0);
-    sconceL.intensity  =flk(0.50,0.12,1.8,0.6);
-    sconceR.intensity  =flk(0.50,0.12,2.4,2.1);
+    sconceL.intensity  =flk(1.4,0.22,1.8,0.6);
+    sconceR.intensity  =flk(1.4,0.22,2.4,2.1);
     // Ember pulse
     if(embers) embers.material.emissiveColor=new BABYLON.Color3(flk(0.6,0.15,3.7,0.5),flk(0.18,0.06,3.7,1.0),0.02);
     // Cauldron brew shimmer
