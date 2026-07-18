@@ -581,9 +581,16 @@ function initBabylon(){
       book.position.set(bsX+0.14,shelfY+bh/2+0.04,bz+bw/2);
       book.rotation.x=tilt;
       const col=BOOK_COLS[Math.floor(Math.random()*BOOK_COLS.length)];
-      const btex=makeBookSpineTexture(scene,64,col);
+      // Book spine — solid colour from BOOK_COLS palette with dark wood texture overlay
       const bm=mat('bm'+sh+Math.floor(bz*10));
-      bm.diffuseTexture=btex;
+      bm.diffuseTexture=new BABYLON.Texture(TEX.darkwood_d,scene);
+      bm.diffuseTexture.uScale=1; bm.diffuseTexture.vScale=4;
+      // Parse hex colour string as diffuse tint
+      const r=parseInt(col.slice(1,3),16)/255;
+      const g=parseInt(col.slice(3,5),16)/255;
+      const b=parseInt(col.slice(5,7),16)/255;
+      bm.diffuseColor=new BABYLON.Color3(r*1.4,g*1.4,b*1.4);
+      bm.specularColor=new BABYLON.Color3(0.04,0.04,0.04);
       book.material=bm;
       bz+=bw+0.008;
     }
