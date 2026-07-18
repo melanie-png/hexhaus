@@ -6,557 +6,701 @@
 <title>HEXHAUS</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0a0a0f; --panel: #12111a; --border: #2a2535;
-    --accent: #7b4fa6; --gold: #c9a84c; --text: #c8bfdc;
-    --muted: #6b6280; --white: #ede8f5; --glow: rgba(123,79,166,0.3);
-  }
-  html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
-    font-family:'Crimson Text',Georgia,serif; overflow:hidden; user-select:none; }
-  .screen { display:none; width:100%; height:100%; position:absolute; top:0; left:0; }
-  .screen.active { display:flex; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #080a12; --panel: #0e1020; --border: #1e2238;
+  --accent: #6a42a0; --gold: #c9a84c; --text: #c0b8d8;
+  --muted: #5a5575; --white: #ede8f5; --glow: rgba(106,66,160,0.35);
+}
+html, body { width:100%; height:100%; background:var(--bg); color:var(--text);
+  font-family:'Crimson Text',Georgia,serif; overflow:hidden; user-select:none;
+  -webkit-tap-highlight-color: transparent; }
+.screen { display:none; width:100%; height:100%; position:absolute; top:0; left:0; flex-direction:column; }
+.screen.active { display:flex; }
 
-  /* TITLE */
-  #title-screen { flex-direction:column; align-items:center; justify-content:center;
-    background:radial-gradient(ellipse at 50% 30%, #1a0d2e 0%, #0a0a0f 70%); text-align:center; }
-  .title-eyebrow { font-family:'Cinzel',serif; font-size:clamp(0.6rem,1.5vw,0.85rem);
-    letter-spacing:6px; color:var(--muted); text-transform:uppercase; margin-bottom:16px; }
-  .title-main { font-family:'Cinzel',serif; font-size:clamp(3.5rem,12vw,8rem); font-weight:700;
-    color:var(--white); letter-spacing:8px; line-height:1;
-    text-shadow:0 0 60px var(--glow),0 0 120px rgba(123,79,166,0.15); margin-bottom:8px; }
-  .title-sub { font-style:italic; color:var(--muted); letter-spacing:2px; margin-bottom:48px;
-    font-size:clamp(0.9rem,2.5vw,1.2rem); }
-  .title-lore { max-width:480px; font-size:clamp(0.9rem,2vw,1.05rem); line-height:1.7;
-    color:#9a8fb0; margin-bottom:48px; padding:0 24px; font-style:italic; }
-  .btn-start { font-family:'Cinzel',serif; font-size:clamp(0.85rem,2vw,1rem);
-    letter-spacing:4px; text-transform:uppercase; color:var(--white); background:transparent;
-    border:1px solid var(--accent); padding:16px 48px; cursor:pointer; transition:all 0.3s; }
-  .btn-start:hover { background:var(--accent); box-shadow:0 0 30px var(--glow); }
-  .cf { position:absolute; animation:flicker 3s ease-in-out infinite; font-size:2.5rem; }
-  .cf:nth-child(1){top:15%;left:8%;} .cf:nth-child(2){top:20%;right:10%;animation-delay:1.2s;}
-  .cf:nth-child(3){bottom:20%;left:12%;animation-delay:0.7s;font-size:2rem;}
-  .cf:nth-child(4){bottom:15%;right:8%;animation-delay:1.8s;}
-  @keyframes flicker {
-    0%,100%{opacity:0.6;transform:scale(1) rotate(-2deg);}
-    25%{opacity:1;transform:scale(1.05) rotate(1deg);}
-    50%{opacity:0.5;transform:scale(0.97) rotate(-1deg);}
-    75%{opacity:0.9;transform:scale(1.02) rotate(2deg);}
-  }
+/* ── TITLE ── */
+#title-screen {
+  align-items:center; justify-content:center; text-align:center;
+  background: radial-gradient(ellipse at 50% 25%, #14082e 0%, #080a12 65%);
+}
+.cf { position:absolute; animation:flicker 3s ease-in-out infinite; font-size:2.2rem; pointer-events:none; }
+.cf:nth-child(1){top:12%;left:7%;} .cf:nth-child(2){top:18%;right:9%;animation-delay:1.3s;}
+.cf:nth-child(3){bottom:22%;left:11%;animation-delay:0.8s;font-size:1.8rem;}
+.cf:nth-child(4){bottom:16%;right:7%;animation-delay:2s;}
+@keyframes flicker{0%,100%{opacity:.55;transform:scale(1) rotate(-2deg);}
+  25%{opacity:1;transform:scale(1.06) rotate(1deg);}
+  50%{opacity:.45;transform:scale(.97) rotate(-1deg);}
+  75%{opacity:.85;transform:scale(1.03) rotate(2deg);}}
+.t-eye { font-family:'Cinzel',serif; font-size:clamp(.6rem,1.4vw,.8rem); letter-spacing:6px;
+  color:var(--muted); text-transform:uppercase; margin-bottom:14px; }
+.t-title { font-family:'Cinzel',serif; font-size:clamp(3.5rem,13vw,8rem); font-weight:700;
+  color:var(--white); letter-spacing:8px; line-height:1;
+  text-shadow:0 0 60px var(--glow),0 0 120px rgba(106,66,160,.15); margin-bottom:6px; }
+.t-sub { font-style:italic; color:var(--muted); letter-spacing:2px; margin-bottom:44px;
+  font-size:clamp(.85rem,2.2vw,1.1rem); }
+.t-lore { max-width:460px; font-size:clamp(.88rem,2vw,1rem); line-height:1.75;
+  color:#9888b0; margin-bottom:44px; padding:0 24px; font-style:italic; }
+.btn-enter { font-family:'Cinzel',serif; font-size:clamp(.8rem,2vw,.95rem); letter-spacing:4px;
+  text-transform:uppercase; color:var(--white); background:transparent;
+  border:1px solid var(--accent); padding:15px 46px; cursor:pointer; transition:all .3s; }
+.btn-enter:hover { background:var(--accent); box-shadow:0 0 28px var(--glow); }
 
-  /* GAME */
-  #game-screen { flex-direction:column; }
-  .top-bar { background:var(--panel); border-bottom:1px solid var(--border);
-    padding:10px 20px; display:flex; align-items:center; justify-content:space-between;
-    flex-shrink:0; }
-  .room-name { font-family:'Cinzel',serif; font-size:clamp(0.75rem,2vw,0.95rem);
-    color:var(--gold); letter-spacing:2px; text-transform:uppercase; }
-  .top-actions { display:flex; gap:10px; }
-  .icon-btn { background:transparent; border:1px solid var(--border); color:var(--muted);
-    width:36px; height:36px; border-radius:4px; cursor:pointer; font-size:1.1rem;
-    transition:all 0.2s; display:flex; align-items:center; justify-content:center; }
-  .icon-btn:hover { border-color:var(--accent); color:var(--white); }
-  .game-area { flex:1; display:flex; overflow:hidden; position:relative; }
-  .room-viewport { flex:1; position:relative; overflow:hidden; }
+/* ── GAME CHROME ── */
+.top-bar { background:var(--panel); border-bottom:1px solid var(--border); padding:9px 18px;
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0; z-index:10; }
+.room-label { font-family:'Cinzel',serif; font-size:clamp(.7rem,1.8vw,.88rem);
+  color:var(--gold); letter-spacing:2px; text-transform:uppercase; }
+.icon-btn { background:transparent; border:1px solid var(--border); color:var(--muted);
+  width:34px; height:34px; border-radius:4px; cursor:pointer; font-size:1rem;
+  display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.icon-btn:hover { border-color:var(--accent); color:var(--white); }
 
-  /* Room art */
-  .hall-art {
-    width:100%; height:100%; position:relative; overflow:hidden;
-    /* Scooby-Doo midnight blue sky — painted cel look */
-    background: linear-gradient(180deg,
-      #0a0f1f 0%, #0d1530 15%, #0f1a3a 30%,
-      #0c1628 50%, #10192e 65%,
-      #12141a 80%, #0e0f14 100%);
-  }
-  /* Painted stone wall — left panel */
-  .hall-art::before {
-    content:'';
-    position:absolute; inset:0;
-    background:
-      /* Stone block grid — horizontal mortar */
-      repeating-linear-gradient(180deg,
-        transparent 0px, transparent 54px,
-        rgba(6,10,22,0.5) 54px, rgba(6,10,22,0.5) 57px
-      ),
-      /* Stone block grid — vertical mortar (offset rows) */
-      repeating-linear-gradient(90deg,
-        transparent 0px, transparent 88px,
-        rgba(6,10,22,0.4) 88px, rgba(6,10,22,0.4) 90px
-      ),
-      /* Blue-grey stone face wash */
-      linear-gradient(135deg,
-        rgba(18,28,55,0.8) 0%, rgba(12,20,42,0.6) 40%,
-        rgba(20,30,60,0.5) 60%, rgba(10,16,35,0.7) 100%
-      );
-    pointer-events:none;
-  }
-  /* Dark wooden floor — planks */
-  .hall-art::after {
-    content:'';
-    position:absolute; bottom:0; left:0; right:0; height:30%;
-    background:
-      repeating-linear-gradient(90deg,
-        #0d0a14 0px,   #0d0a14 2px,
-        #121018 2px,   #121018 130px,
-        #0f0d16 130px, #0f0d16 132px,
-        #141219 132px, #141219 260px
-      ),
-      linear-gradient(180deg, #181420 0%, #0c0a12 100%);
-    border-top: 3px solid #1e1a28;
-    box-shadow: inset 0 8px 30px rgba(0,0,0,0.7);
-  }
+/* ── SCROLL VIEWPORT ── */
+.viewport-wrap { flex:1; position:relative; overflow:hidden; cursor:grab; }
+.viewport-wrap.dragging { cursor:grabbing; }
+.room-scroll { position:absolute; top:0; left:0; height:100%;
+  width: 2600px; /* room total width */
+  will-change:transform; transition:transform .05s linear; }
 
-  /* Objects */
-  .room-object { position:absolute; cursor:pointer; transition:filter 0.2s,transform 0.2s;
-    display:flex; flex-direction:column; align-items:center; gap:4px; }
-  .room-object:hover { filter:brightness(1.4) drop-shadow(0 0 8px var(--accent)); transform:scale(1.05); }
-  .room-object .obj-label { font-family:'Cinzel',serif; font-size:clamp(0.5rem,1.2vw,0.65rem);
-    color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; opacity:0;
-    transition:opacity 0.2s; white-space:nowrap; text-shadow:0 0 6px #000; pointer-events:none; }
-  .room-object:hover .obj-label { opacity:1; }
-  .room-object.collected { opacity:0.25; pointer-events:none; }
-  .obj-icon { font-size:clamp(2rem,6vw,3.5rem); line-height:1; }
-  .portrait-frame { width:clamp(55px,9vw,85px); height:clamp(70px,12vw,110px);
-    border:3px solid #4a3a1a; background:linear-gradient(160deg,#1a0f0a,#2a1a0f);
-    display:flex; align-items:center; justify-content:center; font-size:clamp(1.8rem,5vw,3rem);
-    position:relative; box-shadow:0 0 20px rgba(0,0,0,0.8); overflow:hidden; }
-  .portrait-frame::after { content:'👁 👁'; position:absolute; bottom:20%;
-    font-size:clamp(0.6rem,1.5vw,0.9rem); letter-spacing:6px;
-    animation:eye-shift 4s ease-in-out infinite; }
-  @keyframes eye-shift { 0%,100%{transform:translateX(-4px);} 50%{transform:translateX(4px);} }
-  .candle-obj { animation:cflicker 2s ease-in-out infinite; }
-  @keyframes cflicker {
-    0%,100%{filter:drop-shadow(0 0 8px #ff9920);} 50%{filter:drop-shadow(0 0 3px #ff7700);}
-  }
+/* ── ROOM BACKGROUND (Scooby midnight blue hand-painted style) ── */
+.room-bg {
+  position:absolute; inset:0;
+  background: linear-gradient(180deg,
+    #06080f 0%, #0a0e1c 10%, #0d1228 22%,
+    #101730 38%, #0d1428 54%,
+    #0b0f1e 70%, #080a14 100%);
+}
+/* Stone wall texture */
+.room-bg::before {
+  content:''; position:absolute; inset:0;
+  background:
+    repeating-linear-gradient(180deg, transparent 0, transparent 56px,
+      rgba(4,6,16,.5) 56px, rgba(4,6,16,.5) 59px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 92px,
+      rgba(4,6,16,.3) 92px, rgba(4,6,16,.3) 94px);
+  pointer-events:none;
+}
+/* Floor planks */
+.room-bg::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:31%;
+  background:
+    repeating-linear-gradient(90deg,
+      #0a0812 0,#0a0812 2px, #0f0c18 2px,#0f0c18 140px,
+      #0c0a15 140px,#0c0a15 142px, #111018 142px,#111018 280px),
+    linear-gradient(180deg,#14101e 0%,#09060f 100%);
+  border-top:3px solid #1c1828;
+  box-shadow:inset 0 8px 28px rgba(0,0,0,.75);
+  pointer-events:none;
+}
 
-  /* Sidebar */
-  .sidebar { width:clamp(150px,20vw,220px); background:var(--panel);
-    border-left:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
-  .sidebar-title { font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:3px;
-    text-transform:uppercase; color:var(--muted); padding:14px 16px 10px;
-    border-bottom:1px solid var(--border); }
-  .inventory-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
-    padding:12px; overflow-y:auto; flex:1; }
-  .inv-slot { aspect-ratio:1; border:1px solid var(--border); border-radius:6px;
-    background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center;
-    font-size:clamp(1.2rem,3vw,1.6rem); transition:all 0.2s; position:relative; }
-  .inv-slot.filled { border-color:var(--accent); background:rgba(123,79,166,0.1); cursor:pointer; }
-  .inv-slot.filled:hover { border-color:var(--gold); transform:scale(1.05);
-    box-shadow:0 0 12px var(--glow); }
-  .inv-count { padding:10px 16px; border-top:1px solid var(--border);
-    font-size:0.75rem; color:var(--muted); font-style:italic; }
+/* ── SVG ROOM ART (atmospheric layer) ── */
+.room-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 
-  /* Message bar */
-  .msg-bar { background:#0d0b15; border-top:1px solid var(--border);
-    padding:14px 20px; min-height:60px; display:flex; align-items:center; flex-shrink:0; }
-  .msg-text { font-style:italic; font-size:clamp(0.85rem,2vw,1rem); color:var(--text);
-    line-height:1.5; flex:1; }
-  .msg-text .hl { color:var(--gold); font-style:normal; }
+/* ── DEPTH LAYERS ── */
+.layer-far    { position:absolute; bottom:31%; transform-origin:bottom center; }
+.layer-mid    { position:absolute; bottom:31%; transform-origin:bottom center; }
+.layer-near   { position:absolute; bottom:31%; transform-origin:bottom center; }
+.layer-floor  { position:absolute; bottom:0; transform-origin:bottom center; }
 
-  /* Modal */
-  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8);
-    z-index:100; align-items:center; justify-content:center; padding:20px; }
-  .modal-overlay.open { display:flex; }
-  .modal-box { background:var(--panel); border:1px solid var(--border); max-width:420px;
-    width:100%; padding:28px 24px; position:relative;
-    box-shadow:0 0 60px rgba(0,0,0,0.9); }
-  .modal-box::before { content:''; position:absolute; top:0; left:0; right:0; height:2px;
-    background:linear-gradient(90deg,transparent,var(--accent),transparent); }
-  .modal-icon { font-size:2.8rem; text-align:center; margin-bottom:12px; }
-  .modal-title { font-family:'Cinzel',serif; font-size:1rem; color:var(--gold);
-    letter-spacing:2px; text-align:center; margin-bottom:14px; text-transform:uppercase; }
-  .modal-desc { font-size:1rem; line-height:1.7; color:var(--text);
-    text-align:center; margin-bottom:20px; font-style:italic; }
-  .modal-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-  .modal-btn { font-family:'Cinzel',serif; font-size:0.75rem; letter-spacing:2px;
-    text-transform:uppercase; border:1px solid var(--border); background:transparent;
-    color:var(--text); padding:10px 20px; cursor:pointer; transition:all 0.2s; }
-  .modal-btn:hover { border-color:var(--accent); color:var(--white); }
-  .modal-btn.primary { border-color:var(--gold); color:var(--gold); }
-  .modal-btn.primary:hover { background:rgba(201,168,76,0.15); }
-  .modal-close { position:absolute; top:10px; right:12px; background:none; border:none;
-    color:var(--muted); font-size:1.2rem; cursor:pointer; }
-  .modal-close:hover { color:var(--white); }
+/* ── ROOM OBJECTS ── */
+.obj {
+  position:absolute; bottom:0; display:flex; flex-direction:column;
+  align-items:center; gap:3px; cursor:pointer; transition:filter .2s, transform .2s;
+  transform-origin:bottom center;
+}
+.obj:hover { filter:brightness(1.5) drop-shadow(0 0 10px var(--accent)); transform:scale(1.06); }
+.obj.collected { opacity:.22; pointer-events:none; }
+.obj.no-collect:hover { filter:brightness(1.3) drop-shadow(0 0 6px rgba(255,200,100,.3)); }
+.obj-label { font-family:'Cinzel',serif; font-size:clamp(.45rem,1vw,.6rem); color:var(--muted);
+  letter-spacing:1.5px; text-transform:uppercase; opacity:0; transition:opacity .2s;
+  white-space:nowrap; text-shadow:0 0 6px #000; pointer-events:none; }
+.obj:hover .obj-label { opacity:1; }
+.obj-icon { line-height:1; display:block; }
 
-  /* Whisper */
-  .whisper-overlay { position:fixed; inset:0; pointer-events:none; z-index:200;
-    display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.5s; }
-  .whisper-overlay.show { opacity:1; }
-  .whisper-text { font-family:'Cinzel',serif; font-size:clamp(1rem,3vw,1.5rem);
-    color:rgba(123,79,166,0.9); letter-spacing:4px; text-align:center;
-    text-shadow:0 0 30px var(--accent); padding:0 20px;
-    animation:wpulse 2.5s ease-in-out forwards; }
-  @keyframes wpulse {
-    0%{opacity:0;transform:scale(0.95);} 20%{opacity:1;transform:scale(1);}
-    80%{opacity:1;} 100%{opacity:0;}
-  }
+/* ── PARALLAX DEPTH via size + opacity ── */
+.depth-far  { transform:scale(.55); opacity:.65; filter:brightness(.7); }
+.depth-mid  { transform:scale(.78); opacity:.82; filter:brightness(.85); }
+.depth-near { transform:scale(1);   opacity:1;   filter:brightness(1); }
 
-  @media(max-width:600px){
-    .game-area{flex-direction:column;}
-    .room-viewport{flex:1;min-height:0;}
-    .sidebar{width:100%;height:110px;border-left:none;border-top:1px solid var(--border);
-      flex-direction:row;align-items:center;}
-    .sidebar-title{writing-mode:vertical-rl;border-bottom:none;border-right:1px solid var(--border);
-      height:100%;padding:12px 8px;}
-    .inventory-grid{grid-template-columns:repeat(6,1fr);padding:8px;}
-    .inv-count{display:none;}
-  }
+/* Portrait */
+.portrait-frame { border:3px solid #3a2e12; background:linear-gradient(160deg,#160e08,#221508);
+  display:flex; align-items:center; justify-content:center; position:relative;
+  box-shadow:0 0 22px rgba(0,0,0,.9), inset 0 0 12px rgba(0,0,0,.6); overflow:hidden; }
+.portrait-frame::after { content:'👁 👁'; position:absolute; bottom:18%;
+  font-size:.7rem; letter-spacing:5px; animation:eyeshift 4.5s ease-in-out infinite; }
+@keyframes eyeshift{0%,100%{transform:translateX(-5px);}50%{transform:translateX(5px);}}
+.candle-glow { animation:cglow 2.2s ease-in-out infinite; }
+@keyframes cglow{0%,100%{filter:drop-shadow(0 0 10px #ff9820);}50%{filter:drop-shadow(0 0 4px #ff6600);}}
+
+/* Scroll hint */
+.scroll-hint { position:absolute; bottom:38%; right:20px; z-index:5;
+  font-family:'Cinzel',serif; font-size:.6rem; letter-spacing:2px; color:var(--muted);
+  text-transform:uppercase; animation:hint 3s ease-in-out 2s both; pointer-events:none; }
+.scroll-hint::after { content:' ›'; }
+@keyframes hint{0%{opacity:0;}20%{opacity:.8;}80%{opacity:.8;}100%{opacity:0;}}
+
+/* ── SIDEBAR ── */
+.sidebar { width:clamp(140px,18vw,200px); background:var(--panel);
+  border-left:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
+.sidebar-title { font-family:'Cinzel',serif; font-size:.65rem; letter-spacing:3px;
+  text-transform:uppercase; color:var(--muted); padding:12px 14px 8px;
+  border-bottom:1px solid var(--border); }
+.inv-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; padding:10px; flex:1; overflow-y:auto; }
+.inv-slot { aspect-ratio:1; border:1px solid var(--border); border-radius:5px;
+  background:rgba(0,0,0,.3); display:flex; align-items:center; justify-content:center;
+  font-size:clamp(1.1rem,2.5vw,1.4rem); transition:all .2s; }
+.inv-slot.filled { border-color:var(--accent); background:rgba(106,66,160,.12); cursor:pointer; }
+.inv-slot.filled:hover { border-color:var(--gold); transform:scale(1.06); box-shadow:0 0 10px var(--glow); }
+.inv-count { padding:8px 14px; border-top:1px solid var(--border);
+  font-size:.7rem; color:var(--muted); font-style:italic; }
+
+/* ── GAME AREA ── */
+.game-area { flex:1; display:flex; overflow:hidden; min-height:0; }
+
+/* ── MESSAGE BAR ── */
+.msg-bar { background:#070911; border-top:1px solid var(--border);
+  padding:12px 18px; min-height:56px; display:flex; align-items:center; flex-shrink:0; }
+.msg-text { font-style:italic; font-size:clamp(.8rem,1.8vw,.96rem);
+  color:var(--text); line-height:1.5; flex:1; }
+.msg-text .hl { color:var(--gold); font-style:normal; font-weight:600; }
+
+/* ── MODAL ── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.82);
+  z-index:100; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--panel); border:1px solid var(--border); max-width:400px;
+  width:100%; padding:26px 22px; position:relative; box-shadow:0 0 55px rgba(0,0,0,.9); }
+.modal-box::before { content:''; position:absolute; top:0;left:0;right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent); }
+.modal-icon { font-size:2.6rem; text-align:center; margin-bottom:10px; }
+.modal-title { font-family:'Cinzel',serif; font-size:.92rem; color:var(--gold);
+  letter-spacing:2px; text-align:center; margin-bottom:12px; text-transform:uppercase; }
+.modal-desc { font-size:.96rem; line-height:1.72; color:var(--text);
+  text-align:center; margin-bottom:18px; font-style:italic; }
+.modal-actions { display:flex; gap:9px; justify-content:center; flex-wrap:wrap; }
+.mbtn { font-family:'Cinzel',serif; font-size:.7rem; letter-spacing:2px; text-transform:uppercase;
+  border:1px solid var(--border); background:transparent; color:var(--text);
+  padding:9px 18px; cursor:pointer; transition:all .2s; }
+.mbtn:hover { border-color:var(--accent); color:var(--white); }
+.mbtn.gold { border-color:var(--gold); color:var(--gold); }
+.mbtn.gold:hover { background:rgba(201,168,76,.15); }
+.modal-x { position:absolute; top:9px;right:11px; background:none; border:none;
+  color:var(--muted); font-size:1.1rem; cursor:pointer; }
+.modal-x:hover { color:var(--white); }
+
+/* ── WHISPER ── */
+.whisper { position:fixed; inset:0; pointer-events:none; z-index:200;
+  display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .4s; }
+.whisper.show { opacity:1; }
+.whisper-txt { font-family:'Cinzel',serif; font-size:clamp(.9rem,2.5vw,1.3rem);
+  color:rgba(106,66,160,.95); letter-spacing:4px; text-align:center;
+  text-shadow:0 0 30px var(--accent); padding:0 20px;
+  animation:wpulse 2.8s ease-in-out forwards; }
+@keyframes wpulse{0%{opacity:0;transform:scale(.94);}18%{opacity:1;transform:scale(1);}82%{opacity:1;}100%{opacity:0;}}
+
+/* ── MOBILE: sidebar goes bottom ── */
+@media(max-width:560px){
+  .game-area { flex-direction:column; }
+  .sidebar { width:100%; height:100px; border-left:none; border-top:1px solid var(--border);
+    flex-direction:row; align-items:center; flex-shrink:0; }
+  .sidebar-title { writing-mode:vertical-rl; border-bottom:none; border-right:1px solid var(--border);
+    height:100%; padding:10px 7px; }
+  .inv-grid { grid-template-columns:repeat(7,1fr); padding:7px; overflow-x:auto; overflow-y:hidden; }
+  .inv-count { display:none; }
+}
 </style>
 </head>
 <body>
 
+<!-- TITLE -->
 <div id="title-screen" class="screen active">
   <span class="cf">🕯️</span><span class="cf">🕯️</span>
   <span class="cf">🕯️</span><span class="cf">🕯️</span>
-  <p class="title-eyebrow">you should not have come here</p>
-  <h1 class="title-main">HEXHAUS</h1>
-  <p class="title-sub">a witch's house · room by room</p>
-  <p class="title-lore">
+  <p class="t-eye">you should not have come here</p>
+  <h1 class="t-title">HEXHAUS</h1>
+  <p class="t-sub">a witch's house · room by room</p>
+  <p class="t-lore">
     The house at the end of Hollow Lane has been empty for two hundred years.<br>
-    Everyone says so.<br><br>
-    Everyone is wrong.
+    Everyone says so.<br><br>Everyone is wrong.
   </p>
-  <button class="btn-start" onclick="startGame()">Enter</button>
+  <button class="btn-enter" onclick="startGame()">Enter</button>
 </div>
 
+<!-- GAME -->
 <div id="game-screen" class="screen">
   <div class="top-bar">
-    <span class="room-name" id="room-label">The Entrance Hall</span>
-    <div class="top-actions">
-      <button class="icon-btn" id="snd-btn" title="Sound" onclick="toggleSound()">🔊</button>
+    <span class="room-label">The Entrance Hall</span>
+    <div style="display:flex;gap:8px;">
+      <button class="icon-btn" id="snd-btn" onclick="toggleSound()">🔊</button>
     </div>
   </div>
+
   <div class="game-area">
-    <div class="room-viewport">
-      <div class="hall-art">
-        <!-- SVG painted Scooby-Doo style hall scene -->
-        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <!-- Scrollable Room -->
+    <div class="viewport-wrap" id="vp">
+      <div class="room-scroll" id="rs">
+
+        <!-- Room background -->
+        <div class="room-bg" style="width:2600px;height:100%;position:absolute;top:0;left:0;"></div>
+
+        <!-- SVG atmospheric art: ceiling beams, sconces, wainscoting, arch, glow -->
+        <svg class="room-svg" viewBox="0 0 2600 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="candleL" cx="20%" cy="35%" r="30%">
-              <stop offset="0%" stop-color="#ff9a30" stop-opacity="0.22"/>
-              <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="candleR" cx="80%" cy="35%" r="28%">
-              <stop offset="0%" stop-color="#ff9a30" stop-opacity="0.18"/>
-              <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
-              <stop offset="30%" stop-color="transparent"/>
-              <stop offset="100%" stop-color="#000" stop-opacity="0.65"/>
-            </radialGradient>
-            <filter id="painterly">
-              <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise"/>
-              <feColorMatrix type="saturate" values="0" in="noise" result="grey"/>
-              <feBlend in="SourceGraphic" in2="grey" mode="multiply" result="blend"/>
-              <feComposite in="blend" in2="SourceGraphic" operator="in"/>
-            </filter>
+            <radialGradient id="g1" cx="30%" cy="40%" r="22%"><stop offset="0%" stop-color="#ff9a30" stop-opacity=".2"/><stop offset="100%" stop-color="#ff6600" stop-opacity="0"/></radialGradient>
+            <radialGradient id="g2" cx="70%" cy="40%" r="22%"><stop offset="0%" stop-color="#ff9a30" stop-opacity=".16"/><stop offset="100%" stop-color="#ff6600" stop-opacity="0"/></radialGradient>
+            <radialGradient id="g3" cx="50%" cy="40%" r="20%"><stop offset="0%" stop-color="#ff9a30" stop-opacity=".14"/><stop offset="100%" stop-color="#ff6600" stop-opacity="0"/></radialGradient>
+            <radialGradient id="vg" cx="50%" cy="50%" r="60%"><stop offset="25%" stop-color="transparent"/><stop offset="100%" stop-color="#000" stop-opacity=".6"/></radialGradient>
           </defs>
-
-          <!-- Back wall arch — centre -->
-          <path d="M 280,0 L280,320 Q400,280 520,320 L520,0 Z" fill="#0c1428" opacity="0.4"/>
-          <!-- Arch outline -->
-          <path d="M 280,320 Q400,270 520,320" fill="none" stroke="#1a2545" stroke-width="3" opacity="0.8"/>
-
-          <!-- Left wall panel -->
-          <rect x="0" y="0" width="200" height="500" fill="#0b1225" opacity="0.5"/>
-          <line x1="200" y1="0" x2="200" y2="500" stroke="#1a2545" stroke-width="2" opacity="0.6"/>
-
-          <!-- Right wall panel -->
-          <rect x="600" y="0" width="200" height="500" fill="#0b1225" opacity="0.5"/>
-          <line x1="600" y1="0" x2="600" y2="500" stroke="#1a2545" stroke-width="2" opacity="0.6"/>
-
-          <!-- Ceiling beams -->
-          <rect x="0" y="0" width="800" height="55" fill="#080c1a" opacity="0.8"/>
-          <rect x="0" y="50" width="800" height="6" fill="#1a2545" opacity="0.7"/>
-          <rect x="100" y="0" width="14" height="55" fill="#0a0e1f" opacity="0.6"/>
-          <rect x="280" y="0" width="14" height="55" fill="#0a0e1f" opacity="0.6"/>
-          <rect x="506" y="0" width="14" height="55" fill="#0a0e1f" opacity="0.6"/>
-          <rect x="686" y="0" width="14" height="55" fill="#0a0e1f" opacity="0.6"/>
-
+          <!-- Ceiling beam strip -->
+          <rect x="0" y="0" width="2600" height="58" fill="#050710" opacity=".9"/>
+          <rect x="0" y="54" width="2600" height="5" fill="#1a2245" opacity=".7"/>
+          <!-- Ceiling beams (vertical) -->
+          <rect x="80"   y="0" width="16" height="58" fill="#040610" opacity=".7"/>
+          <rect x="320"  y="0" width="16" height="58" fill="#040610" opacity=".7"/>
+          <rect x="600"  y="0" width="16" height="58" fill="#040610" opacity=".7"/>
+          <rect x="900"  y="0" width="16" height="58" fill="#040610" opacity=".7"/>
+          <rect x="1200" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
+          <rect x="1500" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
+          <rect x="1800" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
+          <rect x="2100" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
+          <rect x="2400" y="0" width="16" height="58" fill="#040610" opacity=".7"/>
           <!-- Skirting board -->
-          <rect x="0" y="348" width="800" height="8" fill="#111828" opacity="0.9"/>
-          <rect x="0" y="344" width="800" height="4" fill="#1c2840" opacity="0.7"/>
-
-          <!-- Wainscoting panels (lower wall trim) -->
-          <rect x="10" y="310" width="170" height="35" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity="0.7"/>
-          <rect x="620" y="310" width="170" height="35" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity="0.7"/>
-
-          <!-- Wall sconce left — painted style -->
-          <ellipse cx="140" cy="165" rx="6" ry="20" fill="#1a2845" opacity="0.9"/>
-          <path d="M134,150 Q140,140 146,150 L148,165 Q140,158 132,165 Z" fill="#2a3d60" opacity="0.8"/>
-          <!-- Sconce arm -->
-          <line x1="140" y1="185" x2="140" y2="220" stroke="#1a2845" stroke-width="5" stroke-linecap="round"/>
-          <rect x="120" y="218" width="40" height="5" rx="2" fill="#1a2845" opacity="0.9"/>
-
-          <!-- Wall sconce right -->
-          <ellipse cx="660" cy="165" rx="6" ry="20" fill="#1a2845" opacity="0.9"/>
-          <path d="M654,150 Q660,140 666,150 L668,165 Q660,158 652,165 Z" fill="#2a3d60" opacity="0.8"/>
-          <line x1="660" y1="185" x2="660" y2="220" stroke="#1a2845" stroke-width="5" stroke-linecap="round"/>
-          <rect x="640" y="218" width="40" height="5" rx="2" fill="#1a2845" opacity="0.9"/>
-
-          <!-- Candle warm glow overlays -->
-          <rect x="0" y="0" width="800" height="500" fill="url(#candleL)"/>
-          <rect x="0" y="0" width="800" height="500" fill="url(#candleR)"/>
-
-          <!-- Lightning flash hint through back wall crack (atmosphere) -->
-          <line x1="400" y1="0" x2="398" y2="60" stroke="#3a4a7a" stroke-width="1" opacity="0.3"/>
-
-          <!-- Edge vignette -->
-          <rect x="0" y="0" width="800" height="500" fill="url(#vignette)"/>
-
-          <!-- Floor perspective lines (painted foreshortening) -->
-          <line x1="0" y1="356" x2="400" y2="420" stroke="#0f1320" stroke-width="2" opacity="0.5"/>
-          <line x1="800" y1="356" x2="400" y2="420" stroke="#0f1320" stroke-width="2" opacity="0.5"/>
-          <line x1="0" y1="430" x2="800" y2="430" stroke="#0d1018" stroke-width="1.5" opacity="0.4"/>
-          <line x1="0" y1="470" x2="800" y2="470" stroke="#0d1018" stroke-width="1" opacity="0.3"/>
+          <rect x="0" y="388" width="2600" height="9" fill="#0f1422" opacity=".95"/>
+          <rect x="0" y="383" width="2600" height="5" fill="#1c2440" opacity=".7"/>
+          <!-- Wainscoting panels repeated -->
+          <rect x="30"   y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="200"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="370"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="540"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="710"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="880"  y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="1050" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="1220" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="1390" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="1560" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="1730" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="1900" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="2070" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="2240" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <rect x="2410" y="340" width="140" height="46" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity=".65"/>
+          <!-- Back wall arch (centre of room) -->
+          <path d="M 1180,59 L1180,295 Q1300,260 1420,295 L1420,59 Z" fill="#0a0e1e" opacity=".5"/>
+          <path d="M 1180,295 Q1300,255 1420,295" fill="none" stroke="#1a2445" stroke-width="3" opacity=".8"/>
+          <!-- Wall sconces (5 evenly spaced) -->
+          <!-- Sconce 1 -->
+          <ellipse cx="200" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
+          <path d="M193,158 Q200,147 207,158 L210,175 Q200,167 190,175 Z" fill="#28396a" opacity=".8"/>
+          <rect x="193" y="197" width="14" height="5" rx="2" fill="#18254a"/>
+          <!-- Sconce 2 -->
+          <ellipse cx="700" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
+          <path d="M693,158 Q700,147 707,158 L710,175 Q700,167 690,175 Z" fill="#28396a" opacity=".8"/>
+          <rect x="693" y="197" width="14" height="5" rx="2" fill="#18254a"/>
+          <!-- Sconce 3 -->
+          <ellipse cx="1300" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
+          <path d="M1293,158 Q1300,147 1307,158 L1310,175 Q1300,167 1290,175 Z" fill="#28396a" opacity=".8"/>
+          <rect x="1293" y="197" width="14" height="5" rx="2" fill="#18254a"/>
+          <!-- Sconce 4 -->
+          <ellipse cx="1900" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
+          <path d="M1893,158 Q1900,147 1907,158 L1910,175 Q1900,167 1890,175 Z" fill="#28396a" opacity=".8"/>
+          <rect x="1893" y="197" width="14" height="5" rx="2" fill="#18254a"/>
+          <!-- Sconce 5 -->
+          <ellipse cx="2400" cy="175" rx="7" ry="22" fill="#18254a" opacity=".9"/>
+          <path d="M2393,158 Q2400,147 2407,158 L2410,175 Q2400,167 2390,175 Z" fill="#28396a" opacity=".8"/>
+          <rect x="2393" y="197" width="14" height="5" rx="2" fill="#18254a"/>
+          <!-- Warm glow overlays at sconces -->
+          <rect x="0" y="0" width="2600" height="600" fill="url(#g1)"/>
+          <rect x="0" y="0" width="2600" height="600" fill="url(#g2)"/>
+          <rect x="0" y="0" width="2600" height="600" fill="url(#g3)"/>
+          <!-- Floor perspective lines -->
+          <line x1="0" y1="397" x2="1300" y2="480" stroke="#0b0e1a" stroke-width="2" opacity=".5"/>
+          <line x1="2600" y1="397" x2="1300" y2="480" stroke="#0b0e1a" stroke-width="2" opacity=".5"/>
+          <line x1="0" y1="500" x2="2600" y2="500" stroke="#090b15" stroke-width="1.5" opacity=".4"/>
+          <!-- Vignette sides -->
+          <rect x="0" y="0" width="2600" height="600" fill="url(#vg)" opacity=".4"/>
+          <rect x="0" y="0" width="80" height="600" fill="url(#vg)" opacity=".8"/>
+          <rect x="2520" y="0" width="80" height="600" fill="url(#vg)" opacity=".8"/>
         </svg>
 
-        <!-- Ceiling shadow -->
-        <div style="position:absolute;top:0;left:0;right:0;height:18%;
-          background:linear-gradient(180deg,rgba(0,0,0,0.75) 0%,transparent 100%);
-          pointer-events:none;"></div>
-        <!-- Edge vignette (extra depth) -->
-        <div style="position:absolute;inset:0;
-          background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(0,0,0,0.5) 100%);
-          pointer-events:none;"></div>
+        <!-- ═══════════════════════════════════════
+             OBJECTS  (left to right across room)
+        ═══════════════════════════════════════ -->
 
-        <div class="room-object" id="obj-portrait" style="left:8%;top:18%;" onclick="inspect('portrait')">
-          <div class="portrait-frame">🧙‍♀️</div>
+        <!-- [FAR] Dusty mirror on back wall (no collect — atmosphere) -->
+        <div class="obj no-collect depth-far" style="left:480px; bottom:32%;" onclick="inspect('mirror')">
+          <svg width="48" height="66" viewBox="0 0 48 66" fill="none">
+            <rect x="2" y="2" width="44" height="62" rx="3" fill="#0e1420" stroke="#2a2a4a" stroke-width="2"/>
+            <rect x="6" y="6" width="36" height="54" rx="2" fill="#0a1828" opacity=".8"/>
+            <rect x="8" y="8" width="10" height="3" rx="1" fill="#1e2a45" opacity=".6"/>
+            <text x="24" y="38" font-size="18" text-anchor="middle" fill="#1a2840" font-family="serif">🪞</text>
+          </svg>
+          <span class="obj-label">Old Mirror</span>
+        </div>
+
+        <!-- [FAR] Portrait — left section back wall -->
+        <div class="obj depth-far" style="left:180px; bottom:32%;" onclick="inspect('portrait')">
+          <div class="portrait-frame" style="width:58px;height:78px;font-size:1.8rem;">🧙‍♀️</div>
           <span class="obj-label">Portrait</span>
         </div>
 
-        <div class="room-object" id="obj-cloak" style="left:27%;top:22%;" onclick="inspect('cloak')">
-          <svg width="60" height="80" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 4px 12px rgba(0,0,0,0.8));">
-            <!-- Coat rack pole -->
-            <rect x="28" y="10" width="4" height="62" rx="2" fill="#1a1520"/>
-            <rect x="14" y="68" width="32" height="4" rx="2" fill="#1a1520"/>
-            <!-- Hook -->
-            <path d="M30,10 Q30,4 36,4 Q42,4 42,10" stroke="#2a2030" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <!-- Black cloak hanging -->
-            <path d="M16,16 Q30,12 44,16 L50,62 Q40,70 30,68 Q20,70 10,62 Z" fill="#0d0b14"/>
-            <path d="M16,16 Q30,12 44,16 L50,62 Q40,70 30,68 Q20,70 10,62 Z" fill="none" stroke="#2a2035" stroke-width="1"/>
-            <!-- Cloak highlight — subtle blue-black sheen -->
-            <path d="M22,18 Q28,14 34,18 L38,55 Q30,60 22,55 Z" fill="#131020" opacity="0.6"/>
-            <!-- Collar -->
-            <path d="M20,18 Q30,22 40,18" stroke="#1e1830" stroke-width="1.5" fill="none"/>
+        <!-- [MID] Coat rack with SVG black cloak -->
+        <div class="obj depth-mid" style="left:340px; bottom:31%;" onclick="inspect('cloak')">
+          <svg width="68" height="96" viewBox="0 0 68 96" fill="none">
+            <rect x="31" y="8" width="5" height="78" rx="2.5" fill="#16121e"/>
+            <rect x="14" y="82" width="40" height="5" rx="2.5" fill="#16121e"/>
+            <path d="M34,8 Q34,2 41,2 Q48,2 48,9" stroke="#26203a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M14,18 Q34,13 54,18 L60,74 Q44,84 34,82 Q24,84 8,74 Z" fill="#0c0a14"/>
+            <path d="M14,18 Q34,13 54,18 L60,74 Q44,84 34,82 Q24,84 8,74 Z" fill="none" stroke="#22183a" stroke-width="1"/>
+            <path d="M22,20 Q32,16 42,20 L46,65 Q34,72 22,65 Z" fill="#141020" opacity=".55"/>
+            <path d="M22,20 Q34,25 46,20" stroke="#1e1635" stroke-width="1.5" fill="none"/>
           </svg>
           <span class="obj-label">Coat Rack</span>
         </div>
 
-        <div class="room-object" id="obj-door" style="left:50%;top:12%;transform:translateX(-50%);" onclick="inspect('door')">
-          <span class="obj-icon" style="font-size:clamp(3.5rem,10vw,6rem);">🚪</span>
+        <!-- [FLOOR] Moth-eaten rug (no collect — atmosphere) -->
+        <div class="obj no-collect depth-mid" style="left:520px; bottom:31%;" onclick="inspect('rug')">
+          <svg width="110" height="28" viewBox="0 0 110 28" fill="none">
+            <ellipse cx="55" cy="14" rx="52" ry="12" fill="#1a1028" stroke="#2a1a40" stroke-width="1.5"/>
+            <ellipse cx="55" cy="14" rx="40" ry="9" fill="none" stroke="#221535" stroke-width="1"/>
+            <line x1="15" y1="14" x2="95" y2="14" stroke="#1e1330" stroke-width="1" opacity=".5"/>
+          </svg>
+          <span class="obj-label">Old Rug</span>
+        </div>
+
+        <!-- [MID] Grandfather clock (no collect) -->
+        <div class="obj no-collect depth-mid" style="left:820px; bottom:31%;" onclick="inspect('clock')">
+          <svg width="58" height="130" viewBox="0 0 58 130" fill="none">
+            <rect x="8" y="2" width="42" height="128" rx="4" fill="#0e1020" stroke="#1a2035" stroke-width="2"/>
+            <rect x="12" y="6" width="34" height="50" rx="3" fill="#0a0c18" stroke="#162030" stroke-width="1.5"/>
+            <circle cx="29" cy="31" r="14" fill="#0c0e1e" stroke="#1c2a40" stroke-width="1.5"/>
+            <line x1="29" y1="31" x2="29" y2="20" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="29" y1="31" x2="37" y2="35" stroke="#8a7040" stroke-width="1.2" stroke-linecap="round"/>
+            <rect x="20" y="60" width="18" height="60" rx="2" fill="#0a0c1a" stroke="#141e30" stroke-width="1"/>
+            <ellipse cx="29" cy="80" rx="6" ry="7" fill="none" stroke="#1e2840" stroke-width="1.5"/>
+            <rect x="12" y="118" width="34" height="8" rx="2" fill="#1a2035"/>
+          </svg>
+          <span class="obj-label">Grandfather Clock</span>
+        </div>
+
+        <!-- [FAR] Stack of old books (no collect) -->
+        <div class="obj no-collect depth-far" style="left:760px; bottom:32%;" onclick="inspect('books')">
+          <svg width="44" height="36" viewBox="0 0 44 36" fill="none">
+            <rect x="2" y="22" width="40" height="12" rx="2" fill="#1a1030" stroke="#26184a" stroke-width="1"/>
+            <rect x="5" y="14" width="34" height="10" rx="2" fill="#12102a" stroke="#1e1840" stroke-width="1"/>
+            <rect x="8" y="7"  width="28" height="9"  rx="2" fill="#0e1028" stroke="#18203a" stroke-width="1"/>
+          </svg>
+          <span class="obj-label">Old Books</span>
+        </div>
+
+        <!-- [BACK] Locked inner door — centre back wall -->
+        <div class="obj no-collect depth-far" style="left:1200px; bottom:32%; transform:scale(.5); opacity:.7;" onclick="inspect('door')">
+          <span class="obj-icon" style="font-size:5rem;">🚪</span>
           <span class="obj-label">Inner Door</span>
         </div>
 
-        <div class="room-object" id="obj-staff" style="right:27%;top:26%;" onclick="inspect('staff')">
-          <span class="obj-icon">🪄</span>
+        <!-- [MID] Umbrella stand with staff -->
+        <div class="obj depth-mid" style="left:1550px; bottom:31%;" onclick="inspect('staff')">
+          <svg width="52" height="90" viewBox="0 0 52 90" fill="none">
+            <ellipse cx="26" cy="82" rx="18" ry="6" fill="#0e1020" stroke="#1a2035" stroke-width="1.5"/>
+            <rect x="22" y="20" width="8" height="62" rx="4" fill="#0e1020" stroke="#1a2035" stroke-width="1.5"/>
+            <!-- Staff inside -->
+            <path d="M32,14 Q38,8 34,2 Q30,8 32,14 L32,82" stroke="#4a3060" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="34" cy="2" r="4" fill="#6a42a0" opacity=".8"/>
+          </svg>
           <span class="obj-label">Umbrella Stand</span>
         </div>
 
-        <div class="room-object candle-obj" id="obj-candle" style="right:12%;top:36%;" onclick="inspect('candle')">
-          <span class="obj-icon">🕯️</span>
+        <!-- [NEAR] Side table with candle -->
+        <div class="obj candle-glow depth-near" style="left:1820px; bottom:31%;" onclick="inspect('candle')">
+          <span class="obj-icon" style="font-size:clamp(2.2rem,5vw,3rem);">🕯️</span>
+          <svg width="70" height="28" viewBox="0 0 70 28" style="margin-top:-4px;" fill="none">
+            <rect x="2" y="4" width="66" height="22" rx="3" fill="#0e1020" stroke="#1a2035" stroke-width="1.5"/>
+            <rect x="6" y="8" width="58" height="14" rx="2" fill="#0a0c18"/>
+            <line x1="8" y1="26" x2="8" y2="30" stroke="#0e1020" stroke-width="3"/>
+            <line x1="62" y1="26" x2="62" y2="30" stroke="#0e1020" stroke-width="3"/>
+          </svg>
           <span class="obj-label">Side Table</span>
         </div>
 
-        <div class="room-object" id="obj-envelope" style="right:9%;top:52%;" onclick="inspect('envelope')">
-          <span class="obj-icon" style="font-size:clamp(1.2rem,3.5vw,2rem);">✉️</span>
-          <span class="obj-label">Envelope</span>
+        <!-- [NEAR] Envelope on floor near table -->
+        <div class="obj depth-near" style="left:1950px; bottom:31%;" onclick="inspect('envelope')">
+          <span class="obj-icon" style="font-size:clamp(1.4rem,3.5vw,2rem);">✉️</span>
+          <span class="obj-label">Sealed Letter</span>
         </div>
 
-        <div class="room-object" id="obj-mat" style="left:50%;bottom:7%;transform:translateX(-50%);" onclick="inspect('mat')">
-          <span class="obj-icon" style="font-size:clamp(1.5rem,4vw,2.5rem);">🟫</span>
+        <!-- [FLOOR/NEAR] Doormat — far right (entrance side) -->
+        <div class="obj depth-near" style="left:2250px; bottom:31%;" onclick="inspect('mat')">
+          <svg width="120" height="36" viewBox="0 0 120 36" fill="none">
+            <rect x="2" y="4" width="116" height="28" rx="4" fill="#1a1228" stroke="#2a1a3a" stroke-width="2"/>
+            <rect x="8" y="8" width="104" height="20" rx="3" fill="#14101e"/>
+            <text x="60" y="23" font-size="7.5" text-anchor="middle" fill="#2e2045" font-family="Cinzel,serif" letter-spacing="1">WIPE YOUR FATE</text>
+          </svg>
           <span class="obj-label">Doormat</span>
         </div>
 
-      </div>
-    </div>
+        <!-- [NEAR] Rosemary tucked by doormat (small, needs looking) -->
+        <div class="obj depth-near" style="left:2310px; bottom:33%;" onclick="inspect('rosemary')">
+          <span class="obj-icon" style="font-size:clamp(1rem,2.5vw,1.5rem);">🌿</span>
+          <span class="obj-label">Something Green</span>
+        </div>
 
+        <!-- [NEAR] Broken walking stick (atmosphere) -->
+        <div class="obj no-collect depth-near" style="left:2120px; bottom:31%;" onclick="inspect('stick')">
+          <svg width="16" height="80" viewBox="0 0 16 80" fill="none">
+            <path d="M8,4 Q4,20 8,40 Q12,60 7,76" stroke="#2a1f10" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M5,38 Q10,42 13,50" stroke="#2a1f10" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          <span class="obj-label">Broken Stick</span>
+        </div>
+
+      </div><!-- end room-scroll -->
+
+      <div class="scroll-hint" id="scroll-hint">drag to explore</div>
+    </div><!-- end viewport-wrap -->
+
+    <!-- Inventory sidebar -->
     <div class="sidebar">
       <div class="sidebar-title">Inventory</div>
-      <div class="inventory-grid" id="inventory-grid"></div>
+      <div class="inv-grid" id="inv-grid"></div>
       <div class="inv-count" id="inv-count">0 / 9 items</div>
     </div>
   </div>
 
+  <!-- Message bar -->
   <div class="msg-bar">
-    <p class="msg-text" id="msg-text">
-      The front door swings open before you touch it. Cold air rolls over your feet.
-      <span class="hl">Look around.</span>
+    <p class="msg-text" id="msg">
+      The door opens on its own. Cold air rushes in. The hall stretches further than it should.
+      <span class="hl">Drag to explore.</span>
     </p>
   </div>
 </div>
 
+<!-- MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-icon" id="modal-icon"></div>
-    <div class="modal-title" id="modal-title"></div>
-    <div class="modal-desc" id="modal-desc"></div>
-    <div class="modal-actions" id="modal-actions"></div>
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div class="modal-icon" id="m-icon"></div>
+    <div class="modal-title" id="m-title"></div>
+    <div class="modal-desc" id="m-desc"></div>
+    <div class="modal-actions" id="m-acts"></div>
   </div>
 </div>
 
-<div class="whisper-overlay" id="whisper">
-  <div class="whisper-text" id="whisper-text"></div>
-</div>
+<!-- WHISPER -->
+<div class="whisper" id="whisper"><div class="whisper-txt" id="wtxt"></div></div>
 
 <script>
 // ── AUDIO ────────────────────────────────────────────────────────
-let ctx, soundOn = true;
-function initAudio() {
-  if (ctx) return;
-  try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+let ctx, soundOn=true;
+function initAudio(){ if(ctx) return; try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+function tone(f,t,d,v=.07,dl=0){
+  if(!ctx||!soundOn)return;
+  const o=ctx.createOscillator(),g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);o.type=t;
+  o.frequency.setValueAtTime(f,ctx.currentTime+dl);
+  o.frequency.exponentialRampToValueAtTime(f*.65,ctx.currentTime+dl+d);
+  g.gain.setValueAtTime(0,ctx.currentTime+dl);
+  g.gain.linearRampToValueAtTime(v,ctx.currentTime+dl+.05);
+  g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dl+d);
+  o.start(ctx.currentTime+dl);o.stop(ctx.currentTime+dl+d);
 }
-function tone(freq, type, dur, vol=0.07, delay=0) {
-  if (!ctx || !soundOn) return;
-  const o=ctx.createOscillator(), g=ctx.createGain();
-  o.connect(g); g.connect(ctx.destination);
-  o.type=type; o.frequency.setValueAtTime(freq,ctx.currentTime+delay);
-  o.frequency.exponentialRampToValueAtTime(freq*0.65,ctx.currentTime+delay+dur);
-  g.gain.setValueAtTime(0,ctx.currentTime+delay);
-  g.gain.linearRampToValueAtTime(vol,ctx.currentTime+delay+0.05);
-  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+dur);
-  o.start(ctx.currentTime+delay); o.stop(ctx.currentTime+delay+dur);
+function playCreak(){[120,95,80,110].forEach((f,i)=>tone(f,'sawtooth',.4,.06,i*.15));}
+function playPickup(){[440,554,659].forEach((f,i)=>tone(f,'sine',.3,.07,i*.08));}
+function playWhisper(){[200,180,160].forEach((f,i)=>tone(f,'sine',.9,.04,i*.22));}
+function playAmbient(){
+  if(!soundOn)return;
+  tone(52+Math.random()*8,'sine',5,.025);
+  tone(108+Math.random()*4,'triangle',3.5,.018,.6);
+  setTimeout(playAmbient,7000+Math.random()*4000);
 }
-function playCreak() { [120,95,80,110].forEach((f,i)=>tone(f,'sawtooth',0.4,0.06,i*0.15)); }
-function playPickup() { [440,554,659].forEach((f,i)=>tone(f,'sine',0.3,0.07,i*0.08)); }
-function playWhisper() { [200,180,160].forEach((f,i)=>tone(f,'sine',0.8,0.04,i*0.2)); }
-function playAmbient() {
-  if (!soundOn) return;
-  tone(55+Math.random()*10,'sine',4,0.03);
-  tone(110+Math.random()*5,'triangle',3,0.02,0.5);
-  setTimeout(playAmbient, 6000+Math.random()*4000);
-}
-function toggleSound() {
+function toggleSound(){
   soundOn=!soundOn;
   document.getElementById('snd-btn').textContent=soundOn?'🔊':'🔇';
 }
 
-// ── STATE ────────────────────────────────────────────────────────
-const inventory=[], collected=new Set();
-
-const OBJECTS = {
-  portrait:{
-    icon:'🖼️', title:'The Portrait',
-    desc:'A woman painted in oils — severe, still. Her eyes are different each time you look. Right now they\'re watching the door behind you. She has been in this house a very long time.',
-    clue:'A small plaque reads: <em>"Helga, 1824. She sees everything."</em>',
-    canCollect:false
-  },
-  cloak:{
-    icon:'🧥', title:'Black Cloak',
-    desc:'Heavy wool, cold to the touch. It smells of lavender and something burnt. A name is stitched into the lining in faded red thread: <em>H. Hex.</em>',
-    clue:'It would make you invisible to her familiar. Probably.',
-    canCollect:true, label:'Take Cloak', name:'Cloak', iicon:'🧥'
-  },
-  door:{
-    icon:'🚪', title:'The Inner Door',
-    desc:'The door to the rest of the house. It is locked. Seven locks, each a different metal. None of them have keyholes.',
-    clue:'You will need to earn your way through.',
-    canCollect:false
-  },
-  staff:{
-    icon:'🪄', title:'Twisted Staff',
-    desc:'Gnarled dark wood, warm despite the cold air. It hums faintly — like it wants to be used. Or like it is warning you.',
-    clue:'Something is carved at the base. A word in a language you almost recognise.',
-    canCollect:true, label:'Take Staff', name:'Staff', iicon:'🪄'
-  },
-  candle:{
-    icon:'🕯️', title:'The Side Table',
-    desc:'A single candle, lit. It should have burned out years ago. The flame does not flicker — not even when you breathe on it. An iron key sits beside the wax.',
-    clue:'The key is small and cold. It fits nothing obvious. Yet.',
-    canCollect:true, label:'Take Iron Key', name:'Iron Key', iicon:'🗝️'
-  },
-  envelope:{
-    icon:'✉️', title:'The Envelope',
-    desc:'Sealed with black wax pressed into a crescent moon. Addressed to: <em>The Next One.</em>',
-    clue:'Inside, in handwriting almost too small to read: <em>"You will not leave the way you came in. But you might leave a different way, if you are clever."</em>',
-    canCollect:true, label:'Take Letter', name:'Letter', iicon:'✉️'
-  },
-  mat:{
-    icon:'🟫', title:'The Doormat',
-    desc:'Worn down by hundreds of years of feet. In letters almost invisible, it reads: <em>"WIPE YOUR FATE."</em>',
-    clue:'Beneath the mat, wedged into the floor: a dried sprig of rosemary. Someone left it in a hurry.',
-    canCollect:true, label:'Take Rosemary', name:'Rosemary', iicon:'🌿'
-  }
+// ── OBJECTS DATA ─────────────────────────────────────────────────
+const OBJS={
+  portrait:{icon:'🖼️',title:'The Portrait',
+    desc:'Painted in oils. Severe, still. The plaque reads: <em>"Helga, 1824."</em> Her eyes move. Every single time you look away and look back, they\'ve shifted.',
+    clue:'She has been watching this room for two hundred years.',canCollect:false},
+  mirror:{icon:'🪞',title:'The Old Mirror',
+    desc:'Silver backing gone black with age. You can barely see yourself in it. But you can see the room — and something in the reflection is not quite where it should be.',
+    clue:'A mirror is only useful if it shows you the truth. This one might not.',canCollect:false},
+  cloak:{icon:'🧥',title:'Black Cloak',
+    desc:'Heavy wool, cold to the touch. Smells of lavender and something burnt — ash, maybe. Stitched into the lining in faded red thread: <em>H. Hex.</em>',
+    clue:'Her familiar will not see you if you wear it. Probably.',canCollect:true,label:'Take Cloak',iname:'Cloak',iicon:'🧥'},
+  rug:{icon:'🟫',title:'Moth-Eaten Rug',
+    desc:'Was ornate once. Crimson and gold thread, now faded to grey and dust. Something scurried away from it when you walked past.',
+    clue:'Atmosphere. Nothing more.',canCollect:false},
+  clock:{icon:'🕰️',title:'Grandfather Clock',
+    desc:'Stopped at 3:17. No pendulum swings. No mechanism ticks. But every few minutes — if you are very quiet — you hear one single, slow tick from somewhere deep inside.',
+    clue:'Time moves differently in this house.',canCollect:false},
+  books:{icon:'📚',title:'Old Books',
+    desc:'Stacked without order. Titles you cannot read — the language predates anything you know. One is warmer than the others to the touch.',
+    clue:'The warmest book has a single page bookmarked in black ribbon.',canCollect:false},
+  door:{icon:'🚪',title:'The Inner Door',
+    desc:'Set deep in the back wall. Locked — but not with keys. The locks are seven different metals, and none have keyholes. They are waiting for something else entirely.',
+    clue:'You will earn your way through.',canCollect:false},
+  staff:{icon:'🪄',title:'Twisted Staff',
+    desc:'Dark, gnarled wood, warm despite the cold air. It hums faintly — not quite sound, more like pressure in your teeth. Something is carved at the base.',
+    clue:'A word you almost recognise. Old German, maybe. Or older.',canCollect:true,label:'Take Staff',iname:'Staff',iicon:'🪄'},
+  candle:{icon:'🕯️',title:'The Side Table',
+    desc:'A single candle, lit. It should have burned out years ago. The flame does not flicker, even when you breathe directly on it. Beside it: a small iron key.',
+    clue:'Cold iron. Fits nothing in this room. Yet.',canCollect:true,label:'Take Iron Key',iname:'Iron Key',iicon:'🗝️'},
+  envelope:{icon:'✉️',title:'The Sealed Letter',
+    desc:'Black wax, pressed into a crescent moon. Addressed to: <em>The Next One.</em> Inside, in handwriting barely visible: <em>"You will not leave the way you came. But you might leave another way — if you are clever."</em>',
+    clue:'She was expecting someone.',canCollect:true,label:'Take Letter',iname:'Letter',iicon:'✉️'},
+  mat:{icon:'🟫',title:'The Doormat',
+    desc:'Worn smooth by centuries of feet. The letters are almost gone, but if you look carefully: <em>WIPE YOUR FATE.</em>',
+    clue:'Something is tucked beneath the edge.',canCollect:false},
+  rosemary:{icon:'🌿',title:'Dried Rosemary',
+    desc:'A sprig of rosemary, tied with a red thread. Still faintly fragrant despite being completely desiccated. Someone left it here deliberately — probably running.',
+    clue:'For protection. Old magic. It might slow her down.',canCollect:true,label:'Take Rosemary',iname:'Rosemary',iicon:'🌿'},
+  stick:{icon:'🪵',title:'Broken Walking Stick',
+    desc:'Snapped clean in the middle. The break looks fresh — white wood, not yet yellowed. Someone dropped this in a hurry. Or was pulled away from it.',
+    clue:'Not yours. Not useful. Unnerving.',canCollect:false},
 };
 
-const WHISPERS=[
-  'she knows you\'re here',
-  'the house remembers',
-  "don't touch what isn't yours",
-  'you smell like fear',
-  'two hundred years and she still waits',
-  'she is listening',
-  'the mirrors are hers'
-];
+const WHISPERS=['she knows you\'re here','the house remembers','don\'t touch what isn\'t yours',
+  'you smell like fear','two hundred years and she still waits','she is listening',
+  'the mirrors are hers','did you hear that','it is very cold in here'];
+const collected=new Set(), inventory=[];
+let wtimer;
 
-let wTimeout;
-function triggerWhisper() {
-  const el=document.getElementById('whisper');
-  const txt=document.getElementById('whisper-text');
-  txt.textContent=WHISPERS[Math.floor(Math.random()*WHISPERS.length)];
+function whisper(){
+  const el=document.getElementById('whisper'),t=document.getElementById('wtxt');
+  t.textContent=WHISPERS[Math.floor(Math.random()*WHISPERS.length)];
   el.classList.add('show'); playWhisper();
-  clearTimeout(wTimeout);
-  wTimeout=setTimeout(()=>el.classList.remove('show'),2800);
+  clearTimeout(wtimer); wtimer=setTimeout(()=>el.classList.remove('show'),3000);
 }
 
 // ── INVENTORY ────────────────────────────────────────────────────
-function renderInventory() {
-  const g=document.getElementById('inventory-grid'); g.innerHTML='';
+function renderInv(){
+  const g=document.getElementById('inv-grid'); g.innerHTML='';
   for(let i=0;i<9;i++){
     const s=document.createElement('div'); s.className='inv-slot';
     if(inventory[i]){
-      const item=inventory[i];
-      s.classList.add('filled'); s.textContent=item.icon;
-      s.title=item.name;
-      s.onclick=()=>setMsg(`${item.icon} <span class="hl">${item.name}</span> — in your possession.`);
+      const it=inventory[i];
+      s.classList.add('filled'); s.textContent=it.icon; s.title=it.name;
+      s.onclick=()=>setMsg(`${it.icon} <span class="hl">${it.name}</span> — in your possession.`);
     }
     g.appendChild(s);
   }
   document.getElementById('inv-count').textContent=`${inventory.length} / 9 items`;
 }
 function addItem(name,icon){
-  inventory.push({name,icon}); renderInventory(); playPickup();
+  inventory.push({name,icon}); renderInv(); playPickup();
   setMsg(`<span class="hl">${name}</span> added to your inventory.`);
 }
 
 // ── MODAL ────────────────────────────────────────────────────────
-function inspect(key) {
+function inspect(key){
   initAudio(); playCreak();
-  const o=OBJECTS[key];
-  document.getElementById('modal-icon').textContent=o.icon;
-  document.getElementById('modal-title').textContent=o.title;
-  document.getElementById('modal-desc').innerHTML=`${o.desc}<br><br><em style="color:var(--gold);font-size:0.88rem">${o.clue}</em>`;
-  const acts=document.getElementById('modal-actions'); acts.innerHTML='';
-  if(o.canCollect && !collected.has(key)){
-    const b=document.createElement('button'); b.className='modal-btn primary';
-    b.textContent=o.label;
-    b.onclick=()=>{ collected.add(key); addItem(o.name,o.iicon);
-      document.getElementById('obj-'+key)?.classList.add('collected'); closeModal(); };
+  const o=OBJS[key];
+  document.getElementById('m-icon').textContent=o.icon;
+  document.getElementById('m-title').textContent=o.title;
+  document.getElementById('m-desc').innerHTML=`${o.desc}<br><br><em style="color:var(--gold);font-size:.88rem">${o.clue}</em>`;
+  const acts=document.getElementById('m-acts'); acts.innerHTML='';
+  if(o.canCollect&&!collected.has(key)){
+    const b=document.createElement('button'); b.className='mbtn gold'; b.textContent=o.label;
+    b.onclick=()=>{collected.add(key);addItem(o.iname,o.iicon);
+      document.querySelectorAll(`[onclick="inspect('${key}')"]`).forEach(el=>el.classList.add('collected'));
+      closeModal();};
     acts.appendChild(b);
   }
-  const cb=document.createElement('button'); cb.className='modal-btn';
-  cb.textContent='Step Back'; cb.onclick=closeModal; acts.appendChild(cb);
+  const cb=document.createElement('button'); cb.className='mbtn'; cb.textContent='Step Back';
+  cb.onclick=closeModal; acts.appendChild(cb);
   document.getElementById('modal').classList.add('open');
-  if(Math.random()<0.4) setTimeout(triggerWhisper,1200);
+  if(Math.random()<.38) setTimeout(whisper,1300);
 }
-function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
 
-// ── MESSAGES ─────────────────────────────────────────────────────
-function setMsg(html){ document.getElementById('msg-text').innerHTML=html; }
+function setMsg(html){document.getElementById('msg').innerHTML=html;}
+
+// ── DRAG TO SCROLL ────────────────────────────────────────────────
+const vp=document.getElementById('vp');
+const rs=document.getElementById('rs');
+const ROOM_W=2600;
+let scrollX=0, maxScroll=0;
+let drag={active:false,startX:0,startScroll:0};
+let vel=0, lastX=0, lastT=0, rafId=null;
+
+function updateScroll(x){
+  scrollX=Math.max(0,Math.min(maxScroll,x));
+  rs.style.transform=`translateX(${-scrollX}px)`;
+}
+function calcMax(){
+  maxScroll=Math.max(0,ROOM_W-vp.clientWidth);
+}
+window.addEventListener('resize',calcMax);
+
+// Mouse
+vp.addEventListener('mousedown',e=>{
+  initAudio();
+  drag.active=true; drag.startX=e.clientX; drag.startScroll=scrollX;
+  vel=0; lastX=e.clientX; lastT=Date.now();
+  vp.classList.add('dragging');
+  cancelAnimationFrame(rafId);
+});
+window.addEventListener('mousemove',e=>{
+  if(!drag.active)return;
+  const now=Date.now(), dt=now-lastT||1;
+  vel=(lastX-e.clientX)/dt*16;
+  lastX=e.clientX; lastT=now;
+  updateScroll(drag.startScroll+(drag.startX-e.clientX));
+});
+window.addEventListener('mouseup',()=>{
+  if(!drag.active)return;
+  drag.active=false;
+  vp.classList.remove('dragging');
+  momentum();
+});
+
+// Touch
+vp.addEventListener('touchstart',e=>{
+  initAudio();
+  const t=e.touches[0];
+  drag.active=true; drag.startX=t.clientX; drag.startScroll=scrollX;
+  vel=0; lastX=t.clientX; lastT=Date.now();
+  cancelAnimationFrame(rafId);
+},{passive:true});
+vp.addEventListener('touchmove',e=>{
+  if(!drag.active)return;
+  const t=e.touches[0], now=Date.now(), dt=now-lastT||1;
+  vel=(lastX-t.clientX)/dt*16;
+  lastX=t.clientX; lastT=now;
+  updateScroll(drag.startScroll+(drag.startX-t.clientX));
+  e.preventDefault();
+},{passive:false});
+vp.addEventListener('touchend',()=>{
+  if(!drag.active)return;
+  drag.active=false;
+  momentum();
+});
+
+function momentum(){
+  cancelAnimationFrame(rafId);
+  function step(){
+    if(Math.abs(vel)<.3){vel=0;return;}
+    vel*=.92;
+    updateScroll(scrollX+vel);
+    rafId=requestAnimationFrame(step);
+  }
+  rafId=requestAnimationFrame(step);
+}
 
 // ── START ────────────────────────────────────────────────────────
 function startGame(){
   initAudio();
   document.getElementById('title-screen').classList.remove('active');
   document.getElementById('game-screen').classList.add('active');
-  renderInventory(); playCreak();
+  calcMax(); renderInv(); playCreak();
   setTimeout(playAmbient,1200);
-  setTimeout(triggerWhisper,9000);
-  setInterval(()=>{ if(Math.random()<0.35) triggerWhisper(); },22000);
+  setTimeout(whisper,10000);
+  setInterval(()=>{if(Math.random()<.3)whisper();},25000);
+  // Hide scroll hint after 5s
+  setTimeout(()=>{ const h=document.getElementById('scroll-hint'); if(h)h.style.display='none';},5500);
 }
-
-document.getElementById('modal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
 </script>
 </body>
 </html>
