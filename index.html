@@ -60,36 +60,50 @@
   .room-viewport { flex:1; position:relative; overflow:hidden; }
 
   /* Room art */
-  .hall-art { width:100%; height:100%; position:relative; overflow:hidden;
-    background:
-      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(80,50,20,0.6) 0%, transparent 70%),
-      radial-gradient(ellipse 30% 50% at 20% 50%, rgba(60,30,80,0.4) 0%, transparent 60%),
-      radial-gradient(ellipse 30% 50% at 80% 50%, rgba(60,30,80,0.3) 0%, transparent 60%),
-      linear-gradient(180deg, #1a0e0a 0%, #2a1a14 18%, #1e1428 45%, #150f1e 70%, #0e0b16 100%);
+  .hall-art {
+    width:100%; height:100%; position:relative; overflow:hidden;
+    /* Scooby-Doo midnight blue sky — painted cel look */
+    background: linear-gradient(180deg,
+      #0a0f1f 0%, #0d1530 15%, #0f1a3a 30%,
+      #0c1628 50%, #10192e 65%,
+      #12141a 80%, #0e0f14 100%);
   }
-  /* Stone wall texture using pseudo-elements */
+  /* Painted stone wall — left panel */
   .hall-art::before {
     content:'';
     position:absolute; inset:0;
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 48px, rgba(0,0,0,0.15) 48px, rgba(0,0,0,0.15) 50px),
-      repeating-linear-gradient(90deg, transparent, transparent 78px, rgba(0,0,0,0.08) 78px, rgba(0,0,0,0.08) 80px);
+    background:
+      /* Stone block grid — horizontal mortar */
+      repeating-linear-gradient(180deg,
+        transparent 0px, transparent 54px,
+        rgba(6,10,22,0.5) 54px, rgba(6,10,22,0.5) 57px
+      ),
+      /* Stone block grid — vertical mortar (offset rows) */
+      repeating-linear-gradient(90deg,
+        transparent 0px, transparent 88px,
+        rgba(6,10,22,0.4) 88px, rgba(6,10,22,0.4) 90px
+      ),
+      /* Blue-grey stone face wash */
+      linear-gradient(135deg,
+        rgba(18,28,55,0.8) 0%, rgba(12,20,42,0.6) 40%,
+        rgba(20,30,60,0.5) 60%, rgba(10,16,35,0.7) 100%
+      );
     pointer-events:none;
   }
-  /* Floor boards at bottom */
+  /* Dark wooden floor — planks */
   .hall-art::after {
     content:'';
-    position:absolute; bottom:0; left:0; right:0; height:32%;
+    position:absolute; bottom:0; left:0; right:0; height:30%;
     background:
       repeating-linear-gradient(90deg,
-        #1a0e08 0px, #1a0e08 118px,
-        #211208 118px, #211208 120px,
-        #1d1008 120px, #1d1008 238px,
-        #211208 238px, #211208 240px
+        #0d0a14 0px,   #0d0a14 2px,
+        #121018 2px,   #121018 130px,
+        #0f0d16 130px, #0f0d16 132px,
+        #141219 132px, #141219 260px
       ),
-      linear-gradient(180deg, #211408 0%, #110a04 100%);
-    border-top:2px solid #3a1f0a;
-    box-shadow: inset 0 4px 20px rgba(0,0,0,0.6);
+      linear-gradient(180deg, #181420 0%, #0c0a12 100%);
+    border-top: 3px solid #1e1a28;
+    box-shadow: inset 0 8px 30px rgba(0,0,0,0.7);
   }
 
   /* Objects */
@@ -215,20 +229,95 @@
   <div class="game-area">
     <div class="room-viewport">
       <div class="hall-art">
-        <!-- Wall glow patches — sconce light effect -->
-        <div style="position:absolute;top:15%;left:3%;width:120px;height:200px;
-          background:radial-gradient(ellipse at 50% 30%,rgba(255,140,40,0.18) 0%,transparent 70%);
+        <!-- SVG painted Scooby-Doo style hall scene -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="candleL" cx="20%" cy="35%" r="30%">
+              <stop offset="0%" stop-color="#ff9a30" stop-opacity="0.22"/>
+              <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="candleR" cx="80%" cy="35%" r="28%">
+              <stop offset="0%" stop-color="#ff9a30" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+              <stop offset="30%" stop-color="transparent"/>
+              <stop offset="100%" stop-color="#000" stop-opacity="0.65"/>
+            </radialGradient>
+            <filter id="painterly">
+              <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise"/>
+              <feColorMatrix type="saturate" values="0" in="noise" result="grey"/>
+              <feBlend in="SourceGraphic" in2="grey" mode="multiply" result="blend"/>
+              <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+            </filter>
+          </defs>
+
+          <!-- Back wall arch — centre -->
+          <path d="M 280,0 L280,320 Q400,280 520,320 L520,0 Z" fill="#0c1428" opacity="0.4"/>
+          <!-- Arch outline -->
+          <path d="M 280,320 Q400,270 520,320" fill="none" stroke="#1a2545" stroke-width="3" opacity="0.8"/>
+
+          <!-- Left wall panel -->
+          <rect x="0" y="0" width="200" height="500" fill="#0b1225" opacity="0.5"/>
+          <line x1="200" y1="0" x2="200" y2="500" stroke="#1a2545" stroke-width="2" opacity="0.6"/>
+
+          <!-- Right wall panel -->
+          <rect x="600" y="0" width="200" height="500" fill="#0b1225" opacity="0.5"/>
+          <line x1="600" y1="0" x2="600" y2="500" stroke="#1a2545" stroke-width="2" opacity="0.6"/>
+
+          <!-- Ceiling beams -->
+          <rect x="0" y="0" width="800" height="55" fill="#080c1a" opacity="0.8"/>
+          <rect x="0" y="50" width="800" height="6" fill="#1a2545" opacity="0.7"/>
+          <rect x="100" y="0" width="14" height="55" fill="#0a0e1f" opacity="0.6"/>
+          <rect x="280" y="0" width="14" height="55" fill="#0a0e1f" opacity="0.6"/>
+          <rect x="506" y="0" width="14" height="55" fill="#0a0e1f" opacity="0.6"/>
+          <rect x="686" y="0" width="14" height="55" fill="#0a0e1f" opacity="0.6"/>
+
+          <!-- Skirting board -->
+          <rect x="0" y="348" width="800" height="8" fill="#111828" opacity="0.9"/>
+          <rect x="0" y="344" width="800" height="4" fill="#1c2840" opacity="0.7"/>
+
+          <!-- Wainscoting panels (lower wall trim) -->
+          <rect x="10" y="310" width="170" height="35" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity="0.7"/>
+          <rect x="620" y="310" width="170" height="35" rx="2" fill="none" stroke="#162035" stroke-width="1.5" opacity="0.7"/>
+
+          <!-- Wall sconce left — painted style -->
+          <ellipse cx="140" cy="165" rx="6" ry="20" fill="#1a2845" opacity="0.9"/>
+          <path d="M134,150 Q140,140 146,150 L148,165 Q140,158 132,165 Z" fill="#2a3d60" opacity="0.8"/>
+          <!-- Sconce arm -->
+          <line x1="140" y1="185" x2="140" y2="220" stroke="#1a2845" stroke-width="5" stroke-linecap="round"/>
+          <rect x="120" y="218" width="40" height="5" rx="2" fill="#1a2845" opacity="0.9"/>
+
+          <!-- Wall sconce right -->
+          <ellipse cx="660" cy="165" rx="6" ry="20" fill="#1a2845" opacity="0.9"/>
+          <path d="M654,150 Q660,140 666,150 L668,165 Q660,158 652,165 Z" fill="#2a3d60" opacity="0.8"/>
+          <line x1="660" y1="185" x2="660" y2="220" stroke="#1a2845" stroke-width="5" stroke-linecap="round"/>
+          <rect x="640" y="218" width="40" height="5" rx="2" fill="#1a2845" opacity="0.9"/>
+
+          <!-- Candle warm glow overlays -->
+          <rect x="0" y="0" width="800" height="500" fill="url(#candleL)"/>
+          <rect x="0" y="0" width="800" height="500" fill="url(#candleR)"/>
+
+          <!-- Lightning flash hint through back wall crack (atmosphere) -->
+          <line x1="400" y1="0" x2="398" y2="60" stroke="#3a4a7a" stroke-width="1" opacity="0.3"/>
+
+          <!-- Edge vignette -->
+          <rect x="0" y="0" width="800" height="500" fill="url(#vignette)"/>
+
+          <!-- Floor perspective lines (painted foreshortening) -->
+          <line x1="0" y1="356" x2="400" y2="420" stroke="#0f1320" stroke-width="2" opacity="0.5"/>
+          <line x1="800" y1="356" x2="400" y2="420" stroke="#0f1320" stroke-width="2" opacity="0.5"/>
+          <line x1="0" y1="430" x2="800" y2="430" stroke="#0d1018" stroke-width="1.5" opacity="0.4"/>
+          <line x1="0" y1="470" x2="800" y2="470" stroke="#0d1018" stroke-width="1" opacity="0.3"/>
+        </svg>
+
+        <!-- Ceiling shadow -->
+        <div style="position:absolute;top:0;left:0;right:0;height:18%;
+          background:linear-gradient(180deg,rgba(0,0,0,0.75) 0%,transparent 100%);
           pointer-events:none;"></div>
-        <div style="position:absolute;top:15%;right:3%;width:120px;height:200px;
-          background:radial-gradient(ellipse at 50% 30%,rgba(255,140,40,0.15) 0%,transparent 70%);
-          pointer-events:none;"></div>
-        <!-- Ceiling shadow vignette -->
-        <div style="position:absolute;top:0;left:0;right:0;height:20%;
-          background:linear-gradient(180deg,rgba(0,0,0,0.7) 0%,transparent 100%);
-          pointer-events:none;"></div>
-        <!-- Side vignettes -->
+        <!-- Edge vignette (extra depth) -->
         <div style="position:absolute;inset:0;
-          background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(0,0,0,0.55) 100%);
+          background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(0,0,0,0.5) 100%);
           pointer-events:none;"></div>
 
         <div class="room-object" id="obj-portrait" style="left:8%;top:18%;" onclick="inspect('portrait')">
@@ -237,11 +326,24 @@
         </div>
 
         <div class="room-object" id="obj-cloak" style="left:27%;top:22%;" onclick="inspect('cloak')">
-          <span class="obj-icon" style="filter:brightness(0.15) sepia(1) hue-rotate(240deg) saturate(0.5);">🧥</span>
+          <svg width="60" height="80" viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 4px 12px rgba(0,0,0,0.8));">
+            <!-- Coat rack pole -->
+            <rect x="28" y="10" width="4" height="62" rx="2" fill="#1a1520"/>
+            <rect x="14" y="68" width="32" height="4" rx="2" fill="#1a1520"/>
+            <!-- Hook -->
+            <path d="M30,10 Q30,4 36,4 Q42,4 42,10" stroke="#2a2030" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Black cloak hanging -->
+            <path d="M16,16 Q30,12 44,16 L50,62 Q40,70 30,68 Q20,70 10,62 Z" fill="#0d0b14"/>
+            <path d="M16,16 Q30,12 44,16 L50,62 Q40,70 30,68 Q20,70 10,62 Z" fill="none" stroke="#2a2035" stroke-width="1"/>
+            <!-- Cloak highlight — subtle blue-black sheen -->
+            <path d="M22,18 Q28,14 34,18 L38,55 Q30,60 22,55 Z" fill="#131020" opacity="0.6"/>
+            <!-- Collar -->
+            <path d="M20,18 Q30,22 40,18" stroke="#1e1830" stroke-width="1.5" fill="none"/>
+          </svg>
           <span class="obj-label">Coat Rack</span>
         </div>
 
-        <div class="room-object" id="obj-door" style="left:50%;top:8%;transform:translateX(-50%);" onclick="inspect('door')">
+        <div class="room-object" id="obj-door" style="left:50%;top:12%;transform:translateX(-50%);" onclick="inspect('door')">
           <span class="obj-icon" style="font-size:clamp(3.5rem,10vw,6rem);">🚪</span>
           <span class="obj-label">Inner Door</span>
         </div>
