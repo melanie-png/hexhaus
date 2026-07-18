@@ -254,16 +254,20 @@ function initBabylon(){
   // ── RECENTRE ────────────────────────────────────────────────────────────────
   let recentreAnim=null;
   function recentreView(){
-    // Smoothly lerp pitch back to 0, keep yaw (forward direction)
+    // Smoothly lerp BOTH pitch AND yaw back to zero (dead ahead, level)
     if(recentreAnim) clearInterval(recentreAnim);
     const startPitch=camPitch;
+    const startYaw=camYaw;
+    // Normalise yaw to shortest arc
+    let normYaw=((startYaw%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+    if(normYaw>Math.PI) normYaw-=Math.PI*2;
     let prog=0;
     recentreAnim=setInterval(()=>{
-      prog+=0.08;
+      prog+=0.07;
       if(prog>=1){ prog=1; clearInterval(recentreAnim); recentreAnim=null; }
-      // Ease out cubic
-      const t=1-Math.pow(1-prog,3);
-      camPitch=startPitch*(1-t);
+      const ease=1-Math.pow(1-prog,3);
+      camPitch=startPitch*(1-ease);
+      camYaw=normYaw*(1-ease);
       applyRot();
     },16);
   }
@@ -279,6 +283,43 @@ function initBabylon(){
   $('game-canvas').addEventListener('touchstart',e=>{ if(state.activeModal||tid!==null)return; const t=e.changedTouches[0]; tid=t.identifier; isDragging=true; dragStartX=t.clientX; dragStartY=t.clientY; lastClientX=t.clientX; lastClientY=t.clientY; },{passive:true});
   $('game-canvas').addEventListener('touchmove',e=>{ if(!isDragging||state.activeModal)return; const t=[...e.changedTouches].find(tt=>tt.identifier===tid); if(!t)return; camYaw-=(t.clientX-lastClientX)*SENS; camPitch=Math.max(PMIN,Math.min(PMAX,camPitch-(t.clientY-lastClientY)*SENS)); lastClientX=t.clientX; lastClientY=t.clientY; applyRot(); },{passive:true});
   $('game-canvas').addEventListener('touchend',e=>{ const t=[...e.changedTouches].find(tt=>tt.identifier===tid); if(!t)return; const m=Math.abs(t.clientX-dragStartX)+Math.abs(t.clientY-dragStartY); isDragging=false; tid=null; if(m<TAP) tryPick(t.clientX,t.clientY); },{passive:true});
+
+
+  // ── PINCH/SPREAD ZOOM ──────────────────────────────────────────────────────
+  const FOV_DEFAULT = 1.1;  // initial FOV (~63°)
+  const FOV_MIN     = 0.45; // max zoom in (~26°)
+  const FOV_MAX     = FOV_DEFAULT; // can't zoom out beyond start
+  let pinchStartDist = null;
+  let pinchStartFov  = FOV_DEFAULT;
+
+  function getTouchDist(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+
+  $('game-canvas').addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      pinchStartDist = getTouchDist(e.touches);
+      pinchStartFov  = camera.fov;
+      // Cancel single-touch drag so pinch doesn't also pan
+      isDragging = false;
+      tid = null;
+    }
+  }, { passive: true });
+
+  $('game-canvas').addEventListener('touchmove', e => {
+    if (e.touches.length === 2 && pinchStartDist !== null) {
+      const dist = getTouchDist(e.touches);
+      const scale = pinchStartDist / dist; // spread = scale<1 = zoom in
+      const newFov = Math.max(FOV_MIN, Math.min(FOV_MAX, pinchStartFov * scale));
+      camera.fov = newFov;
+    }
+  }, { passive: true });
+
+  $('game-canvas').addEventListener('touchend', e => {
+    if (e.touches.length < 2) pinchStartDist = null;
+  }, { passive: true });
 
   window.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); if(e.key==='r'||e.key==='R') recentreView(); },{passive:true});
 
@@ -684,22 +725,37 @@ function initBabylon(){
   const windowLight = new BABYLON.PointLight('winLight', new BABYLON.Vector3(0, 3.5, -D/2+1), scene);
   windowLight.diffuse   = new BABYLON.Color3(0.3, 0.5, 0.75); // cold blue moonlight
   windowLight.specular  = new BABYLON.Color3(0.1, 0.1, 0.15);
-  windowLight.intensity = 1.4;
+  windowLight.intensity = 2.0;
   windowLight.range     = 26;
 
   // Second fill — from the staircase landing (mysterious light from upstairs)
   const stairLight = new BABYLON.PointLight('stairLight', new BABYLON.Vector3(3, 4.2, 2), scene);
   stairLight.diffuse   = new BABYLON.Color3(0.28, 0.45, 0.65);
-  stairLight.intensity = 0.6;
+  stairLight.intensity = 1.0;
   stairLight.range     = 16;
 
 
+
+  // Dark red environmental glow — emanates from the walls/floor, like cursed hearth light
+  const redEnvLight = new BABYLON.PointLight('redEnv', new BABYLON.Vector3(0, 0.4, 0), scene);
+  redEnvLight.diffuse   = new BABYLON.Color3(0.72, 0.08, 0.04);
+  redEnvLight.specular  = new BABYLON.Color3(0.3, 0.02, 0.0);
+  redEnvLight.intensity = 1.2;
+  redEnvLight.range     = 30;
+
+  // Second red fill — from the far end of the room (back wall bleed)
+  const redBackLight = new BABYLON.PointLight('redBack', new BABYLON.Vector3(0, 1.5, D/2 - 1), scene);
+  redBackLight.diffuse   = new BABYLON.Color3(0.6, 0.05, 0.03);
+  redBackLight.specular  = new BABYLON.Color3(0.0, 0.0, 0.0);
+  redBackLight.intensity = 0.8;
+  redBackLight.range     = 22;
+
   const ambient=new BABYLON.HemisphericLight('amb',new BABYLON.Vector3(0,1,0),scene);
-  ambient.intensity=0.45; ambient.diffuse=new BABYLON.Color3(0.38,0.52,0.68);
-  ambient.groundColor=new BABYLON.Color3(0.04,0.08,0.14);
+  ambient.intensity=0.65; ambient.diffuse=new BABYLON.Color3(0.48,0.58,0.72);
+  ambient.groundColor=new BABYLON.Color3(0.18,0.06,0.06);
 
   const chanLight=new BABYLON.PointLight('chanL',new BABYLON.Vector3(0,chanY-1.1,0),scene);
-  chanLight.diffuse=new BABYLON.Color3(0.5,0.68,0.85); chanLight.intensity=0.7; chanLight.range=22;
+  chanLight.diffuse=new BABYLON.Color3(0.6,0.72,0.88); chanLight.intensity=1.4; chanLight.range=28;
 
   const fireLight=new BABYLON.PointLight('fireL',new BABYLON.Vector3(fpX-0.8,0.9,fpZ),scene);
   fireLight.diffuse=new BABYLON.Color3(1.0,0.6,0.18); fireLight.intensity=3.5; fireLight.range=18;
@@ -709,24 +765,25 @@ function initBabylon(){
   cauldLight.diffuse=new BABYLON.Color3(0.1,0.75,0.55); cauldLight.intensity=0.8; cauldLight.range=7;
 
   const sconceL=new BABYLON.PointLight('scL',new BABYLON.Vector3(-6,2.8,-3),scene);
-  sconceL.diffuse=new BABYLON.Color3(0.4,0.62,0.82); sconceL.intensity=0.5; sconceL.range=10;
+  sconceL.diffuse=new BABYLON.Color3(0.5,0.68,0.88); sconceL.intensity=0.9; sconceL.range=14;
   const sconceR=new BABYLON.PointLight('scR',new BABYLON.Vector3(6,2.8,-3),scene);
-  sconceR.diffuse=new BABYLON.Color3(0.4,0.62,0.82); sconceR.intensity=0.5; sconceR.range=10;
+  sconceR.diffuse=new BABYLON.Color3(0.5,0.68,0.88); sconceR.intensity=0.9; sconceR.range=14;
 
   // ── FLICKER ───────────────────────────────────────────────────────────────
   let ft=0;
   function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
   scene.registerBeforeRender(()=>{
     ft+=engine.getDeltaTime()*0.001;
-    chanLight.intensity=flk(0.7,0.12,2.1,0);
+    chanLight.intensity=flk(1.4,0.2,2.1,0);
     fireLight.intensity=flk(3.5,0.6,3.7,1.2);
     cauldLight.intensity=flk(0.55,0.18,1.8,3.0);
-    sconceL.intensity  =flk(0.5,0.1,1.8,0.6);
-    sconceR.intensity  =flk(0.5,0.1,2.4,2.1);
+    sconceL.intensity  =flk(0.9,0.15,1.8,0.6);
+    sconceR.intensity  =flk(0.9,0.15,2.4,2.1);
     // Ember pulse
     if(embers) embers.material.emissiveColor=new BABYLON.Color3(flk(0.6,0.15,3.7,0.5),flk(0.18,0.06,3.7,1.0),0.02);
     // Cauldron brew shimmer
     if(brew) brew.material.emissiveColor=new BABYLON.Color3(0.03,flk(0.35,0.1,1.8,3.0),0.1);
+    if(redEnvLight) redEnvLight.intensity=flk(1.2,0.2,0.8,1.5);
   });
 
   engine.runRenderLoop(()=>scene.render());
