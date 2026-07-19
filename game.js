@@ -345,10 +345,10 @@ function initBabylon(){
   const railM=mat('railM'); railM.diffuseColor=new BABYLON.Color3(0.28,0.18,0.08); railM.specularColor=new BABYLON.Color3(0.15,0.1,0.04); railM.specularPower=16;
   const balM=mat('balM'); balM.diffuseColor=new BABYLON.Color3(0.22,0.15,0.07); balM.specularColor=new BABYLON.Color3(0.12,0.08,0.03);
 
-  const STEPS=12, STEPY=H*0.55/STEPS, STEPZ=0.42, STEPX=3.8;
+  const STAIR_STEPS=12, STEPY=H*0.55/STAIR_STEPS, STEPZ=0.42, STEPX=3.8;
   const stairOriginZ=3.0, stairOriginX=3.5;
 
-  for(let s=0;s<STEPS;s++){
+  for(let s=0;s<STAIR_STEPS;s++){
     // Tread
     const tread=BABYLON.MeshBuilder.CreateBox('tread'+s,{width:STEPX,height:0.06,depth:STEPZ},scene);
     tread.position.set(stairOriginX, s*STEPY+0.06, stairOriginZ-s*STEPZ);
@@ -385,13 +385,13 @@ function initBabylon(){
     }
   }
   // Handrail — box at angle following stair pitch
-  const railAngle=Math.atan2(STEPS*STEPY, STEPS*STEPZ);
-  const railLen=Math.sqrt(Math.pow(STEPS*STEPY,2)+Math.pow(STEPS*STEPZ,2));
+  const railAngle=Math.atan2(STAIR_STEPS*STEPY, STAIR_STEPS*STEPZ);
+  const railLen=Math.sqrt(Math.pow(STAIR_STEPS*STEPY,2)+Math.pow(STAIR_STEPS*STEPZ,2));
   const handrail=BABYLON.MeshBuilder.CreateCylinder('handrail',{diameter:0.07,height:railLen,tessellation:10},scene);
-  handrail.position.set(stairOriginX-STEPX/2+0.12, (STEPS*STEPY)/2+0.78, stairOriginZ-(STEPS*STEPZ)/2);
+  handrail.position.set(stairOriginX-STEPX/2+0.12, (STAIR_STEPS*STEPY)/2+0.78, stairOriginZ-(STAIR_STEPS*STEPZ)/2);
   handrail.rotation.x=railAngle; handrail.material=railM;
   // Newel posts (start + end)
-  [[0,0.06,stairOriginZ,0.9],[0,STEPS*STEPY+0.06,stairOriginZ-STEPS*STEPZ+0.2,0.5]].forEach(([,y,z,h],ni)=>{
+  [[0,0.06,stairOriginZ,0.9],[0,STAIR_STEPS*STEPY+0.06,stairOriginZ-STAIR_STAIR_STEPS*STEPZ+0.2,0.5]].forEach(([,y,z,h],ni)=>{
     const nw=BABYLON.MeshBuilder.CreateBox('newel'+ni,{width:0.14,height:h,depth:0.14},scene);
     nw.position.set(stairOriginX-STEPX/2+0.07,y+h/2,z); nw.material=railM;
     const nwCap=BABYLON.MeshBuilder.CreateSphere('newelCap'+ni,{diameter:0.15,segments:8},scene);
@@ -400,12 +400,12 @@ function initBabylon(){
 
   // Landing platform
   const landing=BABYLON.MeshBuilder.CreateBox('landing',{width:W/2-0.2,height:0.1,depth:3.5},scene);
-  landing.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STEPS*STEPY+0.05, stairOriginZ-STEPS*STEPZ+1.75);
+  landing.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STAIR_STEPS*STEPY+0.05, stairOriginZ-STAIR_STAIR_STEPS*STEPZ+1.75);
   landing.material=stairM;
 
   // Landing balustrade
   const landRail=BABYLON.MeshBuilder.CreateBox('landRail',{width:W/2-0.2,height:0.07,depth:0.07},scene);
-  landRail.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STEPS*STEPY+0.78, stairOriginZ-STEPS*STEPZ+0.12);
+  landRail.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STAIR_STEPS*STEPY+0.78, stairOriginZ-STAIR_STAIR_STEPS*STEPZ+0.12);
   landRail.material=railM;
 
   // ── FIREPLACE (right wall) ─────────────────────────────────────────────────
@@ -694,20 +694,6 @@ function initBabylon(){
     const ros=BABYLON.MeshBuilder.CreateCylinder('rosette'+ri,{diameter:0.13,height:0.05,tessellation:14},scene);
     ros.position.set(-4+rx,2.8+ry,D/2-0.01); ros.rotation.x=Math.PI/2; ros.material=goldM;
     const rosC=BABYLON.MeshBuilder.CreateSphere('rosetteC'+ri,{diameter:0.065,segments:6},scene);
-    rosC.position.set(-4+rx,2.8+ry,D/2+0.02); rosC.material=goldM;
-  });
-  // Ornate frame moulding strips
-  const fOrnM=goldM.clone('fOrnM');
-  [[0,1.14,0.065],[0,-1.14,0.065],[0.89,0,0.065],[-0.89,0,0.065]].forEach(([ox,oy,oz],fi)=>{
-    const isH=fi<2;
-    const fstrip=BABYLON.MeshBuilder.CreateBox('fstrip'+fi,{width:isH?1.78:0.08,height:isH?0.08:2.28,depth:0.05},scene);
-    fstrip.position.set(-4+ox,2.8+oy,D/2-0.04+oz); fstrip.material=fOrnM;
-  });
-  // Corner rosettes
-  [[-0.89,-1.14],[0.89,-1.14],[-0.89,1.14],[0.89,1.14]].forEach(([rx,ry],ri)=>{
-    const ros=BABYLON.MeshBuilder.CreateCylinder('rosette'+ri,{diameter:0.14,height:0.06,tessellation:14},scene);
-    ros.position.set(-4+rx,2.8+ry,D/2-0.01); ros.rotation.x=Math.PI/2; ros.material=goldM;
-    const rosC=BABYLON.MeshBuilder.CreateSphere('rosetteC'+ri,{diameter:0.07,segments:6},scene);
     rosC.position.set(-4+rx,2.8+ry,D/2+0.02); rosC.material=goldM;
   });
 
