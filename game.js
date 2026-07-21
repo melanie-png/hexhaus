@@ -45,7 +45,14 @@ $('btn-enter').addEventListener('click',()=>{
   $('title-screen').classList.add('hidden');
   $('game-canvas').classList.remove('hidden');
   $('hud').classList.remove('hidden');
-  initBabylon();
+  // rAF ensures Safari has painted canvas with real dimensions before WebGL init
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try { initBabylon(); }
+    catch(e) {
+      console.error('Babylon init failed:', e);
+      document.body.innerHTML = '<div style="color:#fff;padding:2rem;font-family:sans-serif;background:#0a0a0a;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center"><div><h2 style="color:#c9a96e">Could not start 3D engine</h2><p style="margin-top:1rem;color:#aaa">' + e.message + '</p></div></div>';
+    }
+  }));
 });
 
 // ─── REAL TEXTURE URLS (CC0 — PolyHaven) ─────────────────────────────────────
@@ -69,7 +76,18 @@ const TEX = {
 // ─── BABYLON INIT ─────────────────────────────────────────────────────────────
 
 function initBabylon(){
-  const engine = new BABYLON.Engine($('game-canvas'), true, { antialias:true });
+  const canvas = $('game-canvas');
+  // Ensure canvas has explicit pixel dimensions (Safari fix)
+  canvas.width  = canvas.offsetWidth  || window.innerWidth;
+  canvas.height = canvas.offsetHeight || window.innerHeight;
+  const engine = new BABYLON.Engine(canvas, true, {
+    antialias: true,
+    adaptToDeviceRatio: true,
+    preserveDrawingBuffer: false,
+    stencil: true,
+    disableWebGL2Support: false,
+  });
+  engine.resize();
   const scene  = new BABYLON.Scene(engine);
   scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
   scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
