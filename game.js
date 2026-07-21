@@ -391,7 +391,7 @@ function initBabylon(){
   handrail.position.set(stairOriginX-STEPX/2+0.12, (STAIR_STEPS*STEPY)/2+0.78, stairOriginZ-(STAIR_STEPS*STEPZ)/2);
   handrail.rotation.x=railAngle; handrail.material=railM;
   // Newel posts (start + end)
-  [[0,0.06,stairOriginZ,0.9],[0,STAIR_STEPS*STEPY+0.06,stairOriginZ-STAIR_STAIR_STEPS*STEPZ+0.2,0.5]].forEach(([,y,z,h],ni)=>{
+  [[0,0.06,stairOriginZ,0.9],[0,STAIR_STEPS*STEPY+0.06,stairOriginZ-STAIR_STEPS*STEPZ+0.2,0.5]].forEach(([,y,z,h],ni)=>{
     const nw=BABYLON.MeshBuilder.CreateBox('newel'+ni,{width:0.14,height:h,depth:0.14},scene);
     nw.position.set(stairOriginX-STEPX/2+0.07,y+h/2,z); nw.material=railM;
     const nwCap=BABYLON.MeshBuilder.CreateSphere('newelCap'+ni,{diameter:0.15,segments:8},scene);
@@ -400,12 +400,12 @@ function initBabylon(){
 
   // Landing platform
   const landing=BABYLON.MeshBuilder.CreateBox('landing',{width:W/2-0.2,height:0.1,depth:3.5},scene);
-  landing.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STAIR_STEPS*STEPY+0.05, stairOriginZ-STAIR_STAIR_STEPS*STEPZ+1.75);
+  landing.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STAIR_STEPS*STEPY+0.05, stairOriginZ-STAIR_STEPS*STEPZ+1.75);
   landing.material=stairM;
 
   // Landing balustrade
   const landRail=BABYLON.MeshBuilder.CreateBox('landRail',{width:W/2-0.2,height:0.07,depth:0.07},scene);
-  landRail.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STAIR_STEPS*STEPY+0.78, stairOriginZ-STAIR_STAIR_STEPS*STEPZ+0.12);
+  landRail.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STAIR_STEPS*STEPY+0.78, stairOriginZ-STAIR_STEPS*STEPZ+0.12);
   landRail.material=railM;
 
   // ── FIREPLACE (right wall) ─────────────────────────────────────────────────
@@ -441,7 +441,7 @@ function initBabylon(){
   }
   // Keystone
   const keystone=BABYLON.MeshBuilder.CreateBox('keystone',{width:0.32,height:0.42,depth:0.28},scene);
-  keystone.position.set(fpX-0.14,3.62,fpZ); keystone.material=stoneMat.clone('ksm');
+  keystone.position.set(fpX-0.14,3.62,fpZ); keystone.material=fpStoneM.clone('ksm');
   keystone.material.diffuseColor=new BABYLON.Color3(0.32,0.4,0.46);
 
   // Mantelshelf — thick with stepped profile
