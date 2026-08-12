@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════
-   HEXHAUS — game.js  v3 (textures + recentre)
+   HEXHAUS — game.js  v4 (multi-room)
    Babylon.js first-person 3D engine
    © 2026 Melanie Mizzi. All rights reserved.
    ═══════════════════════════════════════════ */
@@ -13,6 +13,10 @@ const ITEMS = {
   key:       { name:'Iron Key',           icon:'🗝️', collectible:true,  desc:'Heavy old iron. The bow is shaped like a crescent moon. It opens something important.' },
   letter:    { name:'Sealed Letter',      icon:'📜', collectible:true,  desc:'Black wax seal, pressed with a hexagon. The paper is warm. It hums faintly when held close.' },
   rosemary:  { name:'Dried Rosemary',     icon:'🌿', collectible:true,  desc:"Tied with red thread. Hung above a doorway, rosemary keeps what shouldn't enter from entering." },
+  spellbook: { name:'Spell Book',        icon:'📓', collectible:true,  desc:'Leather-bound, locked with a clasp. The pages whisper when you open it. They whisper your name.' },
+  crystalball:{ name:'Crystal Ball',     icon:'🔮', collectible:false, desc:'Swirling mist inside. You see yourself — but younger. Or older. The image is not clear.' },
+  tea:       { name:'Tea Set',           icon:'☕', collectible:false,  desc:'Two cups. One still warm. The other has a film of dust. She was expecting someone.' },
+  raven:     { name:'The Raven',         icon:'🦅', collectible:false, desc:'It watches you. It has watched everyone who has entered this room. It does not blink.' },
   portrait:  { name:'Family Portrait',    icon:'🖼️', collectible:false, desc:'Four figures. Three look outward. One — the smallest — faces the wall. The paint is old. The posture is not.' },
   mirror:    { name:'Standing Mirror',    icon:'🪞', collectible:false, desc:"Your reflection is a half-second slow. It catches up when you stop moving. When you look away, it doesn't." },
   clock:     { name:'Grandfather Clock',  icon:'🕰️', collectible:false, desc:'Stopped at 3:17. The pendulum is still. But you heard it tick when you entered the room.' },
@@ -20,9 +24,17 @@ const ITEMS = {
   fireplace: { name:'The Fireplace',      icon:'🔥', collectible:false, desc:"The fire is lit. The hearth is cold. The wood isn't burning — it just looks that way." },
   cauldron:  { name:'The Cauldron',       icon:'🫕', collectible:false, desc:'Cast iron, thicker than your fist. Something is still warm inside. The smell is botanical — but wrong.' },
   herbwall:  { name:'Drying Herbs',       icon:'🌾', collectible:false, desc:'Dozens of bundles. Wormwood, yarrow, henbane, rue. She dried them herself. This week.' },
+  jars:      { name:'Specimen Jars',     icon:'🫙', collectible:false, desc:'Newt eyes. Mandrake root. Dragon scale. Powdered hooves. Each labelled in her careful hand.' },
+  still:     { name:'Alchemy Still',     icon:'⚗️', collectible:false, desc:'Copper and glass, connected by thin tubes. Something distils slowly. It has been distilling for a very long time.' },
+  pentagram: { name:'Carved Pentagram',   icon:'⭐', collectible:false, desc:'Cut deep into the floorboards. The grooves are dark — not with age. With use.' },
+  broom:     { name:"Witch's Broom",     icon:'🧹', collectible:false, desc:'Straw and ash wood. The bristles are worn. It has been used — but not for sweeping.' },
+  bones:     { name:'Scattered Bones',    icon:'🦴', collectible:false, desc:'Small bones. Bird? Or not. They are arranged in a pattern. You do not want to know what it means.' },
+  herbs_dried:{ name:'Hanging Garlic',   icon:'🧄', collectible:false, desc:'Plaited and hung from the ceiling. Some bulbs are fresh. Some are dust. The smell keeps other things away.' },
+  spider:    { name:'Spider Web',        icon:'🕸️', collectible:false, desc:'The web spans the entire corner. The spider is somewhere in it. It is bigger than your hand.' },
+  attic_box: { name:'Storage Box',       icon:'📦', collectible:false, desc:'Dusty, unlabelled. Something shifts inside when you tilt it. You decide not to tilt it.' },
 };
 
-const state = { inventory:[], activeModal:null };
+const state = { inventory:[], activeModal:null, currentRoom:'entrance' };
 const $ = id => document.getElementById(id);
 
 // ─── LOADING ──────────────────────────────────────────────────────────────────
@@ -45,11 +57,10 @@ $('btn-enter').addEventListener('click',()=>{
   $('title-screen').classList.add('hidden');
   $('game-canvas').classList.remove('hidden');
   $('hud').classList.remove('hidden');
-  // rAF ensures Safari has painted canvas with real dimensions before WebGL init
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    try { initBabylon(); }
+    try { initEngine(); }
     catch(e) {
-      console.error('Babylon init failed:', e);
+      console.error('Engine init failed:', e);
       document.body.innerHTML = '<div style="color:#fff;padding:2rem;font-family:sans-serif;background:#0a0a0a;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center"><div><h2 style="color:#c9a96e">Could not start 3D engine</h2><p style="margin-top:1rem;color:#aaa">' + e.message + '</p></div></div>';
     }
   }));
@@ -73,14 +84,165 @@ const TEX = {
   mstone_n:  'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_02/medieval_blocks_02_nor_gl_1k.jpg',
 };
 
-// ─── BABYLON INIT ─────────────────────────────────────────────────────────────
+// ─── ENGINE GLOBALS ──────────────────────────────────────────────────────────
+let engine = null;
+let scene  = null;
+let camera = null;
+let camYaw = 0, camPitch = 0;
+let isDragging = false, dragStartX = 0, dragStartY = 0, lastClientX = 0, lastClientY = 0;
+let tid = null;
+let interactables = new Map();
+const TAP = 10, SENS = 0.0025, PMIN = -0.52, PMAX = 0.52;
 
-function initBabylon(){
+// ─── SHARED HELPERS ───────────────────────────────────────────────────────────
+function mat(name){ const m=new BABYLON.StandardMaterial(name,scene); m.specularColor=new BABYLON.Color3(0.04,0.04,0.04); return m; }
+
+function pbr(name, diffUrl, norUrl, usc=2, vsc=2, tint=null, alpha=1.0) {
+  const m = new BABYLON.StandardMaterial(name, scene);
+  const dt = new BABYLON.Texture(diffUrl, scene);
+  dt.uScale = usc; dt.vScale = vsc;
+  m.diffuseTexture = dt;
+  const nt = new BABYLON.Texture(norUrl, scene);
+  nt.uScale = usc; nt.vScale = vsc;
+  m.bumpTexture = nt;
+  m.specularColor = new BABYLON.Color3(0.06, 0.06, 0.08);
+  m.specularPower = 12;
+  if (tint) m.diffuseColor = tint;
+  if (alpha < 1) { m.alpha = alpha; m.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND; }
+  return m;
+}
+
+function emitM(name,r,g,b,ei=0.8){ const m=mat(name); m.diffuseColor=new BABYLON.Color3(r,g,b); m.emissiveColor=new BABYLON.Color3(r*ei,g*ei,b*ei); return m; }
+
+// ─── CAMERA ──────────────────────────────────────────────────────────────────
+function applyRot(){
+  const f=new BABYLON.Vector3(
+    Math.sin(camYaw)*Math.cos(camPitch),
+    Math.sin(camPitch),
+    Math.cos(camYaw)*Math.cos(camPitch)
+  );
+  camera.setTarget(camera.position.add(f));
+}
+
+let recentreAnim=null;
+function recentreView(){
+  if(recentreAnim) clearInterval(recentreAnim);
+  const startPitch=camPitch, startYaw=camYaw;
+  let normYaw=((startYaw%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+  if(normYaw>Math.PI) normYaw-=Math.PI*2;
+  let prog=0;
+  recentreAnim=setInterval(()=>{
+    prog+=0.07;
+    if(prog>=1){ prog=1; clearInterval(recentreAnim); recentreAnim=null; }
+    const ease=1-Math.pow(1-prog,3);
+    camPitch=startPitch*(1-ease);
+    camYaw=normYaw*(1-ease);
+    applyRot();
+  },16);
+}
+
+// ─── ROOM REGISTRY ───────────────────────────────────────────────────────────
+const ROOMS = {
+  entrance: { name:'The Entrance Hall',    build:buildEntranceHall,    camPos:[0,1.7,0],     camYaw:0 },
+  living:   { name:'The Living Room',       build:buildLivingRoom,      camPos:[0,1.7,5],     camYaw:Math.PI },
+  kitchen:  { name:'The Kitchen',          build:buildKitchen,         camPos:[0,1.7,5],     camYaw:Math.PI },
+  library:  { name:'The Library',           build:buildLibrary,        camPos:[0,1.7,5],     camYaw:Math.PI },
+  bathroom: { name:'The Bathroom',          build:buildBathroom,        camPos:[0,1.7,2],     camYaw:Math.PI },
+  pantry:   { name:'The Pantry',            build:buildPantry,          camPos:[0,1.7,3],     camYaw:Math.PI },
+  basement: { name:'The Basement',          build:buildBasement,        camPos:[0,1.7,3],     camYaw:Math.PI },
+  attic:    { name:'The Attic',             build:buildAttic,           camPos:[0,1.7,2],     camYaw:Math.PI },
+};
+
+// ─── TRANSITION ──────────────────────────────────────────────────────────────
+let isTransitioning = false;
+function transitionToRoom(roomId){
+  if(isTransitioning) return;
+  isTransitioning = true;
   const canvas = $('game-canvas');
-  // Ensure canvas has explicit pixel dimensions (Safari fix)
+  canvas.style.transition = 'opacity 0.4s';
+  canvas.style.opacity = '0.3';
+  setTimeout(() => {
+    if(scene) scene.dispose();
+    scene = new BABYLON.Scene(engine);
+    scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
+    scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
+    scene.fogColor   = new BABYLON.Color3(0.06,0.12,0.18);
+    scene.fogDensity = 0.025;
+    const r = ROOMS[roomId];
+    camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(r.camPos[0],r.camPos[1],r.camPos[2]), scene);
+    camera.setTarget(new BABYLON.Vector3(0,1.7,0));
+    camera.minZ=0.1; camera.maxZ=60; camera.fov=1.1;
+    camera.inputs.clear();
+    camYaw=r.camYaw; camPitch=0; applyRot();
+    r.build();
+    state.currentRoom = roomId;
+    $('room-name').textContent = r.name;
+    canvas.style.opacity = '1';
+    isTransitioning = false;
+  }, 400);
+}
+
+// ─── RAYPICK ─────────────────────────────────────────────────────────────────
+function tryPick(cx,cy){
+  if(state.activeModal) return;
+  const pick=scene.pick(cx,cy,m=>interactables.has(m.name));
+  if(pick.hit&&pick.pickedMesh){
+    const key=interactables.get(pick.pickedMesh.name);
+    if(!key) return;
+    if(key.startsWith('door_')){
+      transitionToRoom(key.slice(5));
+    } else {
+      openModal(key);
+    }
+  }
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function openModal(key){
+  if(state.inventory.includes(key)) return;
+  const item=ITEMS[key]; if(!item) return;
+  state.activeModal=key;
+  $('modal-icon').textContent=item.icon; $('modal-name').textContent=item.name; $('modal-desc').textContent=item.desc;
+  $('modal-collect').style.display=item.collectible?'':'none';
+  $('examine-modal').classList.remove('hidden');
+}
+function closeModal(){ $('examine-modal').classList.add('hidden'); state.activeModal=null; }
+
+$('modal-backdrop').addEventListener('click',closeModal);
+$('modal-close').addEventListener('click',closeModal);
+$('modal-collect').addEventListener('click',()=>{
+  const key=state.activeModal; if(!key) return;
+  const item=ITEMS[key]; if(!item||!item.collectible) return;
+  state.inventory.push(key);
+  [...interactables.entries()].filter(([,v])=>v===key).forEach(([n])=>{ const m=scene.getMeshByName(n); if(m) m.setEnabled(false); });
+  closeModal(); updateInv();
+  showToast(item.icon+' '+item.name+' taken');
+});
+
+function updateInv(){
+  $('inv-slots').innerHTML='';
+  state.inventory.forEach(key=>{
+    const item=ITEMS[key];
+    const slot=document.createElement('div'); slot.className='inv-slot';
+    slot.textContent=item.icon; slot.title=item.name;
+    $('inv-slots').appendChild(slot);
+  });
+  const total=Object.values(ITEMS).filter(i=>i.collectible).length;
+  $('item-count').textContent=state.inventory.length+' / '+total+' items';
+}
+
+function showToast(msg){
+  const ex=document.getElementById('toast'); if(ex) ex.remove();
+  const t=document.createElement('div'); t.id='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2500);
+}
+
+// ─── INIT ENGINE ─────────────────────────────────────────────────────────────
+function initEngine(){
+  const canvas = $('game-canvas');
   canvas.width  = canvas.offsetWidth  || window.innerWidth;
   canvas.height = canvas.offsetHeight || window.innerHeight;
-  const engine = new BABYLON.Engine(canvas, true, {
+  engine = new BABYLON.Engine(canvas, true, {
     antialias: true,
     adaptToDeviceRatio: true,
     preserveDrawingBuffer: false,
@@ -88,129 +250,53 @@ function initBabylon(){
     disableWebGL2Support: false,
   });
   engine.resize();
-  const scene  = new BABYLON.Scene(engine);
-  scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
-  scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogColor   = new BABYLON.Color3(0.06,0.12,0.18);
-  scene.fogDensity = 0.025;
 
-  // ─── REAL TEXTURE MATERIAL BUILDER ──────────────────────────────────────────
-  function pbr(name, diffUrl, norUrl, usc=2, vsc=2, tint=null, alpha=1.0) {
-    const m = new BABYLON.StandardMaterial(name, scene);
-    // Diffuse texture
-    const dt = new BABYLON.Texture(diffUrl, scene);
-    dt.uScale = usc; dt.vScale = vsc;
-    m.diffuseTexture = dt;
-    // Normal map (bump)
-    const nt = new BABYLON.Texture(norUrl, scene);
-    nt.uScale = usc; nt.vScale = vsc;
-    m.bumpTexture = nt;
-    m.invertNormalMapX = false; m.invertNormalMapY = false;
-    // Specular — low for rough surfaces
-    m.specularColor = new BABYLON.Color3(0.06, 0.06, 0.08);
-    m.specularPower  = 12;
-    if (tint) m.diffuseColor = tint;
-    if (alpha < 1) { m.alpha = alpha; m.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND; }
-    return m;
-  }
-
-
-
-  // ── CAMERA ─────────────────────────────────────────────────────────────────
-  const camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0,1.7,0), scene);
-  camera.setTarget(new BABYLON.Vector3(0,1.7,1));
-  camera.minZ=0.1; camera.maxZ=60; camera.fov=1.1;
-  camera.inputs.clear();
-
-  let isDragging=false, dragStartX=0, dragStartY=0, lastClientX=0, lastClientY=0;
-  let camYaw=0, camPitch=0;
-  const TAP=10, SENS=0.0025, PMIN=-0.52, PMAX=0.52;
-
-  function applyRot(){
-    const f=new BABYLON.Vector3(
-      Math.sin(camYaw)*Math.cos(camPitch),
-      Math.sin(camPitch),
-      Math.cos(camYaw)*Math.cos(camPitch)
-    );
-    camera.setTarget(camera.position.add(f));
-  }
-
-  // ── RECENTRE ────────────────────────────────────────────────────────────────
-  let recentreAnim=null;
-  function recentreView(){
-    // Smoothly lerp BOTH pitch AND yaw back to zero (dead ahead, level)
-    if(recentreAnim) clearInterval(recentreAnim);
-    const startPitch=camPitch;
-    const startYaw=camYaw;
-    // Normalise yaw to shortest arc
-    let normYaw=((startYaw%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
-    if(normYaw>Math.PI) normYaw-=Math.PI*2;
-    let prog=0;
-    recentreAnim=setInterval(()=>{
-      prog+=0.07;
-      if(prog>=1){ prog=1; clearInterval(recentreAnim); recentreAnim=null; }
-      const ease=1-Math.pow(1-prog,3);
-      camPitch=startPitch*(1-ease);
-      camYaw=normYaw*(1-ease);
-      applyRot();
-    },16);
-  }
-  $('btn-recentre').addEventListener('click', recentreView);
-
-  // Mouse look — use pointer events on window to avoid Babylon canvas interception
+  // Mouse look — pointer events on window
   window.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||state.activeModal)return; isDragging=true; dragStartX=e.clientX; dragStartY=e.clientY; lastClientX=e.clientX; lastClientY=e.clientY; },{passive:true});
   window.addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse'||!isDragging||state.activeModal)return; camYaw-=(e.clientX-lastClientX)*SENS; camPitch=Math.max(PMIN,Math.min(PMAX,camPitch-(e.clientY-lastClientY)*SENS)); lastClientX=e.clientX; lastClientY=e.clientY; applyRot(); },{passive:true});
   window.addEventListener('pointerup',e=>{ if(e.pointerType!=='mouse'||!isDragging)return; const m=Math.abs(e.clientX-dragStartX)+Math.abs(e.clientY-dragStartY); isDragging=false; if(m<TAP) tryPick(e.clientX,e.clientY); },{passive:true});
 
   // Touch look
-  let tid=null;
   $('game-canvas').addEventListener('touchstart',e=>{ if(state.activeModal||tid!==null)return; const t=e.changedTouches[0]; tid=t.identifier; isDragging=true; dragStartX=t.clientX; dragStartY=t.clientY; lastClientX=t.clientX; lastClientY=t.clientY; },{passive:true});
   $('game-canvas').addEventListener('touchmove',e=>{ if(!isDragging||state.activeModal)return; const t=[...e.changedTouches].find(tt=>tt.identifier===tid); if(!t)return; camYaw-=(t.clientX-lastClientX)*SENS; camPitch=Math.max(PMIN,Math.min(PMAX,camPitch-(t.clientY-lastClientY)*SENS)); lastClientX=t.clientX; lastClientY=t.clientY; applyRot(); },{passive:true});
   $('game-canvas').addEventListener('touchend',e=>{ const t=[...e.changedTouches].find(tt=>tt.identifier===tid); if(!t)return; const m=Math.abs(t.clientX-dragStartX)+Math.abs(t.clientY-dragStartY); isDragging=false; tid=null; if(m<TAP) tryPick(t.clientX,t.clientY); },{passive:true});
 
-
-  // ── PINCH/SPREAD ZOOM ──────────────────────────────────────────────────────
-  const FOV_DEFAULT = 1.1;  // initial FOV (~63°)
-  const FOV_MIN     = 0.45; // max zoom in (~26°)
-  const FOV_MAX     = FOV_DEFAULT; // can't zoom out beyond start
-  let pinchStartDist = null;
-  let pinchStartFov  = FOV_DEFAULT;
-
+  // Pinch zoom
+  const FOV_DEFAULT = 1.1, FOV_MIN = 0.45, FOV_MAX = FOV_DEFAULT;
+  let pinchStartDist = null, pinchStartFov = FOV_DEFAULT;
   function getTouchDist(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx*dx + dy*dy);
   }
-
   $('game-canvas').addEventListener('touchstart', e => {
-    if (e.touches.length === 2) {
-      pinchStartDist = getTouchDist(e.touches);
-      pinchStartFov  = camera.fov;
-      // Cancel single-touch drag so pinch doesn't also pan
-      isDragging = false;
-      tid = null;
-    }
+    if (e.touches.length === 2) { pinchStartDist = getTouchDist(e.touches); pinchStartFov = camera.fov; isDragging = false; tid = null; }
   }, { passive: true });
-
   $('game-canvas').addEventListener('touchmove', e => {
     if (e.touches.length === 2 && pinchStartDist !== null) {
       const dist = getTouchDist(e.touches);
-      const scale = pinchStartDist / dist; // spread = scale<1 = zoom in
-      const newFov = Math.max(FOV_MIN, Math.min(FOV_MAX, pinchStartFov * scale));
-      camera.fov = newFov;
+      camera.fov = Math.max(FOV_MIN, Math.min(FOV_MAX, pinchStartFov * (pinchStartDist / dist)));
     }
   }, { passive: true });
+  $('game-canvas').addEventListener('touchend', e => { if (e.touches.length < 2) pinchStartDist = null; }, { passive: true });
 
-  $('game-canvas').addEventListener('touchend', e => {
-    if (e.touches.length < 2) pinchStartDist = null;
-  }, { passive: true });
-
+  // Keyboard
   window.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); if(e.key==='r'||e.key==='R') recentreView(); },{passive:true});
 
-  // ── TEXTURES ───────────────────────────────────────────────────────────────
+  $('btn-recentre').addEventListener('click', recentreView);
 
+  // Render loop
+  engine.runRenderLoop(()=>{ if(scene) scene.render(); });
+  window.addEventListener('resize',()=>engine.resize(),{passive:true});
+
+  // Load first room
+  transitionToRoom('entrance');
+}
+
+
+// ─── ENTRANCE HALL ────────────────────────────────────────────────────────────
+function buildEntranceHall(){
   // ── MATERIALS ──────────────────────────────────────────────────────────────
-  function mat(name){ const m=new BABYLON.StandardMaterial(name,scene); m.specularColor=new BABYLON.Color3(0.04,0.04,0.04); return m; }
 
   // Real stone wall texture with normal map
   const wallM = pbr('wallM', TEX.stone_d, TEX.stone_n, 4, 3,
@@ -243,7 +329,6 @@ function initBabylon(){
   const dirtM = mat('dirtM');
   dirtM.diffuseColor = new BABYLON.Color3(0.12, 0.09, 0.06);
 
-  function emitM(name,r,g,b,ei=0.8){ const m=mat(name); m.diffuseColor=new BABYLON.Color3(r,g,b); m.emissiveColor=new BABYLON.Color3(r*ei,g*ei,b*ei); return m; }
 
   // ── ROOM SHELL ─────────────────────────────────────────────────────────────
   const W=22, D=14, H=5.5;
@@ -824,7 +909,7 @@ function initBabylon(){
   });
 
   // ── INTERACTABLES MAP ──────────────────────────────────────────────────────
-  const interactables=new Map([
+  interactables=new Map([
     ['cloak_mesh','cloak'],['hook','cloak'],
     ['staff_mesh','staff'],['staffTip','staff'],
     ['key_mesh','key'],
@@ -910,53 +995,551 @@ function initBabylon(){
   engine.runRenderLoop(()=>scene.render());
   window.addEventListener('resize',()=>engine.resize(),{passive:true});
 
-  // ── RAYPICK ───────────────────────────────────────────────────────────────
-  function tryPick(cx,cy){
-    if(state.activeModal) return;
-    const pick=scene.pick(cx,cy,m=>interactables.has(m.name));
-    if(pick.hit&&pick.pickedMesh){
-      const key=interactables.get(pick.pickedMesh.name);
-      if(key) openModal(key);
-    }
+
+  // Door triggers — invisible boxes at exits
+  const doorLiving = BABYLON.MeshBuilder.CreateBox('door_living',{width:0.1,height:2.4,depth:1.4},scene);
+  doorLiving.position.set(-W/2+0.05, 1.2, 0);
+  const doorMat = mat('doorMat_living'); doorMat.alpha = 0.01; doorLiving.material = doorMat;
+  interactables.set('door_living','door_living');
+
+  const doorKitchen = BABYLON.MeshBuilder.CreateBox('door_kitchen',{width:1.4,height:2.4,depth:0.1},scene);
+  doorKitchen.position.set(0, 1.2, D/2-0.05);
+  const dkm = mat('doorMat_kitchen'); dkm.alpha = 0.01; doorKitchen.material = dkm;
+  interactables.set('door_kitchen','door_kitchen');
+
+  const doorLibrary = BABYLON.MeshBuilder.CreateBox('door_library',{width:0.1,height:2.4,depth:1.4},scene);
+  doorLibrary.position.set(-W/2+0.05, 1.2, -D/2+2);
+  const dlm = mat('doorMat_library'); dlm.alpha = 0.01; doorLibrary.material = dlm;
+  interactables.set('door_library','door_library');
+
+  const doorBathroom = BABYLON.MeshBuilder.CreateBox('door_bathroom',{width:0.1,height:2.4,depth:1.4},scene);
+  doorBathroom.position.set(W/2-0.05, 1.2, -3);
+  const dbm = mat('doorMat_bathroom'); dbm.alpha = 0.01; doorBathroom.material = dbm;
+  interactables.set('door_bathroom','door_bathroom');
+}
+
+// ─── LIVING ROOM ──────────────────────────────────────────────────────────────
+function buildLivingRoom(){
+  const W=16, D=12, H=4.5;
+  const wallM = pbr('lr_wallM', TEX.plaster_d, TEX.plaster_n, 3, 2, new BABYLON.Color3(0.28,0.24,0.30));
+  const floorM = pbr('lr_floorM', TEX.wood_d, TEX.wood_n, 5, 4, new BABYLON.Color3(0.35,0.25,0.16));
+  const ceilM = pbr('lr_ceilM', TEX.beam_d, TEX.beam_n, 4, 3, new BABYLON.Color3(0.15,0.10,0.06));
+  const woodM = pbr('lr_woodM', TEX.darkwood_d, TEX.darkwood_n, 3, 1, new BABYLON.Color3(0.3,0.22,0.12));
+
+  const floor=BABYLON.MeshBuilder.CreateGround('lr_floor',{width:W,height:D,subdivisions:4},scene);
+  floor.material=floorM; floor.receiveShadows=true;
+  const ceil=BABYLON.MeshBuilder.CreatePlane('lr_ceil',{width:W,height:D},scene);
+  ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
+  function lrWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
+  lrWall('lr_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); lrWall('lr_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
+  lrWall('lr_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); lrWall('lr_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+
+  [-5,-2,1,4].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('lr_beam'+bx,{width:0.3,height:0.28,depth:D},scene); b.position.set(bx,H-0.16,0); const bm=mat('lr_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.16,0.08,0.04); b.material=bm; });
+
+  // Large arched window (back wall) — moonlight
+  const winM=mat('lr_winM'); winM.diffuseColor=new BABYLON.Color3(0.06,0.10,0.18); winM.emissiveColor=new BABYLON.Color3(0.08,0.14,0.24); winM.alpha=0.82;
+  const winGlass=BABYLON.MeshBuilder.CreatePlane('lr_winGlass',{width:3.2,height:3.0},scene);
+  winGlass.position.set(0,2.4,-D/2+0.08); winGlass.material=winM;
+  const archM=mat('lr_archM'); archM.diffuseColor=new BABYLON.Color3(0.2,0.26,0.32);
+  for(let a=0;a<8;a++){ const ang=(a/7)*Math.PI; const ax=Math.cos(ang)*1.5; const ay=3.9+Math.sin(ang)*0.5; const b=BABYLON.MeshBuilder.CreateBox('lr_archB'+a,{width:0.3,height:0.4,depth:0.3},scene); b.position.set(ax,ay,-D/2+0.1); b.material=archM; }
+  [[0,2.4],[-0.8,2.4],[0.8,2.4]].forEach(([mx])=>{ const m=BABYLON.MeshBuilder.CreateBox('lr_mull'+mx,{width:0.04,height:3.0,depth:0.06},scene); m.position.set(mx,2.4,-D/2+0.1); m.material=archM; });
+
+  // Fireplace (right wall)
+  const fpX=W/2-0.15, fpZ=0;
+  const fpM=pbr('lr_fpM',TEX.rock_d,TEX.rock_n,2,2,new BABYLON.Color3(0.3,0.36,0.4));
+  [[fpZ-0.9],[fpZ+0.9]].forEach(([pz])=>{ const s=BABYLON.MeshBuilder.CreateBox('lr_fpSide',{width:0.28,height:2.6,depth:0.5},scene); s.position.set(fpX-0.14,1.3,pz); s.material=fpM; });
+  const mantel=BABYLON.MeshBuilder.CreateBox('lr_mantel',{width:0.4,height:0.1,depth:2.2},scene); mantel.position.set(fpX-0.2,2.7,fpZ); mantel.material=woodM;
+  const fbm=mat('lr_fbM'); fbm.diffuseColor=new BABYLON.Color3(0.04,0.02,0.01); fbm.emissiveColor=new BABYLON.Color3(0.02,0.01,0);
+  const fb=BABYLON.MeshBuilder.CreateBox('lr_firebox',{width:0.1,height:1.2,depth:1.6},scene); fb.position.set(fpX,0.7,fpZ); fb.material=fbm;
+  const emberM=mat('lr_emberM'); emberM.emissiveColor=new BABYLON.Color3(0.6,0.18,0.02);
+  const embers=BABYLON.MeshBuilder.CreateBox('lr_embers',{width:0.05,height:0.03,depth:1.4},scene); embers.position.set(fpX-0.01,0.03,fpZ); embers.material=emberM;
+
+  // Leather couch (left side)
+  const couchM=mat('lr_couchM'); couchM.diffuseColor=new BABYLON.Color3(0.2,0.1,0.08); couchM.specularPower=8;
+  const couchBase=BABYLON.MeshBuilder.CreateBox('lr_couch',{width:3.0,height:0.5,depth:1.2},scene); couchBase.position.set(-W/2+2.5,0.5,1); couchBase.material=couchM;
+  const couchBack=BABYLON.MeshBuilder.CreateBox('lr_couchBack',{width:3.0,height:0.9,depth:0.2},scene); couchBack.position.set(-W/2+2.5,1.1,1-0.5); couchBack.material=couchM;
+
+  // Round table (center)
+  const tabletop=BABYLON.MeshBuilder.CreateCylinder('lr_table',{diameter:1.0,height:0.06,tessellation:16},scene); tabletop.position.set(0,0.75,0); tabletop.material=woodM;
+  const tableleg=BABYLON.MeshBuilder.CreateCylinder('lr_tleg',{diameter:0.08,height:0.72,tessellation:8},scene); tableleg.position.set(0,0.36,0); tableleg.material=woodM;
+
+  // Crystal ball (glowing)
+  const cbM=mat('lr_cbM'); cbM.diffuseColor=new BABYLON.Color3(0.08,0.12,0.2); cbM.emissiveColor=new BABYLON.Color3(0.06,0.1,0.18); cbM.specularColor=new BABYLON.Color3(0.3,0.4,0.6); cbM.specularPower=64; cbM.alpha=0.7;
+  const crystalBall=BABYLON.MeshBuilder.CreateSphere('lr_crystalBall',{diameter:0.45,segments:16},scene);
+  crystalBall.position.set(-W/2+3.5,0.25,-2); crystalBall.material=cbM;
+
+  // Pentacle inlay
+  const pentM=mat('lr_pentM'); pentM.diffuseColor=new BABYLON.Color3(0.15,0.1,0.05); pentM.emissiveColor=new BABYLON.Color3(0.04,0.02,0.01);
+  const pent=BABYLON.MeshBuilder.CreateDisc('lr_pent',{diameter:2.5,tessellation:5},scene); pent.position.set(0,0.02,0); pent.rotation.x=Math.PI/2; pent.material=pentM;
+
+  // Bookshelf with specimen jars
+  const bsX=4, bsZ=-D/2+0.15;
+  const bsBack=BABYLON.MeshBuilder.CreateBox('lr_bsBack',{width:3.0,height:3.5,depth:0.3},scene); bsBack.position.set(bsX,1.75,bsZ); bsBack.material=woodM;
+  for(let sh=0;sh<4;sh++){ const shelf=BABYLON.MeshBuilder.CreateBox('lr_bs'+sh,{width:2.8,height:0.06,depth:0.4},scene); shelf.position.set(bsX,0.4+sh*0.85,bsZ+0.05); shelf.material=woodM;
+    for(let j=0;j<4;j++){ const jar=BABYLON.MeshBuilder.CreateCylinder('lr_jar'+sh+'_'+j,{diameterTop:0.08,diameterBottom:0.1,height:0.25,tessellation:10},scene); jar.position.set(bsX-1.0+j*0.65,0.55+sh*0.85,bsZ+0.1); const jm=mat('lr_jm'+sh+j); jm.diffuseColor=new BABYLON.Color3(0.3+Math.random()*0.3,0.2+Math.random()*0.2,0.1+Math.random()*0.1); jm.alpha=0.6; jar.material=jm; }
   }
 
-  // ── MODAL ─────────────────────────────────────────────────────────────────
-  function openModal(key){
-    if(state.inventory.includes(key)) return;
-    const item=ITEMS[key]; if(!item) return;
-    state.activeModal=key;
-    $('modal-icon').textContent=item.icon; $('modal-name').textContent=item.name; $('modal-desc').textContent=item.desc;
-    $('modal-collect').style.display=item.collectible?'':'none';
-    $('examine-modal').classList.remove('hidden');
+  // Chandelier with dried herbs
+  const chanY=H-0.5;
+  const chanRing=BABYLON.MeshBuilder.CreateTorus('lr_chanRing',{diameter:1.5,thickness:0.04,tessellation:16},scene); chanRing.position.set(0,chanY,0); chanRing.material=mat('lr_chanM'); chanRing.material.diffuseColor=new BABYLON.Color3(0.12,0.1,0.08);
+  for(let h=0;h<8;h++){ const ang=h/8*Math.PI*2; const hx=Math.cos(ang)*0.7, hz=Math.sin(ang)*0.7;
+    const herb=BABYLON.MeshBuilder.CreateCylinder('lr_chanHerb'+h,{diameterTop:0.03,diameterBottom:0.08,height:0.3,tessellation:6},scene); herb.position.set(hx,chanY-0.2,hz); const hm=mat('lr_hm'+h); hm.diffuseColor=new BABYLON.Color3(0.25,0.3,0.12); herb.material=hm;
+    const fl=BABYLON.MeshBuilder.CreateSphere('lr_cf'+h,{diameter:0.05,segments:6},scene); fl.position.set(hx,chanY+0.05,hz); fl.scaling.y=1.6; fl.material=emitM('lr_cfm'+h,1,0.62,0.12,1.0);
   }
-  function closeModal(){ $('examine-modal').classList.add('hidden'); state.activeModal=null; }
 
-  $('modal-backdrop').addEventListener('click',closeModal);
-  $('modal-close').addEventListener('click',closeModal);
-  $('modal-collect').addEventListener('click',()=>{
-    const key=state.activeModal; if(!key) return;
-    const item=ITEMS[key]; if(!item||!item.collectible) return;
-    state.inventory.push(key);
-    [...interactables.entries()].filter(([,v])=>v===key).forEach(([n])=>{ const m=scene.getMeshByName(n); if(m) m.setEnabled(false); });
-    closeModal(); updateInv();
-    showToast(item.icon+' '+item.name+' taken');
+  // Raven on windowsill
+  const ravenM=mat('lr_ravenM'); ravenM.diffuseColor=new BABYLON.Color3(0.02,0.02,0.03);
+  const ravenBody=BABYLON.MeshBuilder.CreateSphere('lr_raven',{diameter:0.25,segments:8},scene); ravenBody.position.set(1.2,1.0,-D/2+0.3); ravenBody.scaling.set(1.3,0.8,1); ravenBody.material=ravenM;
+  const ravenHead=BABYLON.MeshBuilder.CreateSphere('lr_ravenHead',{diameter:0.1,segments:6},scene); ravenHead.position.set(1.35,1.12,-D/2+0.3); ravenHead.material=ravenM;
+
+  // Lights
+  const moonLight=new BABYLON.PointLight('lr_moonL',new BABYLON.Vector3(0,3,-D/2+1),scene);
+  moonLight.diffuse=new BABYLON.Color3(0.25,0.35,0.55); moonLight.intensity=2.0; moonLight.range=20;
+  const fireLight=new BABYLON.PointLight('lr_fireL',new BABYLON.Vector3(fpX-0.5,0.8,fpZ),scene);
+  fireLight.diffuse=new BABYLON.Color3(1.0,0.5,0.15); fireLight.intensity=2.5; fireLight.range=14;
+  const cbLight=new BABYLON.PointLight('lr_cbL',new BABYLON.Vector3(-W/2+3.5,0.4,-2),scene);
+  cbLight.diffuse=new BABYLON.Color3(0.1,0.2,0.5); cbLight.intensity=0.6; cbLight.range=5;
+  const ambient=new BABYLON.HemisphericLight('lr_amb',new BABYLON.Vector3(0,1,0),scene);
+  ambient.intensity=0.5; ambient.diffuse=new BABYLON.Color3(0.35,0.4,0.55); ambient.groundColor=new BABYLON.Color3(0.15,0.08,0.06);
+  const chanLight=new BABYLON.PointLight('lr_chanL',new BABYLON.Vector3(0,chanY-0.5,0),scene);
+  chanLight.diffuse=new BABYLON.Color3(0.6,0.5,0.3); chanLight.intensity=1.0; chanLight.range=12;
+
+  let ft=0;
+  function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
+  scene.registerBeforeRender(()=>{
+    ft+=engine.getDeltaTime()*0.001;
+    fireLight.intensity=flk(2.5,0.5,3.7,1.2);
+    chanLight.intensity=flk(1.0,0.15,2.1,0);
+    if(embers) embers.material.emissiveColor=new BABYLON.Color3(flk(0.6,0.15,3.7,0.5),flk(0.18,0.06,3.7,1.0),0.02);
+    if(crystalBall) crystalBall.material.emissiveColor=new BABYLON.Color3(0.04,flk(0.1,0.04,1.5,2),flk(0.18,0.06,1.5,3));
   });
 
-  function updateInv(){
-    $('inv-slots').innerHTML='';
-    state.inventory.forEach(key=>{
-      const item=ITEMS[key];
-      const slot=document.createElement('div'); slot.className='inv-slot';
-      slot.textContent=item.icon; slot.title=item.name;
-      $('inv-slots').appendChild(slot);
-    });
-    const total=Object.values(ITEMS).filter(i=>i.collectible).length;
-    $('item-count').textContent=state.inventory.length+' / '+total+' items';
+  interactables.set('lr_crystalBall','crystalball');
+  interactables.set('lr_raven','raven'); interactables.set('lr_ravenHead','raven');
+  interactables.set('lr_table','tea');
+  interactables.set('lr_bsBack','bookshelf');
+  interactables.set('lr_embers','fireplace'); interactables.set('lr_firebox','fireplace'); interactables.set('lr_mantel','fireplace');
+
+  const doorE=BABYLON.MeshBuilder.CreateBox('door_entrance',{width:1.4,height:2.4,depth:0.1},scene); doorE.position.set(0,1.2,D/2-0.05); const deM=mat('lr_deM'); deM.alpha=0.01; doorE.material=deM;
+  interactables.set('door_entrance','door_entrance');
+  const doorK=BABYLON.MeshBuilder.CreateBox('door_kitchen',{width:0.1,height:2.4,depth:1.4},scene); doorK.position.set(W/2-0.05,1.2,-3); const dkM=mat('lr_dkM'); dkM.alpha=0.01; doorK.material=dkM;
+  interactables.set('door_kitchen','door_kitchen');
+}
+
+// ─── KITCHEN ──────────────────────────────────────────────────────────────────
+function buildKitchen(){
+  const W=14, D=12, H=4.0;
+  const wallM = pbr('k_wallM', TEX.mstone_d, TEX.mstone_n, 2, 2, new BABYLON.Color3(0.25,0.28,0.30));
+  const floorM = pbr('k_floorM', TEX.stone_d, TEX.stone_n, 4, 3, new BABYLON.Color3(0.22,0.24,0.26));
+  const ceilM = pbr('k_ceilM', TEX.beam_d, TEX.beam_n, 3, 3, new BABYLON.Color3(0.14,0.09,0.05));
+  const woodM = pbr('k_woodM', TEX.darkwood_d, TEX.darkwood_n, 3, 2, new BABYLON.Color3(0.3,0.22,0.12));
+
+  const floor=BABYLON.MeshBuilder.CreateGround('k_floor',{width:W,height:D,subdivisions:4},scene); floor.material=floorM; floor.receiveShadows=true;
+  const ceil=BABYLON.MeshBuilder.CreatePlane('k_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
+  function kWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
+  kWall('k_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); kWall('k_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
+  kWall('k_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); kWall('k_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  [-4,-1,2].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('k_beam'+bx,{width:0.28,height:0.26,depth:D},scene); b.position.set(bx,H-0.14,0); const bm=mat('k_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.14,0.07,0.03); b.material=bm; });
+
+  // Stone hearth with cauldron
+  const hearthM=pbr('k_hearthM',TEX.rock_d,TEX.rock_n,2,2,new BABYLON.Color3(0.28,0.32,0.35));
+  const hearth=BABYLON.MeshBuilder.CreateBox('k_hearth',{width:3.5,height:2.8,depth:0.8},scene); hearth.position.set(0,1.4,-D/2+0.4); hearth.material=hearthM;
+  for(let a=0;a<6;a++){ const ang=(a/5)*Math.PI; const ax=Math.cos(ang)*1.2; const ay=2.5+Math.sin(ang)*0.5; const b=BABYLON.MeshBuilder.CreateBox('k_hArch'+a,{width:0.28,height:0.35,depth:0.4},scene); b.position.set(ax,ay,-D/2+0.4); b.material=hearthM; }
+  const cauldM=mat('k_cauldM'); cauldM.diffuseColor=new BABYLON.Color3(0.08,0.06,0.08);
+  const cauldron=BABYLON.MeshBuilder.CreateSphere('k_cauldron',{diameter:0.8,segments:12},scene); cauldron.position.set(0,0.35,-D/2+0.5); cauldron.scaling.y=0.7; cauldron.material=cauldM;
+  const brewM=mat('k_brewM'); brewM.emissiveColor=new BABYLON.Color3(0.05,0.4,0.15); brewM.alpha=0.75;
+  const brew=BABYLON.MeshBuilder.CreateDisc('k_brew',{radius:0.3,tessellation:16},scene); brew.position.set(0,0.55,-D/2+0.5); brew.rotation.x=Math.PI/2; brew.material=brewM;
+  const smokeM=mat('k_smokeM'); smokeM.diffuseColor=new BABYLON.Color3(0.08,0.15,0.08); smokeM.emissiveColor=new BABYLON.Color3(0.03,0.08,0.03); smokeM.alpha=0.1;
+  const smoke=BABYLON.MeshBuilder.CreateCylinder('k_smoke',{diameterTop:0.5,diameterBottom:0.1,height:1.5,tessellation:8},scene); smoke.position.set(0,1.3,-D/2+0.5); smoke.material=smokeM;
+
+  // Copper pot rack
+  const rackM=mat('k_rackM'); rackM.diffuseColor=new BABYLON.Color3(0.3,0.18,0.08); rackM.specularColor=new BABYLON.Color3(0.3,0.2,0.1);
+  const rackBar=BABYLON.MeshBuilder.CreateBox('k_rack',{width:3.5,height:0.06,depth:0.06},scene); rackBar.position.set(0,H-0.6,0); rackBar.material=rackM;
+  for(let p=0;p<5;p++){ const px=-1.5+p*0.75;
+    const pan=BABYLON.MeshBuilder.CreateCylinder('k_pan'+p,{diameterTop:0.3,diameterBottom:0.25,height:0.12,tessellation:12},scene); pan.position.set(px,H-0.9,0); pan.material=rackM;
+    const hook=BABYLON.MeshBuilder.CreateCylinder('k_hook'+p,{diameter:0.01,height:0.3,tessellation:4},scene); hook.position.set(px,H-0.75,0); hook.material=rackM;
   }
 
-  function showToast(msg){
-    const ex=document.getElementById('toast'); if(ex) ex.remove();
-    const t=document.createElement('div'); t.id='toast'; t.textContent=msg;
-    document.body.appendChild(t); setTimeout(()=>t.remove(),2500);
+  // Leaded window
+  const winM=mat('k_winM'); winM.diffuseColor=new BABYLON.Color3(0.06,0.10,0.18); winM.emissiveColor=new BABYLON.Color3(0.06,0.12,0.2); winM.alpha=0.82;
+  const win=BABYLON.MeshBuilder.CreatePlane('k_win',{width:2.0,height:2.4},scene); win.position.set(-W/2+0.08,2.0,0); win.rotation.y=Math.PI/2; win.material=winM;
+  for(let h=0;h<3;h++){ const herb=BABYLON.MeshBuilder.CreateCylinder('k_winHerb'+h,{diameterTop:0.03,diameterBottom:0.06,height:0.25,tessellation:6},scene); herb.position.set(-W/2+0.15,0.85,-0.5+h*0.5); const hm=mat('k_whm'+h); hm.diffuseColor=new BABYLON.Color3(0.25,0.3,0.12); herb.material=hm; }
+
+  // Butcher's block
+  const blockM=pbr('k_blockM',TEX.wood_d,TEX.wood_n,2,1,new BABYLON.Color3(0.32,0.24,0.14));
+  const block=BABYLON.MeshBuilder.CreateBox('k_block',{width:1.5,height:0.9,depth:1.0},scene); block.position.set(W/2-2,0.45,1); block.material=blockM;
+  const cleaverM=mat('k_cleaverM'); cleaverM.diffuseColor=new BABYLON.Color3(0.3,0.28,0.3); cleaverM.specularColor=new BABYLON.Color3(0.5,0.5,0.5);
+  const cleaver=BABYLON.MeshBuilder.CreateBox('k_cleaver',{width:0.04,height:0.25,depth:0.15},scene); cleaver.position.set(W/2-2,0.95,0.8); cleaver.material=cleaverM;
+  for(let k=0;k<4;k++){ const knife=BABYLON.MeshBuilder.CreateBox('k_knife'+k,{width:0.02,height:0.02,depth:0.2},scene); knife.position.set(W/2-2-0.4+k*0.25,0.92,1.1); knife.material=cleaverM; }
+
+  // Spice shelves
+  for(let s=0;s<3;s++){ const shelf=BABYLON.MeshBuilder.CreateBox('k_spice'+s,{width:2.5,height:0.05,depth:0.25},scene); shelf.position.set(W/2-2.5,1.0+s*0.5,-D/2+0.15); shelf.material=woodM;
+    for(let j=0;j<6;j++){ const jar=BABYLON.MeshBuilder.CreateCylinder('k_sjar'+s+'_'+j,{diameterTop:0.04,diameterBottom:0.05,height:0.15,tessellation:8},scene); jar.position.set(W/2-3.2+j*0.4,1.1+s*0.5,-D/2+0.2); const jm=mat('k_sjm'+s+j); jm.diffuseColor=new BABYLON.Color3(0.3+Math.random()*0.3,0.15+Math.random()*0.15,0.05+Math.random()*0.1); jar.material=jm; }
   }
+
+  // Red rug
+  const rugM=mat('k_rugM'); rugM.diffuseColor=new BABYLON.Color3(0.35,0.08,0.06);
+  const rug=BABYLON.MeshBuilder.CreateGround('k_rug',{width:3.0,height:4.0,subdivisions:2},scene); rug.position.set(0,0.01,2); rug.material=rugM;
+
+  // Hanging garlic
+  [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(([gx,gz],gi)=>{ const g=BABYLON.MeshBuilder.CreateCylinder('k_garlic'+gi,{diameterTop:0.04,diameterBottom:0.15,height:0.4,tessellation:8},scene); g.position.set(gx,H-0.4,gz); const gm=mat('k_gm'+gi); gm.diffuseColor=new BABYLON.Color3(0.28,0.24,0.16); g.material=gm; });
+
+  // Lights
+  const hearthLight=new BABYLON.PointLight('k_hL',new BABYLON.Vector3(0,0.8,-D/2+0.5),scene);
+  hearthLight.diffuse=new BABYLON.Color3(0.1,0.6,0.2); hearthLight.intensity=1.5; hearthLight.range=10;
+  const winLight=new BABYLON.PointLight('k_wL',new BABYLON.Vector3(-W/2+1,2.5,0),scene);
+  winLight.diffuse=new BABYLON.Color3(0.2,0.3,0.5); winLight.intensity=1.0; winLight.range=12;
+  const ambient=new BABYLON.HemisphericLight('k_amb',new BABYLON.Vector3(0,1,0),scene);
+  ambient.intensity=0.4; ambient.diffuse=new BABYLON.Color3(0.3,0.35,0.4); ambient.groundColor=new BABYLON.Color3(0.1,0.08,0.05);
+
+  let ft=0;
+  function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
+  scene.registerBeforeRender(()=>{
+    ft+=engine.getDeltaTime()*0.001;
+    hearthLight.intensity=flk(1.5,0.3,2.5,0.5);
+    if(brew) brew.material.emissiveColor=new BABYLON.Color3(0.03,flk(0.4,0.1,1.8,2),0.12);
+    if(smoke) { smoke.rotation.y=ft*0.3; smoke.position.y=1.3+Math.sin(ft*0.5)*0.1; }
+  });
+
+  interactables.set('k_cauldron','cauldron'); interactables.set('k_brew','cauldron');
+  interactables.set('k_hearth','fireplace');
+  interactables.set('k_garlic0','herbs_dried'); interactables.set('k_garlic1','herbs_dried');
+
+  const doorE=BABYLON.MeshBuilder.CreateBox('door_entrance',{width:1.4,height:2.4,depth:0.1},scene); doorE.position.set(0,1.2,D/2-0.05); const deM=mat('k_deM'); deM.alpha=0.01; doorE.material=deM;
+  interactables.set('door_entrance','door_entrance');
+  const doorP=BABYLON.MeshBuilder.CreateBox('door_pantry',{width:1.2,height:2.4,depth:0.1},scene); doorP.position.set(-W/2+3,1.2,-D/2+0.05); const dpM=mat('k_dpM'); dpM.alpha=0.01; doorP.material=dpM;
+  interactables.set('door_pantry','door_pantry');
 }
+
+// ─── LIBRARY ──────────────────────────────────────────────────────────────────
+function buildLibrary(){
+  const W=16, D=14, H=5.0;
+  const wallM = pbr('lib_wallM', TEX.plaster_d, TEX.plaster_n, 3, 2, new BABYLON.Color3(0.26,0.22,0.28));
+  const floorM = pbr('lib_floorM', TEX.wood_d, TEX.wood_n, 4, 4, new BABYLON.Color3(0.3,0.22,0.14));
+  const ceilM = pbr('lib_ceilM', TEX.beam_d, TEX.beam_n, 4, 3, new BABYLON.Color3(0.14,0.09,0.05));
+  const woodM = pbr('lib_woodM', TEX.darkwood_d, TEX.darkwood_n, 3, 2, new BABYLON.Color3(0.28,0.2,0.1));
+
+  const floor=BABYLON.MeshBuilder.CreateGround('lib_floor',{width:W,height:D,subdivisions:4},scene); floor.material=floorM; floor.receiveShadows=true;
+  const ceil=BABYLON.MeshBuilder.CreatePlane('lib_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
+  function libWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
+  libWall('lib_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); libWall('lib_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
+  libWall('lib_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); libWall('lib_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  [-6,-3,0,3,6].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('lib_beam'+bx,{width:0.3,height:0.28,depth:D},scene); b.position.set(bx,H-0.16,0); const bm=mat('lib_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.16,0.08,0.04); b.material=bm; });
+
+  // Display cases with skulls
+  for(let dc=0;dc<5;dc++){ const dx=-5+dc*2.5;
+    const caseBox=BABYLON.MeshBuilder.CreateBox('lib_dc'+dc,{width:1.0,height:2.0,depth:0.5},scene); caseBox.position.set(dx,1.0,-D/2+0.3); caseBox.material=woodM;
+    const glassM=mat('lib_glassM'); glassM.diffuseColor=new BABYLON.Color3(0.05,0.08,0.1); glassM.alpha=0.3;
+    const glass=BABYLON.MeshBuilder.CreatePlane('lib_dg'+dc,{width:0.9,height:1.9},scene); glass.position.set(dx,1.0,-D/2+0.55); glass.material=glassM;
+    const skullM=mat('lib_skullM'); skullM.diffuseColor=new BABYLON.Color3(0.6,0.55,0.45);
+    const skull=BABYLON.MeshBuilder.CreateSphere('lib_skull'+dc,{diameter:0.2,segments:8},scene); skull.position.set(dx,1.0,-D/2+0.3); skull.scaling.y=1.2; skull.material=skullM;
+  }
+
+  // Diagonal staircase
+  const STS=10, SY=H*0.5/STS, SZ=0.35, SX=2.5;
+  const soX=-W/2+3, soZ=D/2-1;
+  for(let s=0;s<STS;s++){ const tread=BABYLON.MeshBuilder.CreateBox('lib_tread'+s,{width:SX,height:0.05,depth:SZ},scene); tread.position.set(soX+s*0.4,s*SY+0.05,soZ-s*SZ); tread.material=woodM;
+    const riser=BABYLON.MeshBuilder.CreateBox('lib_riser'+s,{width:SX,height:SY,depth:0.03},scene); riser.position.set(soX+s*0.4,s*SY+SY/2,soZ-s*SZ+SZ/2); riser.material=woodM; }
+
+  // Leather wingback chair
+  const chairM=mat('lib_chairM'); chairM.diffuseColor=new BABYLON.Color3(0.15,0.08,0.06); chairM.specularPower=8;
+  const chairBase=BABYLON.MeshBuilder.CreateBox('lib_chair',{width:0.8,height:0.45,depth:0.8},scene); chairBase.position.set(W/2-2,0.45,-2); chairBase.material=chairM;
+  const chairBack=BABYLON.MeshBuilder.CreateBox('lib_chairBack',{width:0.8,height:1.0,depth:0.15},scene); chairBack.position.set(W/2-2,1.0,-2-0.35); chairBack.material=chairM;
+
+  // Red rug
+  const rugM=mat('lib_rugM'); rugM.diffuseColor=new BABYLON.Color3(0.32,0.06,0.04);
+  const rug=BABYLON.MeshBuilder.CreateGround('lib_rug',{width:3.5,height:4.5,subdivisions:2},scene); rug.position.set(W/2-2,0.01,-1.5); rug.material=rugM;
+
+  // Owl with glowing eyes
+  const owlM=mat('lib_owlM'); owlM.diffuseColor=new BABYLON.Color3(0.3,0.25,0.15);
+  const owlBody=BABYLON.MeshBuilder.CreateSphere('lib_owl',{diameter:0.25,segments:8},scene); owlBody.position.set(-W/2+0.5,3.5,2); owlBody.scaling.set(0.8,1.2,0.8); owlBody.material=owlM;
+  const owlHead=BABYLON.MeshBuilder.CreateSphere('lib_owlH',{diameter:0.15,segments:8},scene); owlHead.position.set(-W/2+0.5,3.75,2); owlHead.material=owlM;
+  [[-0.04],[0.04]].forEach(([ex])=>{ const e=BABYLON.MeshBuilder.CreateSphere('lib_owlE',{diameter:0.04,segments:6},scene); e.position.set(-W/2+0.5+ex,3.78,2+0.06); e.material=emitM('lib_owlEm',0.8,0.75,0.3,0.7); });
+
+  // Broom on wall
+  const broomM=mat('lib_broomM'); broomM.diffuseColor=new BABYLON.Color3(0.2,0.14,0.06);
+  const broomHandle=BABYLON.MeshBuilder.CreateCylinder('lib_broomHandle',{diameterTop:0.03,diameterBottom:0.04,height:2.0,tessellation:8},scene); broomHandle.position.set(W/2-0.3,2.5,-4); broomHandle.rotation.z=Math.PI/2+0.3; broomHandle.material=broomM;
+  const broomStraw=BABYLON.MeshBuilder.CreateCylinder('lib_broomStraw',{diameterTop:0.04,diameterBottom:0.12,height:0.4,tessellation:8},scene); broomStraw.position.set(W/2-0.7,2.3,-4); broomStraw.rotation.z=Math.PI/2+0.3; broomStraw.material=broomM;
+
+  // Locked cage
+  const cageM=mat('lib_cageM'); cageM.diffuseColor=new BABYLON.Color3(0.12,0.1,0.08);
+  const cage=BABYLON.MeshBuilder.CreateBox('lib_cage',{width:0.8,height:1.2,depth:0.4},scene); cage.position.set(3,2.5,D/2-0.25); cage.material=cageM;
+
+  // Floating magic wisps
+  const wisps=[];
+  for(let w=0;w<5;w++){ const wp=BABYLON.MeshBuilder.CreateSphere('lib_wisp'+w,{diameter:0.15,segments:6},scene); wp.position.set((Math.random()-0.5)*W*0.6, 2+Math.random()*2, (Math.random()-0.5)*D*0.6); wp.material=emitM('lib_wm'+w,0.3,0.8,0.5,0.5); wp.material.alpha=0.4; wisps.push(wp); }
+
+  // Lights
+  const ambient=new BABYLON.HemisphericLight('lib_amb',new BABYLON.Vector3(0,1,0),scene);
+  ambient.intensity=0.4; ambient.diffuse=new BABYLON.Color3(0.3,0.38,0.48); ambient.groundColor=new BABYLON.Color3(0.12,0.06,0.05);
+  const winLight=new BABYLON.PointLight('lib_wL',new BABYLON.Vector3(0,3,-D/2+1),scene);
+  winLight.diffuse=new BABYLON.Color3(0.25,0.35,0.55); winLight.intensity=1.5; winLight.range=20;
+  const candleLight=new BABYLON.PointLight('lib_cL',new BABYLON.Vector3(W/2-2,1.5,-2),scene);
+  candleLight.diffuse=new BABYLON.Color3(0.7,0.5,0.2); candleLight.intensity=0.8; candleLight.range=8;
+
+  let ft=0;
+  function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
+  scene.registerBeforeRender(()=>{
+    ft+=engine.getDeltaTime()*0.001;
+    candleLight.intensity=flk(0.8,0.15,2.1,0);
+    wisps.forEach((w,i)=>{ w.position.y+=Math.sin(ft*0.5+i*2)*0.003; w.material.emissiveColor=new BABYLON.Color3(flk(0.2,0.1,0.7+i,0),flk(0.5,0.15,0.5+i,1),flk(0.3,0.1,0.6+i,2)); });
+  });
+
+  interactables.set('lib_dc0','bookshelf'); interactables.set('lib_dc1','bookshelf');
+  interactables.set('lib_owl','portrait'); interactables.set('lib_owlH','portrait');
+  interactables.set('lib_cage','clock');
+  interactables.set('lib_broomHandle','broom'); interactables.set('lib_broomStraw','broom');
+
+  const doorE=BABYLON.MeshBuilder.CreateBox('door_entrance',{width:1.4,height:2.4,depth:0.1},scene); doorE.position.set(0,1.2,D/2-0.05); const deM=mat('lib_deM'); deM.alpha=0.01; doorE.material=deM;
+  interactables.set('door_entrance','door_entrance');
+  const doorA=BABYLON.MeshBuilder.CreateBox('door_attic',{width:1.2,height:2.4,depth:0.1},scene); doorA.position.set(soX+STS*0.2,1.2+STS*SY/2,soZ-STS*SZ+0.2); const daM=mat('lib_daM'); daM.alpha=0.01; doorA.material=daM;
+  interactables.set('door_attic','door_attic');
+  const doorBs=BABYLON.MeshBuilder.CreateBox('door_basement',{width:0.1,height:2.0,depth:1.0},scene); doorBs.position.set(-W/2+0.05,1.0,-D/2+3); const dbm2=mat('lib_dbm'); dbm2.alpha=0.01; doorBs.material=dbm2;
+  interactables.set('door_basement','door_basement');
+}
+
+// ─── BATHROOM ──────────────────────────────────────────────────────────────────
+function buildBathroom(){
+  const W=6, D=5, H=3.5;
+  const wallM = pbr('b_wallM', TEX.plaster_d, TEX.plaster_n, 2, 2, new BABYLON.Color3(0.20,0.22,0.24));
+  const floorM = pbr('b_floorM', TEX.stone_d, TEX.stone_n, 3, 2, new BABYLON.Color3(0.15,0.18,0.20));
+  const ceilM = mat('b_ceilM'); ceilM.diffuseColor=new BABYLON.Color3(0.1,0.12,0.14);
+
+  const floor=BABYLON.MeshBuilder.CreateGround('b_floor',{width:W,height:D,subdivisions:2},scene); floor.material=floorM; floor.receiveShadows=true;
+  const ceil=BABYLON.MeshBuilder.CreatePlane('b_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
+  function bWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
+  bWall('b_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); bWall('b_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
+  bWall('b_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); bWall('b_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+
+  // Bathtub
+  const tubM=mat('b_tubM'); tubM.diffuseColor=new BABYLON.Color3(0.5,0.48,0.42);
+  const tub=BABYLON.MeshBuilder.CreateBox('b_tub',{width:1.6,height:0.7,depth:0.8},scene); tub.position.set(0,0.35,-D/2+1.2); tub.material=tubM;
+  const waterM=mat('b_waterM'); waterM.diffuseColor=new BABYLON.Color3(0.08,0.1,0.06); waterM.alpha=0.6;
+  const water=BABYLON.MeshBuilder.CreateBox('b_water',{width:1.4,height:0.02,depth:0.6},scene); water.position.set(0,0.65,-D/2+1.2); water.material=waterM;
+
+  // Sink + cracked mirror
+  const sink=BABYLON.MeshBuilder.CreateBox('b_sink',{width:0.6,height:0.4,depth:0.4},scene); sink.position.set(W/2-0.5,0.8,-D/2+2.5); sink.material=tubM;
+  const mirM=mat('b_mirM'); mirM.diffuseColor=new BABYLON.Color3(0.08,0.08,0.1); mirM.emissiveColor=new BABYLON.Color3(0.01,0.01,0.02);
+  const mirror=BABYLON.MeshBuilder.CreatePlane('b_mirror',{width:0.5,height:0.7},scene); mirror.position.set(W/2-0.5,1.3,-D/2+2.5+0.21); mirror.material=mirM;
+
+  // Spider webs
+  const webM=mat('b_webM'); webM.diffuseColor=new BABYLON.Color3(0.35,0.32,0.28); webM.alpha=0.2;
+  [[-W/2+0.1,0,0],[W/2-0.1,0,Math.PI/2],[-W/2+0.1,0,-Math.PI/2],[W/2-0.1,0,Math.PI]].forEach(([cx,cz,ry],i)=>{
+    const web=BABYLON.MeshBuilder.CreatePlane('b_web'+i,{width:2.0,height:1.8},scene); web.position.set(cx,H-0.8,cz); web.rotation.y=ry; web.material=webM.clone('b_wm'+i);
+  });
+
+  // Giant spider
+  const spiderM=mat('b_spiderM'); spiderM.diffuseColor=new BABYLON.Color3(0.05,0.04,0.03);
+  const spiderBody=BABYLON.MeshBuilder.CreateSphere('b_spider',{diameter:0.15,segments:8},scene); spiderBody.position.set(-W/2+0.3,H-0.8,-D/2+0.3); spiderBody.scaling.set(1,0.6,1); spiderBody.material=spiderM;
+  for(let l=0;l<8;l++){ const ang=l/8*Math.PI*2; const leg=BABYLON.MeshBuilder.CreateCylinder('b_leg'+l,{diameterTop:0.01,diameterBottom:0.02,height:0.4,tessellation:4},scene); leg.position.set(-W/2+0.3+Math.cos(ang)*0.15,H-0.8,-D/2+0.3+Math.sin(ang)*0.15); leg.rotation.x=Math.sin(ang)*0.5; leg.rotation.z=Math.cos(ang)*0.5; leg.material=spiderM; }
+
+  // Dim lights
+  const ambient=new BABYLON.HemisphericLight('b_amb',new BABYLON.Vector3(0,1,0),scene);
+  ambient.intensity=0.25; ambient.diffuse=new BABYLON.Color3(0.2,0.25,0.3); ambient.groundColor=new BABYLON.Color3(0.08,0.06,0.05);
+  const dimLight=new BABYLON.PointLight('b_dim',new BABYLON.Vector3(W/2-1,2,-D/2+2),scene);
+  dimLight.diffuse=new BABYLON.Color3(0.15,0.15,0.18); dimLight.intensity=0.5; dimLight.range=8;
+
+  interactables.set('b_spider','spider'); interactables.set('b_leg0','spider');
+  interactables.set('b_mirror','mirror');
+
+  const doorE=BABYLON.MeshBuilder.CreateBox('door_entrance',{width:1.0,height:2.2,depth:0.1},scene); doorE.position.set(0,1.1,D/2-0.05); const deM=mat('b_deM'); deM.alpha=0.01; doorE.material=deM;
+  interactables.set('door_entrance','door_entrance');
+}
+
+// ─── PANTRY ────────────────────────────────────────────────────────────────────
+function buildPantry(){
+  const W=10, D=8, H=3.8;
+  const wallM = pbr('p_wallM', TEX.mstone_d, TEX.mstone_n, 2, 2, new BABYLON.Color3(0.22,0.25,0.27));
+  const floorM = pbr('p_floorM', TEX.stone_d, TEX.stone_n, 3, 2, new BABYLON.Color3(0.18,0.2,0.22));
+  const woodM = pbr('p_woodM', TEX.darkwood_d, TEX.darkwood_n, 2, 2, new BABYLON.Color3(0.28,0.2,0.1));
+
+  const floor=BABYLON.MeshBuilder.CreateGround('p_floor',{width:W,height:D,subdivisions:3},scene); floor.material=floorM; floor.receiveShadows=true;
+  const ceilM=mat('p_ceilM'); ceilM.diffuseColor=new BABYLON.Color3(0.1,0.08,0.06); const ceil=BABYLON.MeshBuilder.CreatePlane('p_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
+  function pWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
+  pWall('p_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); pWall('p_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
+  pWall('p_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); pWall('p_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+
+  // Specimen jar grid
+  for(let row=0;row<3;row++){ for(let col=0;col<6;col++){ const jx=-W/2+1+col*1.5; const jy=1.0+row*0.8;
+    const jar=BABYLON.MeshBuilder.CreateCylinder('p_jar'+row+col,{diameterTop:0.12,diameterBottom:0.15,height:0.5,tessellation:10},scene); jar.position.set(jx,jy+0.25,-D/2+0.3); const jm=mat('p_jm'+row+col);
+    const cols=[[0.2,0.3,0.15],[0.3,0.2,0.1],[0.15,0.25,0.3],[0.25,0.15,0.1]]; const c=cols[(row*6+col)%4]; jm.diffuseColor=new BABYLON.Color3(c[0],c[1],c[2]); jm.alpha=0.65; jar.material=jm;
+    const lid=BABYLON.MeshBuilder.CreateCylinder('p_lid'+row+col,{diameter:0.14,height:0.05,tessellation:10},scene); lid.position.set(jx,jy+0.55,-D/2+0.3); lid.material=woodM;
+  }}
+  for(let row=0;row<3;row++){ const shelf=BABYLON.MeshBuilder.CreateBox('p_shelf'+row,{width:W-1,height:0.04,depth:0.3},scene); shelf.position.set(0,0.95+row*0.8,-D/2+0.3); shelf.material=woodM; }
+
+  // Leaded window
+  const winM=mat('p_winM'); winM.diffuseColor=new BABYLON.Color3(0.06,0.1,0.18); winM.emissiveColor=new BABYLON.Color3(0.06,0.12,0.2); winM.alpha=0.82;
+  const win=BABYLON.MeshBuilder.CreatePlane('p_win',{width:1.5,height:2.0},scene); win.position.set(-W/2+0.08,2.0,0); win.rotation.y=Math.PI/2; win.material=winM;
+
+  // Storage chest
+  const chest=BABYLON.MeshBuilder.CreateBox('p_chest',{width:2.5,height:1.0,depth:0.8},scene); chest.position.set(W/2-2,0.5,1); chest.material=woodM;
+
+  // Burlap sacks
+  [[0,1],[0.6,1.5]].forEach(([sx,sz])=>{ const s=BABYLON.MeshBuilder.CreateSphere('p_sack',{diameter:0.4,segments:8},scene); s.position.set(sx,0.25,sz); s.scaling.set(1,1.2,1); const sm=mat('p_sackM'); sm.diffuseColor=new BABYLON.Color3(0.28,0.24,0.16); s.material=sm; });
+
+  // Wicker baskets
+  [[-3,2],[-3,-1],[3,-2]].forEach(([bx,bz])=>{ const b=BABYLON.MeshBuilder.CreateCylinder('p_basket',{diameter:0.4,height:0.35,tessellation:10},scene); b.position.set(bx,0.18,bz); const bm=mat('p_basketM'); bm.diffuseColor=new BABYLON.Color3(0.35,0.28,0.15); b.material=bm; });
+
+  // Green glow
+  const glowM=emitM('p_glowM',0.1,0.5,0.2,0.4); glowM.alpha=0.5;
+  const glow=BABYLON.MeshBuilder.CreateSphere('p_glow',{diameter:0.15,segments:8},scene); glow.position.set(W/2-2,1.15,0.8); glow.material=glowM;
+
+  // Lights
+  const ambient=new BABYLON.HemisphericLight('p_amb',new BABYLON.Vector3(0,1,0),scene);
+  ambient.intensity=0.3; ambient.diffuse=new BABYLON.Color3(0.25,0.3,0.35); ambient.groundColor=new BABYLON.Color3(0.1,0.08,0.05);
+  const winLight=new BABYLON.PointLight('p_wL',new BABYLON.Vector3(-W/2+1,2,0),scene);
+  winLight.diffuse=new BABYLON.Color3(0.2,0.3,0.5); winLight.intensity=0.8; winLight.range=10;
+  const glowLight=new BABYLON.PointLight('p_gL',new BABYLON.Vector3(W/2-2,1.2,0.8),scene);
+  glowLight.diffuse=new BABYLON.Color3(0.1,0.5,0.2); glowLight.intensity=0.6; glowLight.range=5;
+
+  let ft=0;
+  scene.registerBeforeRender(()=>{ ft+=engine.getDeltaTime()*0.001; glowLight.intensity=0.4+Math.sin(ft*1.5)*0.15; if(glow) glow.material.emissiveColor=new BABYLON.Color3(0.05,0.3+Math.sin(ft*1.5)*0.1,0.1); });
+
+  interactables.set('p_jar00','jars'); interactables.set('p_jar11','jars');
+  interactables.set('p_glow','crystalball');
+
+  const doorK=BABYLON.MeshBuilder.CreateBox('door_kitchen',{width:1.2,height:2.2,depth:0.1},scene); doorK.position.set(0,1.1,D/2-0.05); const dkM=mat('p_dkM'); dkM.alpha=0.01; doorK.material=dkM;
+  interactables.set('door_kitchen','door_kitchen');
+  const doorBs=BABYLON.MeshBuilder.CreateBox('door_basement',{width:1.0,height:2.0,depth:0.1},scene); doorBs.position.set(W/2-0.5,1.0,-D/2+0.05); const dbM=mat('p_dbM'); dbM.alpha=0.01; doorBs.material=dbM;
+  interactables.set('door_basement','door_basement');
+}
+
+// ─── BASEMENT ──────────────────────────────────────────────────────────────────
+function buildBasement(){
+  const W=14, D=12, H=4.0;
+  const wallM = pbr('bs_wallM', TEX.rock_d, TEX.rock_n, 3, 2, new BABYLON.Color3(0.15,0.12,0.14));
+  const floorM = pbr('bs_floorM', TEX.wood_d, TEX.wood_n, 4, 3, new BABYLON.Color3(0.15,0.1,0.06));
+  const ceilM = pbr('bs_ceilM', TEX.stone_d, TEX.stone_n, 3, 2, new BABYLON.Color3(0.1,0.08,0.1));
+
+  const floor=BABYLON.MeshBuilder.CreateGround('bs_floor',{width:W,height:D,subdivisions:4},scene); floor.material=floorM; floor.receiveShadows=true;
+  const ceil=BABYLON.MeshBuilder.CreatePlane('bs_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
+  function bsWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
+  bsWall('bs_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); bsWall('bs_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
+  bsWall('bs_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); bsWall('bs_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+
+  // Domed leaded window
+  const winM=mat('bs_winM'); winM.diffuseColor=new BABYLON.Color3(0.04,0.1,0.06); winM.emissiveColor=new BABYLON.Color3(0.06,0.16,0.08); winM.alpha=0.82;
+  const win=BABYLON.MeshBuilder.CreatePlane('bs_win',{width:2.0,height:2.5},scene); win.position.set(0,2.5,-D/2+0.08); win.material=winM;
+  const archM=mat('bs_archM'); archM.diffuseColor=new BABYLON.Color3(0.12,0.14,0.12);
+  for(let a=0;a<7;a++){ const ang=(a/6)*Math.PI; const ax=Math.cos(ang)*0.9; const ay=3.75+Math.sin(ang)*0.4; const b=BABYLON.MeshBuilder.CreateBox('bs_arch'+a,{width:0.25,height:0.35,depth:0.3},scene); b.position.set(ax,ay,-D/2+0.1); b.material=archM; }
+
+  // Copper alchemy still
+  const copperM=mat('bs_copperM'); copperM.diffuseColor=new BABYLON.Color3(0.3,0.15,0.06); copperM.specularColor=new BABYLON.Color3(0.3,0.2,0.1); copperM.specularPower=32;
+  const glassM=mat('bs_glassM'); glassM.diffuseColor=new BABYLON.Color3(0.05,0.1,0.06); glassM.emissiveColor=new BABYLON.Color3(0.04,0.15,0.08); glassM.alpha=0.5;
+  const flask=BABYLON.MeshBuilder.CreateSphere('bs_flask',{diameter:0.5,segments:12},scene); flask.position.set(-3,0.6,-1); flask.material=glassM;
+  const tube=BABYLON.MeshBuilder.CreateCylinder('bs_tube',{diameter:0.05,height:1.5,tessellation:8},scene); tube.position.set(-3,1.3,-1); tube.material=copperM;
+  const bulb=BABYLON.MeshBuilder.CreateSphere('bs_bulb',{diameter:0.25,segments:10},scene); bulb.position.set(-3,2.1,-1); bulb.material=glassM;
+  const arm=BABYLON.MeshBuilder.CreateCylinder('bs_arm',{diameter:0.04,height:0.8,tessellation:8},scene); arm.position.set(-2.7,2.1,-1); arm.rotation.z=Math.PI/2; arm.material=copperM;
+  const cFlask=BABYLON.MeshBuilder.CreateSphere('bs_cflask',{diameter:0.3,segments:10},scene); cFlask.position.set(-2.3,1.8,-1); cFlask.material=glassM;
+  const stand=BABYLON.MeshBuilder.CreateCylinder('bs_stand',{diameter:0.3,height:0.4,tessellation:10},scene); stand.position.set(-3,0.2,-1); stand.material=copperM;
+  const heatM=emitM('bs_heatM',0.8,0.3,0.05,0.7);
+  const heat=BABYLON.MeshBuilder.CreateSphere('bs_heat',{diameter:0.1,segments:6},scene); heat.position.set(-3,0.15,-1); heat.material=heatM;
+
+  // Workbench
+  const benchM=pbr('bs_benchM',TEX.darkwood_d,TEX.darkwood_n,2,1,new BABYLON.Color3(0.25,0.18,0.1));
+  const bench=BABYLON.MeshBuilder.CreateBox('bs_bench',{width:2.5,height:0.9,depth:1.0},scene); bench.position.set(3,0.45,-3); bench.material=benchM;
+
+  // Pentagram
+  const pentM=mat('bs_pentM'); pentM.diffuseColor=new BABYLON.Color3(0.08,0.03,0.03); pentM.emissiveColor=new BABYLON.Color3(0.06,0.01,0.01);
+  const pent=BABYLON.MeshBuilder.CreateDisc('bs_pent',{diameter:3.0,tessellation:5},scene); pent.position.set(0,0.02,1); pent.rotation.x=Math.PI/2; pent.material=pentM;
+  const lineM=emitM('bs_lineM',0.4,0.05,0.02,0.5);
+  for(let i=0;i<5;i++){ const a1=i/5*Math.PI*2-Math.PI/2; const a2=(i+2)/5*Math.PI*2-Math.PI/2; const r=1.3;
+    const x1=Math.cos(a1)*r, z1=Math.sin(a1)*r, x2=Math.cos(a2)*r, z2=Math.sin(a2)*r;
+    const lx=(x1+x2)/2, lz=(z1+z2)/2; const len=Math.sqrt((x2-x1)**2+(z2-z1)**2); const ang=Math.atan2(z2-z1,x2-x1);
+    const line=BABYLON.MeshBuilder.CreateBox('bs_pline'+i,{width:len,height:0.02,depth:0.04},scene); line.position.set(lx,0.03,1+lz); line.rotation.y=-ang; line.material=lineM;
+  }
+
+  // Scattered bones
+  [[1,2.5],[2,3],[1.5,2],[0.5,3.5]].forEach(([bx,bz])=>{ const bone=BABYLON.MeshBuilder.CreateCylinder('bs_bone',{diameterTop:0.02,diameterBottom:0.03,height:0.2,tessellation:6},scene); bone.position.set(bx,0.02,bz); bone.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI); const bm=mat('bs_boneM'); bm.diffuseColor=new BABYLON.Color3(0.4,0.35,0.25); bone.material=bm; });
+
+  // Crates
+  [[-5,-4],[-4.2,-4]].forEach(([cx,cz],ci)=>{ const crate=BABYLON.MeshBuilder.CreateBox('bs_crate'+ci,{width:0.7,height:0.7,depth:0.7},scene); crate.position.set(cx,0.35,cz); const cm=mat('bs_crateM'); cm.diffuseColor=new BABYLON.Color3(0.2,0.14,0.08); crate.material=cm; });
+
+  // Stone archway to specimen nook
+  for(let a=0;a<7;a++){ const ang=(a/6)*Math.PI; const ay=0.5+Math.sin(ang)*1.2; const az=-2+Math.cos(ang)*1.0; const b=BABYLON.MeshBuilder.CreateBox('bs_sArch'+a,{width:0.25,height:0.35,depth:0.3},scene); b.position.set(-W/2+0.15,ay,az); b.material=wallM; }
+  for(let s=0;s<2;s++){ const shelf=BABYLON.MeshBuilder.CreateBox('bs_nShelf'+s,{width:0.8,height:0.04,depth:0.3},scene); shelf.position.set(-W/2+0.5,1.0+s*0.6,-2); shelf.material=benchM;
+    for(let j=0;j<3;j++){ const jar=BABYLON.MeshBuilder.CreateCylinder('bs_nJar'+s+j,{diameterTop:0.06,diameterBottom:0.08,height:0.18,tessellation:8},scene); jar.position.set(-W/2+0.5-0.2+j*0.2,1.1+s*0.6,-2); const jm=mat('bs_njm'+s+j); jm.diffuseColor=new BABYLON.Color3(0.2+Math.random()*0.2,0.1+Math.random()*0.1,0.05+Math.random()*0.05); jar.material=jm; }
+  }
+
+  // Hanging herbs
+  for(let h=0;h<4;h++){ const hz=-3+h*1.5;
+    const herb=BABYLON.MeshBuilder.CreateCylinder('bs_herb'+h,{diameterTop:0.03,diameterBottom:0.1,height:0.4,tessellation:6},scene); herb.position.set(-W/2+0.2,3.0,hz); const hm=mat('bs_hm'+h); hm.diffuseColor=new BABYLON.Color3(0.2,0.22,0.1); herb.material=hm;
+  }
+
+  // Lights
+  const winLight=new BABYLON.PointLight('bs_wL',new BABYLON.Vector3(0,3,-D/2+1),scene);
+  winLight.diffuse=new BABYLON.Color3(0.1,0.3,0.15); winLight.intensity=1.5; winLight.range=18;
+  const stillLight=new BABYLON.PointLight('bs_sL',new BABYLON.Vector3(-3,1.5,-1),scene);
+  stillLight.diffuse=new BABYLON.Color3(0.4,0.8,0.3); stillLight.intensity=1.0; stillLight.range=8;
+  const pentLight=new BABYLON.PointLight('bs_pL',new BABYLON.Vector3(0,0.5,1),scene);
+  pentLight.diffuse=new BABYLON.Color3(0.5,0.05,0.02); pentLight.intensity=1.0; pentLight.range=6;
+  const lampLight=new BABYLON.PointLight('bs_lL',new BABYLON.Vector3(3,1.5,-3),scene);
+  lampLight.diffuse=new BABYLON.Color3(0.7,0.4,0.1); lampLight.intensity=1.5; lampLight.range=10;
+  const ambient=new BABYLON.HemisphericLight('bs_amb',new BABYLON.Vector3(0,1,0),scene);
+  ambient.intensity=0.2; ambient.diffuse=new BABYLON.Color3(0.1,0.15,0.12); ambient.groundColor=new BABYLON.Color3(0.08,0.03,0.02);
+
+  let ft=0;
+  function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
+  scene.registerBeforeRender(()=>{
+    ft+=engine.getDeltaTime()*0.001;
+    stillLight.intensity=flk(1.0,0.2,1.8,0.5);
+    pentLight.intensity=flk(1.0,0.25,0.7,1.5);
+    lampLight.intensity=flk(1.5,0.2,2.1,2.0);
+    if(heat) heat.material.emissiveColor=new BABYLON.Color3(flk(0.8,0.2,4,0),flk(0.3,0.1,4,1),0.02);
+  });
+
+  interactables.set('bs_flask','still'); interactables.set('bs_bulb','still'); interactables.set('bs_tube','still');
+  interactables.set('bs_pent','pentagram'); interactables.set('bs_pline0','pentagram');
+  interactables.set('bs_bone','bones');
+
+  const doorP=BABYLON.MeshBuilder.CreateBox('door_pantry',{width:1.2,height:2.2,depth:0.1},scene); doorP.position.set(0,1.1,D/2-0.05); const dpM=mat('bs_dpM'); dpM.alpha=0.01; doorP.material=dpM;
+  interactables.set('door_pantry','door_pantry');
+}
+
+// ─── ATTIC ────────────────────────────────────────────────────────────────────
+function buildAttic(){
+  const W=10, D=8, H=3.0;
+  const wallM = pbr('a_wallM', TEX.beam_d, TEX.beam_n, 2, 2, new BABYLON.Color3(0.12,0.08,0.05));
+  const floorM = pbr('a_floorM', TEX.wood_d, TEX.wood_n, 3, 2, new BABYLON.Color3(0.12,0.08,0.04));
+  const ceilM = pbr('a_ceilM', TEX.beam_d, TEX.beam_n, 2, 2, new BABYLON.Color3(0.08,0.05,0.03));
+
+  const floor=BABYLON.MeshBuilder.CreateGround('a_floor',{width:W,height:D,subdivisions:3},scene); floor.material=floorM; floor.receiveShadows=true;
+  const ceil=BABYLON.MeshBuilder.CreatePlane('a_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
+  function aWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
+  aWall('a_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); aWall('a_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
+  aWall('a_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); aWall('a_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  [-3,-1,1,3].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('a_rafter'+bx,{width:0.2,height:0.2,depth:D},scene); b.position.set(bx,H-0.12,0); const bm=mat('a_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.1,0.06,0.03); b.material=bm; });
+
+  // Storage boxes
+  [[-3,-2,0.8],[3,-2,0.6],[-2,2,0.7],[2,2,0.5],[0,0,0.9]].forEach(([bx,bz,h])=>{ const box=BABYLON.MeshBuilder.CreateBox('a_box',{width:h*1.2,height:h,depth:h*0.9},scene); box.position.set(bx,h/2,bz); const bm=mat('a_boxM'); bm.diffuseColor=new BABYLON.Color3(0.15+Math.random()*0.1,0.1+Math.random()*0.05,0.05); box.material=bm; });
+
+  // Locked trunk
+  const trunkM=pbr('a_trunkM',TEX.darkwood_d,TEX.darkwood_n,2,1,new BABYLON.Color3(0.2,0.14,0.08));
+  const trunk=BABYLON.MeshBuilder.CreateBox('a_trunk',{width:1.2,height:0.7,depth:0.6},scene); trunk.position.set(-3,0.35,-2.5); trunk.material=trunkM;
+
+  // Broom
+  const broomM=mat('a_broomM'); broomM.diffuseColor=new BABYLON.Color3(0.2,0.14,0.06);
+  const broomHandle=BABYLON.MeshBuilder.CreateCylinder('a_broomHandle',{diameterTop:0.03,diameterBottom:0.04,height:1.8,tessellation:8},scene); broomHandle.position.set(W/2-0.4,0.9,2); broomHandle.rotation.z=0.15; broomHandle.material=broomM;
+  const broomStraw=BABYLON.MeshBuilder.CreateCylinder('a_broomStraw',{diameterTop:0.04,diameterBottom:0.12,height:0.35,tessellation:8},scene); broomStraw.position.set(W/2-0.55,0.2,2); broomStraw.rotation.z=0.15; broomStraw.material=broomM;
+
+  // Cobwebs
+  for(let i=0;i<4;i++){ const web=BABYLON.MeshBuilder.CreatePlane('a_web'+i,{width:1.5,height:1.0},scene); const angles=[0,Math.PI/2,-Math.PI/2,Math.PI]; web.position.set(Math.cos(i*1.57)*(W/2-0.1),H-0.4,Math.sin(i*1.57)*(D/2-0.1)); web.rotation.y=angles[i]; const wm=mat('a_wm'+i); wm.diffuseColor=new BABYLON.Color3(0.2,0.18,0.15); wm.alpha=0.15; web.material=wm; }
+
+  // Dim flickering bulb
+  const bulbM=emitM('a_bulbM',0.6,0.5,0.3,0.5);
+  const bulb=BABYLON.MeshBuilder.CreateSphere('a_bulb',{diameter:0.1,segments:8},scene); bulb.position.set(0,H-0.3,0); bulb.material=bulbM;
+  const bulbLight=new BABYLON.PointLight('a_bL',new BABYLON.Vector3(0,H-0.4,0),scene);
+  bulbLight.diffuse=new BABYLON.Color3(0.4,0.35,0.2); bulbLight.intensity=0.8; bulbLight.range=10;
+  const ambient=new BABYLON.HemisphericLight('a_amb',new BABYLON.Vector3(0,1,0),scene);
+  ambient.intensity=0.15; ambient.diffuse=new BABYLON.Color3(0.15,0.12,0.1); ambient.groundColor=new BABYLON.Color3(0.05,0.03,0.02);
+
+  let ft=0;
+  scene.registerBeforeRender(()=>{ ft+=engine.getDeltaTime()*0.001; bulbLight.intensity=0.5+Math.sin(ft*8)*0.2+Math.random()*0.1; if(Math.random()<0.005) bulbLight.intensity=0.05; });
+
+  interactables.set('a_trunk','attic_box'); interactables.set('a_box','attic_box');
+  interactables.set('a_broomHandle','broom');
+
+  const doorL=BABYLON.MeshBuilder.CreateBox('door_library',{width:1.0,height:2.0,depth:0.1},scene); doorL.position.set(0,1.0,D/2-0.05); const dlM=mat('a_dlM'); dlM.alpha=0.01; doorL.material=dlM;
+  interactables.set('door_library','door_library');
+}
+
