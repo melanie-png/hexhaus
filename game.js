@@ -178,7 +178,7 @@ function transitionToRoom(roomId){
       camYaw=r.camYaw; camPitch=0; applyRot();
       r.build();
       state.currentRoom = roomId;
-      $('room-name').textContent = r.name;
+      $('room-name').textContent = r.name + ' [meshes:' + scene.meshes.length + ' lights:' + scene.lights.length + ' cam:' + camera.position.toString() + ']';
       canvas.style.opacity = '1';
       isTransitioning = false;
     } catch(e) {
