@@ -177,6 +177,14 @@ function transitionToRoom(roomId){
       camera.inputs.clear();
       camYaw=r.camYaw; camPitch=0; applyRot();
       r.build();
+      // DIAGNOSTIC: bright red test sphere at camera
+      const testSphere = BABYLON.MeshBuilder.CreateSphere('testSphere',{diameter:0.5,segments:8},scene);
+      testSphere.position.set(camera.position.x, camera.position.y, camera.position.z - 3);
+      const testMat = new BABYLON.StandardMaterial('testMat',scene);
+      testMat.emissiveColor = new BABYLON.Color3(1,0,0);
+      testMat.diffuseColor = new BABYLON.Color3(1,0,0);
+      testSphere.material = testMat;
+      console.log('DIAG: scene meshes=' + scene.meshes.length + ' lights=' + scene.lights.length + ' cam pos=' + camera.position.toString());
       state.currentRoom = roomId;
       $('room-name').textContent = r.name;
       canvas.style.opacity = '1';
