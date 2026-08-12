@@ -313,17 +313,22 @@ function initEngine(){
       if(renderCount === 30) {
         const dbg = document.createElement('div');
         dbg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:14px;padding:16px;z-index:99999;border:1px solid #0f0;white-space:pre';
+        const fr = camera.getForwardRay();
+        const activeCam = scene.activeCamera;
+        let inFrustum = 0;
+        scene.meshes.forEach(m => { if(m.isEnabled() && m.isVisible && scene.isInFrustum(m)) inFrustum++; });
         dbg.textContent = 'ENGINE: ' + (engine ? 'OK' : 'NULL') + '\n' +
-          'WebGL: ' + (engine?._gl ? engine._gl.constructor.name : 'NONE') + '\n' +
           'Canvas: ' + canvas.width + 'x' + canvas.height + '\n' +
           'Render calls: ' + renderCount + '\n' +
-          'Scene: ' + (scene ? 'OK' : 'NULL') + '\n' +
           'Meshes: ' + (scene ? scene.meshes.length : 0) + '\n' +
+          'In frustum: ' + inFrustum + '\n' +
           'Lights: ' + (scene ? scene.lights.length : 0) + '\n' +
-          'Cam: ' + (camera ? camera.position.toString() : 'NULL') + '\n' +
-          'Cam fov: ' + (camera ? camera.fov : 'N/A') + '\n' +
-          'Cam minZ: ' + (camera ? camera.minZ : 'N/A') + '\n' +
-          'Cam maxZ: ' + (camera ? camera.maxZ : 'N/A');
+          'Active cam: ' + (activeCam ? activeCam.name : 'NONE') + '\n' +
+          'Cam pos: ' + (camera ? camera.position.toString() : 'NULL') + '\n' +
+          'Cam target: ' + (camera ? (camera.getTarget ? camera.getTarget().toString() : 'N/A') : 'NULL') + '\n' +
+          'Forward ray: ' + fr.direction.toString() + ' len=' + fr.length + '\n' +
+          'Cam fov: ' + (camera ? camera.fov : 'N/A') + ' minZ: ' + (camera ? camera.minZ : 'N/A') + ' maxZ: ' + (camera ? camera.maxZ : 'N/A') + '\n' +
+          'Canvas opacity: ' + canvas.style.opacity + ' display: ' + getComputedStyle(canvas).display;
         document.body.appendChild(dbg);
       }
     }
