@@ -178,7 +178,7 @@ function transitionToRoom(roomId){
       camYaw=r.camYaw; camPitch=0; applyRot();
       r.build();
       state.currentRoom = roomId;
-      $('room-name').textContent = r.name + ' [meshes:' + scene.meshes.length + ' lights:' + scene.lights.length + ' cam:' + camera.position.toString() + ']';
+      $('room-name').textContent = r.name;
       canvas.style.opacity = '1';
       isTransitioning = false;
     } catch(e) {
@@ -1002,10 +1002,6 @@ function buildEntranceHall(){
     if(brew) brew.material.emissiveColor=new BABYLON.Color3(0.03,flk(0.35,0.1,1.8,3.0),0.1);
     if(redEnvLight) redEnvLight.intensity=flk(1.2,0.2,0.8,1.5);
   });
-
-  engine.runRenderLoop(()=>scene.render());
-  window.addEventListener('resize',()=>engine.resize(),{passive:true});
-
 
   // Door triggers — invisible boxes at exits
   const doorLiving = BABYLON.MeshBuilder.CreateBox('door_living',{width:0.1,height:2.4,depth:1.4},scene);
