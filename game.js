@@ -162,23 +162,34 @@ function transitionToRoom(roomId){
   canvas.style.transition = 'opacity 0.4s';
   canvas.style.opacity = '0.3';
   setTimeout(() => {
-    if(scene) scene.dispose();
-    scene = new BABYLON.Scene(engine);
-    scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
-    scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
-    scene.fogColor   = new BABYLON.Color3(0.06,0.12,0.18);
-    scene.fogDensity = 0.025;
-    const r = ROOMS[roomId];
-    camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(r.camPos[0],r.camPos[1],r.camPos[2]), scene);
-    camera.setTarget(new BABYLON.Vector3(0,1.7,0));
-    camera.minZ=0.1; camera.maxZ=60; camera.fov=1.1;
-    camera.inputs.clear();
-    camYaw=r.camYaw; camPitch=0; applyRot();
-    r.build();
-    state.currentRoom = roomId;
-    $('room-name').textContent = r.name;
-    canvas.style.opacity = '1';
-    isTransitioning = false;
+    try {
+      if(scene) scene.dispose();
+      interactables = new Map();
+      scene = new BABYLON.Scene(engine);
+      scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
+      scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
+      scene.fogColor   = new BABYLON.Color3(0.06,0.12,0.18);
+      scene.fogDensity = 0.025;
+      const r = ROOMS[roomId];
+      camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(r.camPos[0],r.camPos[1],r.camPos[2]), scene);
+      camera.setTarget(new BABYLON.Vector3(0,1.7,0));
+      camera.minZ=0.1; camera.maxZ=60; camera.fov=1.1;
+      camera.inputs.clear();
+      camYaw=r.camYaw; camPitch=0; applyRot();
+      r.build();
+      state.currentRoom = roomId;
+      $('room-name').textContent = r.name;
+      canvas.style.opacity = '1';
+      isTransitioning = false;
+    } catch(e) {
+      console.error('Room build failed:', roomId, e);
+      isTransitioning = false;
+      canvas.style.opacity = '1';
+      const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;top:60px;left:10px;right:10px;background:#300;color:#faa;padding:12px;font-family:monospace;font-size:12px;z-index:9999;white-space:pre-wrap;max-height:70vh;overflow:auto;border:1px solid #f66';
+      el.textContent = 'ROOM BUILD ERROR (' + roomId + '):\n' + e.message + '\n\n' + (e.stack||'');
+      document.body.appendChild(el);
+    }
   }, 400);
 }
 
