@@ -758,35 +758,35 @@ function buildEntranceHall(){
   // ── DOORS ───────────────────────────────────────────────────────────────────
   // ── REAL 3D MODELS (Quaternius CC0) ───────────────────────────────────────
   // Fireplace model on back wall
-  loadModel('Fireplace.glb', [0, 0, -D/2 + 0.6], 2.0, 0, 'fireplace');
+  loadModel('Fireplace.glb', [0, 0, -D/2 + 0.6], 90, 0, 'fireplace');
   
   // Chandelier hanging from ceiling
-  loadModel('Light_Chandelier.glb', [0, H - 1.0, 0], 1.5, 0, null);
+  loadModel('Light_Chandelier.glb', [0, H - 1.0, 0], 200, 0, null);
   
   // Large carpet in center of room
-  loadModel('Carpet_1.glb', [0, 0.02, 0], 3.5, 0, null);
+  loadModel('Carpet_1.glb', [0, 0.02, 0], 150, 0, null);
   
   // Two chairs flanking the fireplace
-  loadModel('Chair_1.glb', [-2.5, 0, -D/2 + 2.5], 1.2, Math.PI/4, null);
-  loadModel('Chair_2.glb', [2.5, 0, -D/2 + 2.5], 1.2, -Math.PI/4, null);
+  loadModel('Chair_1.glb', [-2.5, 0, -D/2 + 2.5], 65, Math.PI/4, null);
+  loadModel('Chair_2.glb', [2.5, 0, -D/2 + 2.5], 65, -Math.PI/4, null);
   
   // Bookshelf on left wall
-  loadModel('Bookshelf.glb', [-W/2 + 0.5, 0, 2], 1.8, Math.PI/2, 'bookshelf');
+  loadModel('Bookshelf.glb', [-W/2 + 0.5, 0, 2], 75, Math.PI/2, 'bookshelf');
   
   // Cauldron near the fireplace (witch's house!)
-  loadModel('Cauldron.glb', [3.5, 0, -D/2 + 1.5], 0.8, 0, 'cauldron');
+  loadModel('Cauldron.glb', [3.5, 0, -D/2 + 1.5], 250, 0, 'cauldron');
   
   // Round table near the front
-  loadModel('Table_RoundSmall.glb', [0, 0, 3], 1.3, 0, 'tea');
+  loadModel('Table_RoundSmall.glb', [0, 0, 3], 50, 0, 'tea');
   
   // Bone decoration in corner
-  loadModel('Bone.glb', [-W/2 + 1.5, 0, D/2 - 1.5], 0.6, 0, 'bones');
+  loadModel('Bone.glb', [-W/2 + 1.5, 0, D/2 - 1.5], 30, 0, 'bones');
   
   // Scythe on the wall (classic witch prop)
-  loadModel('Scythe.glb', [W/2 - 0.5, 1.8, -1], 1.0, -Math.PI/2, null);
+  loadModel('Scythe.glb', [W/2 - 0.5, 1.8, -1], 35, -Math.PI/2, null);
   
   // Chest in corner
-  loadModel('Chest_Closed.glb', [-W/2 + 1.0, 0, -D/2 + 1.0], 1.2, 0, null);
+  loadModel('Chest_Closed.glb', [-W/2 + 1.0, 0, -D/2 + 1.0], 100, 0, null);
 
   // Door to Living Room (left wall)
   const doorLR = BABYLON.MeshBuilder.CreateBox('door_living', {width:0.1, height:2.4, depth:1.4}, scene);
