@@ -117,18 +117,47 @@ function emitM(name,r,g,b,ei=0.8){ const m=mat(name); m.diffuseColor=new BABYLON
 // ─── MODEL LOADER ───────────────────────────────────────────────────────────
 const MODEL_BASE = 'models/';
 function loadModel(fileName, pos, scale, rotY, interactableKey) {
-  if (typeof BABYLON.SceneLoader === 'undefined') { console.error('SceneLoader not available!'); return; }
-  var dbg = document.getElementById('dbgLoad'); if (dbg) dbg.textContent += fileName + '... | ';
-  BABYLON.SceneLoader.ImportMesh(null, MODEL_BASE, fileName, scene, function(meshes) {
-    const root = meshes[0];
+  var dbg = document.getElementById('dbgLoad');
+  if (dbg) dbg.textContent += fileName + '... | ';
+  
+  // Check if SceneLoader is available
+  if (typeof BABYLON.SceneLoader === 'undefined') {
+    if (dbg) dbg.textContent += 'FAIL:' + fileName + ' (no SceneLoader) | ';
+    console.error('[Hexhaus] SceneLoader not available!');
+    return;
+  }
+  
+  // Use the full URL for clarity
+  var fullUrl = MODEL_BASE + fileName;
+  console.log('[Hexhaus] Loading model from:', fullUrl);
+  
+  BABYLON.SceneLoader.ImportMeshAsync(null, MODEL_BASE, fileName, scene).then(function(result) {
+    var meshes = result.meshes;
+    if (dbg) dbg.textContent += fileName + ' OK (' + meshes.length + ') | ';
+    console.log('[Hexhaus] Loaded model:', fileName, 'meshes:', meshes.length, 'scale:', scale);
+    
+    var root = meshes[0];
     if (!root) return;
-    root.position.set(pos[0], pos[1], pos[2]);
     root.scaling.set(scale, scale, scale);
     if (rotY) root.rotation.y = rotY;
-    // Convert PBR materials to StandardMaterial so they work with the scene's point lights
+    root.position.set(pos[0], pos[1], pos[2]);
+    
+    // Auto-adjust Y so model base sits at the specified Y position
+    meshes.forEach(function(m) { if (m.refreshBoundingInfo) m.refreshBoundingInfo(); });
+    var minY = Infinity;
+    meshes.forEach(function(m) {
+      if (m.getBoundingInfo && m.isVisible !== false) {
+        var bb = m.getBoundingInfo().boundingBox;
+        if (bb.minimumWorld.y < minY) minY = bb.minimumWorld.y;
+      }
+    });
+    if (minY !== Infinity && isFinite(minY)) {
+      root.position.y = pos[1] + (root.position.y - minY);
+    }
+    
+    // Convert PBR materials to StandardMaterial
     meshes.forEach(function(m) {
       if (m.material && m.material.getClassName) {
-        var cls = m.material.getClassName();
         var stdMat = new BABYLON.StandardMaterial(m.name + '_std', scene);
         if (m.material.albedoTexture) {
           stdMat.diffuseTexture = m.material.albedoTexture.clone();
@@ -142,25 +171,25 @@ function loadModel(fileName, pos, scale, rotY, interactableKey) {
         } else {
           stdMat.diffuseColor = new BABYLON.Color3(0.6, 0.5, 0.4);
         }
-        if (m.material.bumpTexture) {
-          stdMat.bumpTexture = m.material.bumpTexture.clone();
-        }
         stdMat.specularColor = new BABYLON.Color3(0.08, 0.08, 0.08);
         stdMat.specularPower = 16;
-        // Add emissive so models are visible even in dim light
         if (stdMat.diffuseColor) {
           stdMat.emissiveColor = stdMat.diffuseColor.scale(0.25);
         }
         m.material = stdMat;
       }
     });
+    
     if (interactableKey) {
       meshes.forEach(function(m) {
         if (m.getTotalVertices && m.getTotalVertices() > 0) interactables.set(m.name, interactableKey);
       });
     }
-    console.log('[Hexhaus] Loaded model:', fileName, 'meshes:', meshes.length);
-  }, null, function(scene, msg, exc){ var d=document.getElementById('dbgLoad'); if(d) d.textContent += 'FAIL:' + fileName + ' (' + msg + ') | '; console.warn('[Hexhaus] Model load failed:', fileName, msg, exc); });
+  }).catch(function(err) {
+    if (dbg) dbg.textContent += 'FAIL:' + fileName + ' (' + (err.message || err) + ') | ';
+    console.error('[Hexhaus] Model load FAILED:', fileName, err);
+  });
+}
 }
 
 
