@@ -335,6 +335,10 @@ function buildEntranceHall(){
 
   // ── ROOM SHELL ─────────────────────────────────────────────────────────────
   const W=18, D=12, H=4.8;
+  // Override global fog for this room (warmer, lighter)
+  scene.fogColor = new BABYLON.Color3(0.08, 0.06, 0.05);
+  scene.fogDensity = 0.012;
+  scene.clearColor = new BABYLON.Color4(0.03, 0.025, 0.02, 1);
 
   // Floor
   const floor = BABYLON.MeshBuilder.CreateGround('floor',{width:W,height:D,subdivisions:4},scene);
@@ -635,12 +639,12 @@ function buildEntranceHall(){
   // Fireplace glow (warm amber)
   const fireLight = new BABYLON.PointLight('fireLight', new BABYLON.Vector3(fpX, 0.8, fpZ + 0.2), scene);
   fireLight.diffuse = new BABYLON.Color3(1.0, 0.5, 0.15);
-  fireLight.intensity = 2.8; fireLight.range = 14;
+  fireLight.intensity = 4.5; fireLight.range = 22;
 
   // Moonlight from window (cool blue)
   const moonLight = new BABYLON.PointLight('moonLight', new BABYLON.Vector3(4.5, 3, D/2 - 0.5), scene);
   moonLight.diffuse = new BABYLON.Color3(0.25, 0.35, 0.55);
-  moonLight.intensity = 1.2; moonLight.range = 10;
+  moonLight.intensity = 2.5; moonLight.range = 16;
 
   // Sconce lights (warm amber, flickering)
   const sconceLights = [];
@@ -653,20 +657,20 @@ function buildEntranceHall(){
   sconcePositions.forEach((sp, si) => {
     const sl = new BABYLON.PointLight('sconceLight'+si, new BABYLON.Vector3(sp.pos[0], sp.pos[1], sp.pos[2]), scene);
     sl.diffuse = new BABYLON.Color3(sp.color[0], sp.color[1], sp.color[2]);
-    sl.intensity = 0.6; sl.range = sp.range;
+    sl.intensity = 1.2; sl.range = sp.range * 1.5;
     sconceLights.push(sl);
   });
 
   // Candle light (mantel)
   const candleLight = new BABYLON.PointLight('candleLight', new BABYLON.Vector3(fpX + 0.6, 2.1, fpZ), scene);
   candleLight.diffuse = new BABYLON.Color3(0.8, 0.55, 0.2);
-  candleLight.intensity = 0.5; candleLight.range = 4;
+  candleLight.intensity = 1.0; candleLight.range = 6;
 
   // Ambient (very low, warm)
   const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
-  ambient.intensity = 0.3;
-  ambient.diffuse = new BABYLON.Color3(0.25, 0.22, 0.18);
-  ambient.groundColor = new BABYLON.Color3(0.10, 0.06, 0.04);
+  ambient.intensity = 0.55;
+  ambient.diffuse = new BABYLON.Color3(0.32, 0.28, 0.22);
+  ambient.groundColor = new BABYLON.Color3(0.14, 0.10, 0.06);
 
   // ── FLICKERING ──────────────────────────────────────────────────────────────
   let ft = 0;
@@ -675,10 +679,10 @@ function buildEntranceHall(){
   }
   scene.registerBeforeRender(() => {
     ft += engine.getDeltaTime() * 0.001;
-    fireLight.intensity = flk(2.8, 0.5, 3.7, 1.2);
-    candleLight.intensity = flk(0.5, 0.1, 4.1, 0.5);
+    fireLight.intensity = flk(4.5, 0.6, 3.7, 1.2);
+    candleLight.intensity = flk(1.0, 0.15, 4.1, 0.5);
     sconceLights.forEach((sl, i) => {
-      sl.intensity = flk(0.6, 0.08, 2.1 + i*0.7, i*1.3);
+      sl.intensity = flk(1.2, 0.12, 2.1 + i*0.7, i*1.3);
     });
     if (embers) embers.material.emissiveColor = new BABYLON.Color3(flk(0.7, 0.15, 3.7, 0.5), flk(0.22, 0.06, 3.7, 1.0), 0.02);
     // Flicker candle flame
