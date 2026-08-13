@@ -145,6 +145,10 @@ function loadModel(fileName, pos, scale, rotY, interactableKey) {
         }
         stdMat.specularColor = new BABYLON.Color3(0.08, 0.08, 0.08);
         stdMat.specularPower = 16;
+        // Add emissive so models are visible even in dim light
+        if (stdMat.diffuseColor) {
+          stdMat.emissiveColor = stdMat.diffuseColor.scale(0.25);
+        }
         m.material = stdMat;
       }
     });
@@ -679,16 +683,18 @@ function buildEntranceHall(){
   const mullion = BABYLON.MeshBuilder.CreateBox('mullion', {width:0.04, height:2.0, depth:0.06}, scene);
   mullion.position.set(4.5, 2.8, D/2 - 0.06); mullion.material = winFrameM;
 
+  var dbgEl = document.createElement('div'); dbgEl.id='dbgLoad'; dbgEl.style.cssText='position:fixed;top:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#0f0;font:11px monospace;padding:4px 8px;z-index:9999;max-width:90%;pointer-events:none'; document.body.appendChild(dbgEl);
+
   // ── LIGHTS ──────────────────────────────────────────────────────────────────
   // Fireplace glow (warm amber)
   const fireLight = new BABYLON.PointLight('fireLight', new BABYLON.Vector3(fpX, 0.8, fpZ + 0.2), scene);
   fireLight.diffuse = new BABYLON.Color3(1.0, 0.5, 0.15);
-  fireLight.intensity = 4.5; fireLight.range = 22;
+  fireLight.intensity = 8.0; fireLight.range = 30;
 
   // Moonlight from window (cool blue)
   const moonLight = new BABYLON.PointLight('moonLight', new BABYLON.Vector3(4.5, 3, D/2 - 0.5), scene);
   moonLight.diffuse = new BABYLON.Color3(0.25, 0.35, 0.55);
-  moonLight.intensity = 2.5; moonLight.range = 16;
+  moonLight.intensity = 4.0; moonLight.range = 25;
 
   // Sconce lights (warm amber, flickering)
   const sconceLights = [];
@@ -712,7 +718,7 @@ function buildEntranceHall(){
 
   // Ambient (very low, warm)
   const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
-  ambient.intensity = 0.55;
+  ambient.intensity = 1.5; ambient.diffuse = new BABYLON.Color3(0.5, 0.45, 0.4); ambient.groundColor = new BABYLON.Color3(0.25, 0.2, 0.15);
   ambient.diffuse = new BABYLON.Color3(0.32, 0.28, 0.22);
   ambient.groundColor = new BABYLON.Color3(0.14, 0.10, 0.06);
 
