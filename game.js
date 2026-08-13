@@ -156,49 +156,50 @@ const ROOMS = {
 // ─── TRANSITION ──────────────────────────────────────────────────────────────
 let isTransitioning = false;
 function transitionToRoom(roomId){
-  if(isTransitioning) return;
-  isTransitioning = true;
-  const canvas = $('game-canvas');
-  canvas.style.transition = 'opacity 0.4s';
-  canvas.style.opacity = '0.3';
-  setTimeout(() => {
-    try {
-      if(scene) scene.dispose();
-      interactables = new Map();
-      scene = new BABYLON.Scene(engine);
-      scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
-      scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
-      scene.fogColor   = new BABYLON.Color3(0.06,0.12,0.18);
-      scene.fogDensity = 0.025;
-      const r = ROOMS[roomId];
-      camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(r.camPos[0],r.camPos[1],r.camPos[2]), scene);
-      camera.setTarget(new BABYLON.Vector3(0,1.7,0));
-      camera.minZ=0.1; camera.maxZ=60; camera.fov=1.1;
-      camera.inputs.clear();
-      camYaw=r.camYaw; camPitch=0; applyRot();
-      r.build();
-      // DIAGNOSTIC: bright red test sphere at camera
-      const testSphere = BABYLON.MeshBuilder.CreateSphere('testSphere',{diameter:0.5,segments:8},scene);
-      testSphere.position.set(camera.position.x, camera.position.y, camera.position.z - 3);
-      const testMat = new BABYLON.StandardMaterial('testMat',scene);
-      testMat.emissiveColor = new BABYLON.Color3(1,0,0);
-      testMat.diffuseColor = new BABYLON.Color3(1,0,0);
-      testSphere.material = testMat;
-      console.log('DIAG: scene meshes=' + scene.meshes.length + ' lights=' + scene.lights.length + ' cam pos=' + camera.position.toString());
-      state.currentRoom = roomId;
-      $('room-name').textContent = r.name;
-      canvas.style.opacity = '1';
-      isTransitioning = false;
-    } catch(e) {
-      console.error('Room build failed:', roomId, e);
-      isTransitioning = false;
-      canvas.style.opacity = '1';
-      const el = document.createElement('div');
-      el.style.cssText = 'position:fixed;top:60px;left:10px;right:10px;background:#300;color:#faa;padding:12px;font-family:monospace;font-size:12px;z-index:9999;white-space:pre-wrap;max-height:70vh;overflow:auto;border:1px solid #f66';
-      el.textContent = 'ROOM BUILD ERROR (' + roomId + '):\n' + e.message + '\n\n' + (e.stack||'');
-      document.body.appendChild(el);
-    }
-  }, 400);
+  if(scene) scene.dispose();
+  interactables = new Map();
+  scene = new BABYLON.Scene(engine);
+  scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
+  
+  // Minimal test: camera + light + simple room
+  camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0,1.7,0), scene);
+  camera.setTarget(new BABYLON.Vector3(0,1.7,5));
+  camera.minZ=0.1; camera.maxZ=60; camera.fov=1.1;
+  camera.inputs.clear();
+  camYaw=0; camPitch=0;
+  
+  // One hemispheric light
+  const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0,1,0), scene);
+  light.intensity = 0.8;
+  
+  // Floor
+  const floor = BABYLON.MeshBuilder.CreateGround('floor', {width:20, height:14}, scene);
+  const fm = new BABYLON.StandardMaterial('fm', scene);
+  fm.diffuseColor = new BABYLON.Color3(0.5, 0.3, 0.15);
+  fm.emissiveColor = new BABYLON.Color3(0.15, 0.08, 0.04);
+  floor.material = fm;
+  
+  // Back wall (in front of camera at +Z)
+  const wall = BABYLON.MeshBuilder.CreatePlane('wall', {width:20, height:6}, scene);
+  wall.position.set(0, 3, 7);
+  wall.rotation.y = Math.PI;
+  const wm = new BABYLON.StandardMaterial('wm', scene);
+  wm.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.5);
+  wm.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.12);
+  wm.backFaceCulling = false;
+  wall.material = wm;
+  
+  // A bright box right in front of the camera
+  const box = BABYLON.MeshBuilder.CreateBox('box', {size:1}, scene);
+  box.position.set(0, 1.5, 3);
+  const bm = new BABYLON.StandardMaterial('bm', scene);
+  bm.emissiveColor = new BABYLON.Color3(0, 1, 0);
+  box.material = bm;
+  
+  console.log('MINIMAL TEST: meshes=' + scene.meshes.length + ' lights=' + scene.lights.length + ' cam=' + camera.position.toString() + ' activeCam=' + (scene.activeCamera ? scene.activeCamera.name : 'NONE'));
+  
+  state.currentRoom = roomId;
+  $('room-name').textContent = 'MINIMAL TEST';
 }
 
 // ─── RAYPICK ─────────────────────────────────────────────────────────────────
