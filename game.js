@@ -311,726 +311,428 @@ function initEngine(){
 
 
 // ─── ENTRANCE HALL ────────────────────────────────────────────────────────────
+// ─── ENTRANCE HALL ────────────────────────────────────────────────────────────
 function buildEntranceHall(){
   // ── MATERIALS ──────────────────────────────────────────────────────────────
+  // Dark plaster walls with warm green-brown tint (witch's cottage, not Victorian)
+  const wallM = pbr('wallM', TEX.plaster_d, TEX.plaster_n, 3, 2,
+    new BABYLON.Color3(0.20, 0.22, 0.18));
 
-  // Real stone wall texture with normal map
-  const wallM = pbr('wallM', TEX.stone_d, TEX.stone_n, 4, 3,
-    new BABYLON.Color3(0.32, 0.40, 0.48)); // cold blue-grey tint over stone
+  const floorM = pbr('floorM', TEX.wood_d, TEX.wood_n, 5, 4, new BABYLON.Color3(0.28, 0.20, 0.12));
+  floorM.specularColor = new BABYLON.Color3(0.06, 0.04, 0.02); floorM.specularPower = 20;
 
-  const floorM = pbr('floorM', TEX.wood_d, TEX.wood_n, 6, 5, new BABYLON.Color3(0.38,0.28,0.18));
-  floorM.specularColor = new BABYLON.Color3(0.08,0.06,0.03); floorM.specularPower = 28;
+  // Dark wood beam ceiling
+  const ceilM = pbr('ceilM', TEX.beam_d, TEX.beam_n, 4, 3,
+    new BABYLON.Color3(0.12, 0.08, 0.04));
 
-  // Real wood beam ceiling
-  const ceilM = pbr('ceilM', TEX.beam_d, TEX.beam_n, 5, 3,
-    new BABYLON.Color3(0.18, 0.12, 0.07));
+  // Dark wood for furniture/trim
+  const woodM = pbr('woodM', TEX.darkwood_d, TEX.darkwood_n, 3, 2,
+    new BABYLON.Color3(0.25, 0.18, 0.10));
 
-  // Real rock/stone for fireplace
-  const fpStoneM = pbr('fpStoneM', TEX.rock_d, TEX.rock_n, 2, 2,
-    new BABYLON.Color3(0.3, 0.36, 0.4));
-
-  // Real dark wood trim
-  const woodTrimM = pbr('woodTrimM', TEX.darkwood_d, TEX.darkwood_n, 8, 1,
-    new BABYLON.Color3(0.4, 0.3, 0.18));
-
-  const goldM = mat('goldM');
-  goldM.diffuseColor  = new BABYLON.Color3(0.28,0.38,0.32);
-  goldM.specularColor = new BABYLON.Color3(0.4,0.55,0.45);
-  goldM.specularPower = 48;
-
-  // Real dark wood for bookshelf/clock
-  const darkWoodM = pbr('darkWoodM', TEX.darkwood_d, TEX.darkwood_n, 3, 6,
-    new BABYLON.Color3(0.3, 0.22, 0.12));
-
-  const dirtM = mat('dirtM');
-  dirtM.diffuseColor = new BABYLON.Color3(0.12, 0.09, 0.06);
-
+  // Stone for fireplace
+  const stoneM = pbr('stoneM', TEX.rock_d, TEX.rock_n, 2, 2,
+    new BABYLON.Color3(0.22, 0.20, 0.18));
 
   // ── ROOM SHELL ─────────────────────────────────────────────────────────────
-  const W=22, D=14, H=5.5;
+  const W=18, D=12, H=4.8;
 
   // Floor
-  const floor=BABYLON.MeshBuilder.CreateGround('floor',{width:W,height:D,subdivisions:4},scene);
-  floor.material=floorM; floor.receiveShadows=true;
+  const floor = BABYLON.MeshBuilder.CreateGround('floor',{width:W,height:D,subdivisions:4},scene);
+  floor.material = floorM; floor.receiveShadows = true;
 
   // Ceiling
-  const ceil=BABYLON.MeshBuilder.CreatePlane('ceil',{width:W,height:D},scene);
-  ceil.position.y=H; ceil.rotation.x=Math.PI/2;
-  ceilM.backFaceCulling=false;
-  ceil.material=ceilM;
+  const ceil = BABYLON.MeshBuilder.CreatePlane('ceil',{width:W,height:D},scene);
+  ceil.position.y = H; ceil.rotation.x = Math.PI/2;
+  ceilM.backFaceCulling = false; ceil.material = ceilM;
 
   // Walls
   function wall(name,w,h,pos,rotY){
-    const m=BABYLON.MeshBuilder.CreatePlane(name,{width:w,height:h},scene);
-    m.position.copyFrom(pos); m.rotation.y=rotY;
-    const wm=wallM.clone(name+'_m'); wm.backFaceCulling=false;
-    m.material=wm; return m;
+    const m = BABYLON.MeshBuilder.CreatePlane(name,{width:w,height:h},scene);
+    m.position.copyFrom(pos); m.rotation.y = rotY;
+    const wm = wallM.clone(name+'_m'); wm.backFaceCulling = false;
+    m.material = wm; return m;
   }
-  wall('wBack', W, H, new BABYLON.Vector3(0,H/2,D/2), 0);
-  wall('wFront',W, H, new BABYLON.Vector3(0,H/2,-D/2), Math.PI);
-  wall('wLeft', D, H, new BABYLON.Vector3(-W/2,H/2,0), Math.PI/2);
-  wall('wRight',D, H, new BABYLON.Vector3(W/2,H/2,0), -Math.PI/2);
-
-  // Dado rail
-  function dado(nm,len,pos,ry=0){ const b=BABYLON.MeshBuilder.CreateBox(nm,{width:len,height:0.07,depth:0.09},scene); b.position.copyFrom(pos); b.rotation.y=ry; b.material=woodTrimM; }
-  dado('dB',W, new BABYLON.Vector3(0,1.05,D/2-0.06));
-  dado('dF',W, new BABYLON.Vector3(0,1.05,-D/2+0.06),Math.PI);
-  dado('dL',D, new BABYLON.Vector3(-W/2+0.06,1.05,0),Math.PI/2);
-  dado('dR',D, new BABYLON.Vector3(W/2-0.06,1.05,0),-Math.PI/2);
-
-  // Crown moulding
-  function crown(nm,len,pos,ry=0){ const b=BABYLON.MeshBuilder.CreateBox(nm,{width:len,height:0.09,depth:0.1},scene); b.position.copyFrom(pos); b.rotation.y=ry; b.material=goldM; }
-  crown('cB',W, new BABYLON.Vector3(0,H-0.06,D/2-0.07));
-  crown('cF',W, new BABYLON.Vector3(0,H-0.06,-D/2+0.07));
-  crown('cL',D, new BABYLON.Vector3(-W/2+0.07,H-0.06,0),Math.PI/2);
-  crown('cR',D, new BABYLON.Vector3(W/2-0.07,H-0.06,0),-Math.PI/2);
-
-  // Skirting boards
-  function skirt(nm,len,pos,ry=0){ const b=BABYLON.MeshBuilder.CreateBox(nm,{width:len,height:0.2,depth:0.07},scene); b.position.copyFrom(pos); b.rotation.y=ry; b.material=woodTrimM; }
-  skirt('sB',W, new BABYLON.Vector3(0,0.1,D/2-0.05));
-  skirt('sF',W, new BABYLON.Vector3(0,0.1,-D/2+0.05));
-  skirt('sL',D, new BABYLON.Vector3(-W/2+0.05,0.1,0),Math.PI/2);
-  skirt('sR',D, new BABYLON.Vector3(W/2-0.05,0.1,0),-Math.PI/2);
+  wall('wBack',  W, H, new BABYLON.Vector3(0, H/2, -D/2), 0);
+  wall('wFront', W, H, new BABYLON.Vector3(0, H/2,  D/2), Math.PI);
+  wall('wLeft',  D, H, new BABYLON.Vector3(-W/2, H/2, 0), Math.PI/2);
+  wall('wRight', D, H, new BABYLON.Vector3( W/2, H/2, 0), -Math.PI/2);
 
   // Exposed ceiling beams
-  const beamPositions=[-8,-4,0,4,8];
-  beamPositions.forEach((bx,i)=>{
-    const beam=BABYLON.MeshBuilder.CreateBox('beam'+i,{width:0.38,height:0.32,depth:D},scene);
-    beam.position.set(bx,H-0.18,0);
-    const bm=mat('bm'+i); bm.diffuseColor=new BABYLON.Color3(0.18,0.09,0.04);
-    bm.emissiveColor=new BABYLON.Color3(0.01,0.005,0.002);
-    beam.material=bm;
+  const beamPositions = [-7, -3.5, 0, 3.5, 7];
+  beamPositions.forEach((bx, i) => {
+    const beam = BABYLON.MeshBuilder.CreateBox('beam'+i, {width:0.32, height:0.28, depth:D}, scene);
+    beam.position.set(bx, H-0.16, 0);
+    const bm = mat('bm'+i); bm.diffuseColor = new BABYLON.Color3(0.14, 0.07, 0.03);
+    bm.emissiveColor = new BABYLON.Color3(0.005, 0.003, 0.001);
+    beam.material = bm;
   });
 
+  // Skirting boards (dark wood)
+  function skirt(nm, len, pos, ry=0) {
+    const b = BABYLON.MeshBuilder.CreateBox(nm, {width:len, height:0.18, depth:0.06}, scene);
+    b.position.copyFrom(pos); b.rotation.y = ry; b.material = woodM;
+  }
+  skirt('sB', W, new BABYLON.Vector3(0, 0.09, -D/2+0.04));
+  skirt('sF', W, new BABYLON.Vector3(0, 0.09,  D/2-0.04), Math.PI);
+  skirt('sL', D, new BABYLON.Vector3(-W/2+0.04, 0.09, 0), Math.PI/2);
+  skirt('sR', D, new BABYLON.Vector3( W/2-0.04, 0.09, 0), -Math.PI/2);
 
-  // ── WALL PANELLING (Victorian raised panels — Scooby-Doo mansion style) ──
-  // Panels sit between dado rail (y=1.05) and crown (y=H-0.06)
-  // Back wall panels
-  const panelMat = mat('panelMat');
-  panelMat.diffuseColor = new BABYLON.Color3(0.32, 0.42, 0.50); // slightly lighter stone
-  panelMat.emissiveColor = new BABYLON.Color3(0.0, 0.0, 0.0);
+  // ── FIREPLACE (back wall, stone with fire) ─────────────────────────────────
+  const fpX = 0, fpZ = -D/2 + 0.4;
+  const hearth = BABYLON.MeshBuilder.CreateBox('hearth', {width:3.2, height:2.6, depth:0.7}, scene);
+  hearth.position.set(fpX, 1.3, fpZ); hearth.material = stoneM;
 
-  const panelTrimMat = mat('panelTrimMat');
-  panelTrimMat.diffuseColor = new BABYLON.Color3(0.22, 0.28, 0.35); // dark grey stone trim
-  panelTrimMat.specularColor = new BABYLON.Color3(0.12, 0.08, 0.04);
-  panelTrimMat.specularPower = 16;
+  // Arch over fireplace opening
+  for (let a = 0; a < 7; a++) {
+    const ang = (a/6) * Math.PI;
+    const ax = Math.cos(ang) * 1.0;
+    const ay = 2.3 + Math.sin(ang) * 0.4;
+    const b = BABYLON.MeshBuilder.CreateBox('fpArch'+a, {width:0.22, height:0.32, depth:0.35}, scene);
+    b.position.set(ax, ay, fpZ); b.material = stoneM;
+  }
 
-  function makeWallPanel(name, px, py, pz, pw, ph, ry=0) {
-    // Inset panel face
-    const face = BABYLON.MeshBuilder.CreatePlane(name+'_f', {width:pw-0.12, height:ph-0.12}, scene);
-    face.position.set(px, py, pz); face.rotation.y = ry;
-    const fm = panelMat.clone(name+'_fm'); fm.backFaceCulling = false;
-    face.material = fm;
-    // Outer frame strips (top, bottom, left, right)
-    const strips = [
-      {w:pw, h:0.06, ox:0, oy:ph/2-0.03},   // top
-      {w:pw, h:0.06, ox:0, oy:-ph/2+0.03},  // bottom
-      {w:0.06, h:ph, ox:-pw/2+0.03, oy:0},  // left
-      {w:0.06, h:ph, ox:pw/2-0.03, oy:0},   // right
-    ];
-    strips.forEach((s,i) => {
-      const strip = BABYLON.MeshBuilder.CreatePlane(name+'_s'+i, {width:s.w, height:s.h}, scene);
-      strip.position.set(px+s.ox, py+s.oy, pz+(ry===0?-0.005:0.005));
-      strip.rotation.y = ry;
-      const sm = panelTrimMat.clone(name+'_sm'+i); sm.backFaceCulling = false;
-      strip.material = sm;
+  // Firebox (dark interior)
+  const fbM = mat('fbM');
+  fbM.diffuseColor = new BABYLON.Color3(0.03, 0.02, 0.01);
+  fbM.emissiveColor = new BABYLON.Color3(0.015, 0.008, 0.002);
+  const firebox = BABYLON.MeshBuilder.CreateBox('firebox', {width:1.6, height:1.4, depth:0.4}, scene);
+  firebox.position.set(fpX, 0.8, fpZ + 0.1); firebox.material = fbM;
+
+  // Glowing embers
+  const emberM = mat('emberM');
+  emberM.emissiveColor = new BABYLON.Color3(0.7, 0.22, 0.04);
+  const embers = BABYLON.MeshBuilder.CreateBox('embers', {width:1.2, height:0.04, depth:0.35}, scene);
+  embers.position.set(fpX, 0.12, fpZ + 0.05); embers.material = emberM;
+
+  // Small flame cones
+  for (let f = 0; f < 3; f++) {
+    const flame = BABYLON.MeshBuilder.CreateCylinder('flame'+f, {diameterTop:0.02, diameterBottom:0.15, height:0.35+f*0.08, tessellation:6}, scene);
+    flame.position.set(fpX - 0.3 + f*0.3, 0.3, fpZ + 0.05);
+    flame.material = emitM('flameM'+f, 0.9, 0.45, 0.1, 0.8);
+  }
+
+  // Wooden mantel
+  const mantel = BABYLON.MeshBuilder.CreateBox('mantel', {width:2.0, height:0.08, depth:0.5}, scene);
+  mantel.position.set(fpX, 1.75, fpZ + 0.05); mantel.material = woodM;
+
+  // Candle on mantel
+  const candleBase = BABYLON.MeshBuilder.CreateCylinder('candleBase', {diameter:0.08, height:0.25, tessellation:8}, scene);
+  candleBase.position.set(fpX + 0.6, 1.92, fpZ + 0.05);
+  candleBase.material = mat('candleMat'); candleBase.material.diffuseColor = new BABYLON.Color3(0.5, 0.45, 0.3);
+  const candleFlame = BABYLON.MeshBuilder.CreateSphere('candleFlame', {diameter:0.04, segments:6}, scene);
+  candleFlame.position.set(fpX + 0.6, 2.1, fpZ + 0.05);
+  candleFlame.scaling.y = 2.0;
+  candleFlame.material = emitM('candleFlameM', 1.0, 0.65, 0.15, 1.0);
+
+  // ── GRANDFATHER CLOCK (right wall, stopped at 3:17) ─────────────────────────
+  const clockX = W/2 - 0.3;
+  const clockBody = BABYLON.MeshBuilder.CreateBox('clockBody', {width:0.8, height:2.4, depth:0.35}, scene);
+  clockBody.position.set(clockX, 1.2, -3); clockBody.material = woodM;
+  const clockFace = BABYLON.MeshBuilder.CreateCylinder('clockFace', {diameter:0.4, height:0.03, tessellation:16}, scene);
+  clockFace.position.set(clockX - 0.18, 1.8, -3);
+  clockFace.rotation.z = Math.PI/2;
+  clockFace.material = mat('clockFaceM'); clockFace.material.diffuseColor = new BABYLON.Color3(0.3, 0.28, 0.22);
+  // Clock hands (fixed at 3:17)
+  const hourHand = BABYLON.MeshBuilder.CreateBox('hourHand', {width:0.02, height:0.08, depth:0.01}, scene);
+  hourHand.position.set(clockX - 0.18, 1.82, -3); hourHand.rotation.z = -Math.PI/6; // ~3 o'clock
+  hourHand.material = mat('hourHandM'); hourHand.material.diffuseColor = new BABYLON.Color3(0.1, 0.08, 0.06);
+  const minHand = BABYLON.MeshBuilder.CreateBox('minHand', {width:0.02, height:0.13, depth:0.01}, scene);
+  minHand.position.set(clockX - 0.18, 1.82, -3); minHand.rotation.z = -Math.PI/3 * 0.57; // ~17 min
+  minHand.material = mat('minHandM'); minHand.material.diffuseColor = new BABYLON.Color3(0.1, 0.08, 0.06);
+  // Pendulum (still)
+  const pendRod = BABYLON.MeshBuilder.CreateCylinder('pendRod', {diameter:0.01, height:0.6, tessellation:4}, scene);
+  pendRod.position.set(clockX - 0.18, 1.2, -3); pendRod.material = mat('pendRodM'); pendRod.material.diffuseColor = new BABYLON.Color3(0.15, 0.12, 0.08);
+  const pendBob = BABYLON.MeshBuilder.CreateSphere('pendBob', {diameter:0.12, segments:8}, scene);
+  pendBob.position.set(clockX - 0.18, 0.85, -3); pendBob.material = mat('pendBobM'); pendBob.material.diffuseColor = new BABYLON.Color3(0.2, 0.15, 0.08);
+
+  // ── FAMILY PORTRAIT (left wall) ─────────────────────────────────────────────
+  const portFrame = BABYLON.MeshBuilder.CreateBox('portFrame', {width:1.0, height:1.3, depth:0.06}, scene);
+  portFrame.position.set(-W/2 + 0.06, 2.8, -2);
+  portFrame.rotation.y = Math.PI/2;
+  portFrame.material = woodM;
+  const portCanvas = BABYLON.MeshBuilder.CreatePlane('portCanvas', {width:0.85, height:1.15}, scene);
+  portCanvas.position.set(-W/2 + 0.09, 2.8, -2);
+  portCanvas.rotation.y = Math.PI/2;
+  portCanvas.material = mat('portCanvasM');
+  portCanvas.material.diffuseColor = new BABYLON.Color3(0.12, 0.10, 0.08);
+  portCanvas.material.emissiveColor = new BABYLON.Color3(0.02, 0.015, 0.01);
+
+  // ── STANDING MIRROR (left-front corner) ─────────────────────────────────────
+  const mirFrame = BABYLON.MeshBuilder.CreateBox('mirFrame', {width:0.8, height:2.0, depth:0.08}, scene);
+  mirFrame.position.set(-W/2 + 0.3, 1.0, D/2 - 1);
+  mirFrame.rotation.y = Math.PI * 0.15;
+  mirFrame.material = woodM;
+  const mirGlass = BABYLON.MeshBuilder.CreatePlane('mirGlass', {width:0.6, height:1.7}, scene);
+  mirGlass.position.set(-W/2 + 0.32, 1.0, D/2 - 1);
+  mirGlass.rotation.y = Math.PI * 0.15;
+  const mirM = mat('mirM');
+  mirM.diffuseColor = new BABYLON.Color3(0.05, 0.05, 0.08);
+  mirM.emissiveColor = new BABYLON.Color3(0.008, 0.008, 0.015);
+  mirM.specularColor = new BABYLON.Color3(0.15, 0.15, 0.2);
+  mirM.specularPower = 64;
+  mirM.alpha = 0.55;
+  mirGlass.material = mirM;
+
+  // ── COAT RACK WITH BLACK CLOAK (right-front corner) ─────────────────────────
+  const rackPole = BABYLON.MeshBuilder.CreateCylinder('rackPole', {diameterTop:0.05, diameterBottom:0.07, height:2.0, tessellation:8}, scene);
+  rackPole.position.set(W/2 - 0.8, 1.0, D/2 - 1);
+  rackPole.material = woodM;
+  // Hook arms
+  for (let h = 0; h < 3; h++) {
+    const hook = BABYLON.MeshBuilder.CreateCylinder('hook'+h, {diameter:0.03, height:0.15, tessellation:4}, scene);
+    hook.position.set(W/2 - 0.8, 1.6 - h*0.25, D/2 - 1 + 0.08);
+    hook.rotation.x = Math.PI/2;
+    hook.material = woodM;
+  }
+  // The Black Cloak hanging
+  const cloakM = mat('cloakM');
+  cloakM.diffuseColor = new BABYLON.Color3(0.04, 0.03, 0.05);
+  cloakM.specularColor = new BABYLON.Color3(0.08, 0.06, 0.1);
+  cloakM.specularPower = 4;
+  const cloakBody = BABYLON.MeshBuilder.CreateBox('cloakMesh', {width:0.5, height:1.2, depth:0.15}, scene);
+  cloakBody.position.set(W/2 - 0.8, 1.0, D/2 - 1 + 0.1);
+  cloakBody.material = cloakM;
+  // Silver moth clasp
+  const clasp = BABYLON.MeshBuilder.CreateSphere('clasp', {diameter:0.05, segments:8}, scene);
+  clasp.position.set(W/2 - 0.8, 1.5, D/2 - 1 + 0.15);
+  clasp.material = mat('claspM'); clasp.material.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.42);
+  clasp.material.specularColor = new BABYLON.Color3(0.5, 0.5, 0.55); clasp.material.specularPower = 48;
+
+  // ── CONSOLE TABLE WITH SEALED LETTER (front wall) ───────────────────────────
+  const console = BABYLON.MeshBuilder.CreateBox('console', {width:1.2, height:0.85, depth:0.4}, scene);
+  console.position.set(-2.5, 0.43, D/2 - 0.25);
+  console.material = woodM;
+  // Drawer detail
+  const drawer = BABYLON.MeshBuilder.CreateBox('drawer', {width:1.0, height:0.25, depth:0.02}, scene);
+  drawer.position.set(-2.5, 0.55, D/2 - 0.06); drawer.material = woodM;
+  const knob = BABYLON.MeshBuilder.CreateSphere('knob', {diameter:0.04, segments:6}, scene);
+  knob.position.set(-2.5, 0.55, D/2 - 0.03); knob.material = mat('knobM'); knob.material.diffuseColor = new BABYLON.Color3(0.2, 0.15, 0.08);
+
+  // Sealed Letter on console
+  const letterM = mat('letterM');
+  letterM.diffuseColor = new BABYLON.Color3(0.55, 0.45, 0.30);
+  const letter = BABYLON.MeshBuilder.CreateBox('letterMesh', {width:0.22, height:0.01, depth:0.15}, scene);
+  letter.position.set(-2.5, 0.87, D/2 - 0.25);
+  letter.material = letterM;
+  // Black wax seal
+  const seal = BABYLON.MeshBuilder.CreateSphere('seal', {diameter:0.04, segments:8}, scene);
+  seal.position.set(-2.5, 0.88, D/2 - 0.25);
+  seal.scaling.y = 0.4;
+  seal.material = mat('sealM'); seal.material.diffuseColor = new BABYLON.Color3(0.05, 0.03, 0.08);
+  seal.material.emissiveColor = new BABYLON.Color3(0.01, 0.005, 0.02);
+
+  // ── IRON KEY ON HOOK (near the door) ────────────────────────────────────────
+  const keyHook = BABYLON.MeshBuilder.CreateCylinder('keyHook', {diameter:0.02, height:0.08, tessellation:4}, scene);
+  keyHook.position.set(2.5, 1.8, D/2 - 0.06);
+  keyHook.rotation.x = Math.PI/2;
+  keyHook.material = woodM;
+  const keyM = mat('keyM');
+  keyM.diffuseColor = new BABYLON.Color3(0.2, 0.18, 0.16);
+  keyM.specularColor = new BABYLON.Color3(0.3, 0.28, 0.25);
+  const keyBow = BABYLON.MeshBuilder.CreateTorus('keyBow', {diameter:0.08, thickness:0.015, tessellation:12}, scene);
+  keyBow.position.set(2.5, 1.72, D/2 - 0.06);
+  keyBow.material = keyM;
+  const keyShaft = BABYLON.MeshBuilder.CreateBox('keyShaft', {width:0.02, height:0.15, depth:0.02}, scene);
+  keyShaft.position.set(2.5, 1.63, D/2 - 0.06);
+  keyShaft.material = keyM;
+
+  // ── DRIED ROSEMARY ABOVE DOORWAY (left wall, hanging) ───────────────────────
+  const rosemaryM = mat('rosemaryM');
+  rosemaryM.diffuseColor = new BABYLON.Color3(0.22, 0.26, 0.14);
+  for (let r = 0; r < 2; r++) {
+    const bundle = BABYLON.MeshBuilder.CreateCylinder('rosemary'+r, {diameterTop:0.03, diameterBottom:0.08, height:0.3, tessellation:6}, scene);
+    bundle.position.set(-W/2 + 0.12, 2.8, -3.5 + r*1.5);
+    bundle.rotation.z = Math.PI/2 + (r%2 ? 0.1 : -0.1);
+    bundle.rotation.y = Math.PI/2;
+    bundle.material = rosemaryM;
+  }
+
+  // ── HANGING DRIED HERBS FROM BEAMS ──────────────────────────────────────────
+  const herbPositions = [[-5, -1], [3, 2], [-2, 3], [5, -3], [0, 0]];
+  herbPositions.forEach(([hx, hz], hi) => {
+    const herb = BABYLON.MeshBuilder.CreateCylinder('herb'+hi, {diameterTop:0.03, diameterBottom:0.1, height:0.35, tessellation:6}, scene);
+    herb.position.set(hx, H - 0.45, hz);
+    const hm = mat('herbM'+hi);
+    hm.diffuseColor = new BABYLON.Color3(0.20 + Math.random()*0.08, 0.24 + Math.random()*0.06, 0.10 + Math.random()*0.04);
+    herb.material = hm;
+    // String
+    const string = BABYLON.MeshBuilder.CreateCylinder('herbStr'+hi, {diameter:0.005, height:0.25, tessellation:4}, scene);
+    string.position.set(hx, H - 0.25, hz);
+    string.material = mat('herbStrM'+hi); string.material.diffuseColor = new BABYLON.Color3(0.15, 0.12, 0.08);
+  });
+
+  // ── RED PERSIAN RUG ─────────────────────────────────────────────────────────
+  const rugM = mat('rugM');
+  rugM.diffuseColor = new BABYLON.Color3(0.30, 0.06, 0.04);
+  rugM.specularColor = new BABYLON.Color3(0.05, 0.02, 0.01);
+  const rug = BABYLON.MeshBuilder.CreateGround('rug', {width:4.0, height:5.5, subdivisions:2}, scene);
+  rug.position.set(0, 0.01, 0.5); rug.material = rugM;
+  // Rug border (slightly lighter)
+  const rugBorderM = mat('rugBorderM');
+  rugBorderM.diffuseColor = new BABYLON.Color3(0.35, 0.12, 0.06);
+  const rugBorder = BABYLON.MeshBuilder.CreateGround('rugBorder', {width:4.3, height:5.8, subdivisions:1}, scene);
+  rugBorder.position.set(0, 0.008, 0.5); rugBorder.material = rugBorderM;
+
+  // ── COBWEBS IN CORNERS ──────────────────────────────────────────────────────
+  const webM = mat('webM');
+  webM.diffuseColor = new BABYLON.Color3(0.25, 0.22, 0.18);
+  webM.alpha = 0.15;
+  const corners = [
+    {pos: [-W/2+0.1, H-0.5, -D/2+0.1], rot: 0},
+    {pos: [ W/2-0.1, H-0.5, -D/2+0.1], rot: Math.PI/2},
+    {pos: [-W/2+0.1, H-0.5,  D/2-0.1], rot: -Math.PI/2},
+    {pos: [ W/2-0.1, H-0.5,  D/2-0.1], rot: Math.PI},
+  ];
+  corners.forEach((c, ci) => {
+    const web = BABYLON.MeshBuilder.CreatePlane('web'+ci, {width:1.8, height:1.5}, scene);
+    web.position.set(c.pos[0], c.pos[1], c.pos[2]);
+    web.rotation.y = c.rot;
+    web.material = webM.clone('webM'+ci);
+  });
+
+  // ── WALL SCONCES (amber candle light) ──────────────────────────────────────
+  function sconce(nm, pos, rotY) {
+    const bracket = BABYLON.MeshBuilder.CreateBox(nm+'_bracket', {width:0.08, height:0.25, depth:0.12}, scene);
+    bracket.position.copyFrom(pos); bracket.rotation.y = rotY;
+    bracket.material = woodM;
+    const candle = BABYLON.MeshBuilder.CreateCylinder(nm+'_candle', {diameter:0.05, height:0.18, tessellation:8}, scene);
+    candle.position.set(pos.x, pos.y + 0.12, pos.z); candle.rotation.y = rotY;
+    candle.material = mat(nm+'_cM'); candle.material.diffuseColor = new BABYLON.Color3(0.5, 0.45, 0.3);
+    const flame = BABYLON.MeshBuilder.CreateSphere(nm+'_flame', {diameter:0.03, segments:6}, scene);
+    flame.position.set(pos.x, pos.y + 0.25, pos.z);
+    flame.scaling.y = 2.0;
+    flame.material = emitM(nm+'_fM', 1.0, 0.62, 0.12, 1.0);
+  }
+  sconce('sconceL1', new BABYLON.Vector3(-W/2 + 0.1, 2.5, 0), Math.PI/2);
+  sconce('sconceR1', new BABYLON.Vector3(W/2 - 0.1, 2.5, 0), -Math.PI/2);
+  sconce('sconceB1', new BABYLON.Vector3(-4, 2.5, -D/2 + 0.1), 0);
+  sconce('sconceB2', new BABYLON.Vector3(4, 2.5, -D/2 + 0.1), 0);
+
+  // ── SMALL WINDOW WITH MOONLIGHT (front wall, high up) ───────────────────────
+  const winM = mat('winM');
+  winM.diffuseColor = new BABYLON.Color3(0.04, 0.08, 0.16);
+  winM.emissiveColor = new BABYLON.Color3(0.06, 0.10, 0.18);
+  winM.alpha = 0.82;
+  const winGlass = BABYLON.MeshBuilder.CreatePlane('winGlass', {width:1.6, height:2.0}, scene);
+  winGlass.position.set(4.5, 2.8, D/2 - 0.08);
+  winGlass.rotation.y = Math.PI;
+  winGlass.material = winM;
+  // Window frame
+  const winFrameM = mat('winFrameM'); winFrameM.diffuseColor = new BABYLON.Color3(0.15, 0.10, 0.06);
+  const winTop = BABYLON.MeshBuilder.CreateBox('winTop', {width:1.8, height:0.08, depth:0.1}, scene);
+  winTop.position.set(4.5, 3.8, D/2 - 0.05); winTop.material = winFrameM;
+  const winBot = BABYLON.MeshBuilder.CreateBox('winBot', {width:1.8, height:0.08, depth:0.1}, scene);
+  winBot.position.set(4.5, 1.8, D/2 - 0.05); winBot.material = winFrameM;
+  const winLeft = BABYLON.MeshBuilder.CreateBox('winLeft', {width:0.08, height:2.0, depth:0.1}, scene);
+  winLeft.position.set(3.7, 2.8, D/2 - 0.05); winLeft.material = winFrameM;
+  const winRight = BABYLON.MeshBuilder.CreateBox('winRight', {width:0.08, height:2.0, depth:0.1}, scene);
+  winRight.position.set(5.3, 2.8, D/2 - 0.05); winRight.material = winFrameM;
+  // Mullion
+  const mullion = BABYLON.MeshBuilder.CreateBox('mullion', {width:0.04, height:2.0, depth:0.06}, scene);
+  mullion.position.set(4.5, 2.8, D/2 - 0.06); mullion.material = winFrameM;
+
+  // ── LIGHTS ──────────────────────────────────────────────────────────────────
+  // Fireplace glow (warm amber)
+  const fireLight = new BABYLON.PointLight('fireLight', new BABYLON.Vector3(fpX, 0.8, fpZ + 0.2), scene);
+  fireLight.diffuse = new BABYLON.Color3(1.0, 0.5, 0.15);
+  fireLight.intensity = 2.8; fireLight.range = 14;
+
+  // Moonlight from window (cool blue)
+  const moonLight = new BABYLON.PointLight('moonLight', new BABYLON.Vector3(4.5, 3, D/2 - 0.5), scene);
+  moonLight.diffuse = new BABYLON.Color3(0.25, 0.35, 0.55);
+  moonLight.intensity = 1.2; moonLight.range = 10;
+
+  // Sconce lights (warm amber, flickering)
+  const sconceLights = [];
+  const sconcePositions = [
+    {pos: [-W/2 + 0.5, 2.6, 0], color: [0.7, 0.5, 0.2], range: 6},
+    {pos: [W/2 - 0.5, 2.6, 0], color: [0.7, 0.5, 0.2], range: 6},
+    {pos: [-4, 2.6, -D/2 + 0.5], color: [0.65, 0.45, 0.18], range: 6},
+    {pos: [4, 2.6, -D/2 + 0.5], color: [0.65, 0.45, 0.18], range: 6},
+  ];
+  sconcePositions.forEach((sp, si) => {
+    const sl = new BABYLON.PointLight('sconceLight'+si, new BABYLON.Vector3(sp.pos[0], sp.pos[1], sp.pos[2]), scene);
+    sl.diffuse = new BABYLON.Color3(sp.color[0], sp.color[1], sp.color[2]);
+    sl.intensity = 0.6; sl.range = sp.range;
+    sconceLights.push(sl);
+  });
+
+  // Candle light (mantel)
+  const candleLight = new BABYLON.PointLight('candleLight', new BABYLON.Vector3(fpX + 0.6, 2.1, fpZ), scene);
+  candleLight.diffuse = new BABYLON.Color3(0.8, 0.55, 0.2);
+  candleLight.intensity = 0.5; candleLight.range = 4;
+
+  // Ambient (very low, warm)
+  const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
+  ambient.intensity = 0.3;
+  ambient.diffuse = new BABYLON.Color3(0.25, 0.22, 0.18);
+  ambient.groundColor = new BABYLON.Color3(0.10, 0.06, 0.04);
+
+  // ── FLICKERING ──────────────────────────────────────────────────────────────
+  let ft = 0;
+  function flk(base, amp, sp, off) {
+    return base + amp * (Math.sin(ft*sp + off)*0.5 + Math.sin(ft*sp*2.3 + off*1.7)*0.3 + Math.sin(ft*sp*0.41 + off*0.9)*0.2);
+  }
+  scene.registerBeforeRender(() => {
+    ft += engine.getDeltaTime() * 0.001;
+    fireLight.intensity = flk(2.8, 0.5, 3.7, 1.2);
+    candleLight.intensity = flk(0.5, 0.1, 4.1, 0.5);
+    sconceLights.forEach((sl, i) => {
+      sl.intensity = flk(0.6, 0.08, 2.1 + i*0.7, i*1.3);
     });
-  }
-
-  // Back wall — 4 panels
-  const panelH = H - 1.05 - 0.2; // from dado to crown, with margin
-  const panelY = 1.05 + panelH/2 + 0.1;
-  const panelZ = D/2 - 0.04;
-  makeWallPanel('pB0', -7,   panelY, panelZ, 3.2, panelH);
-  makeWallPanel('pB1', -2.2, panelY, panelZ, 3.2, panelH);
-  makeWallPanel('pB2',  2.2, panelY, panelZ, 3.2, panelH);
-  makeWallPanel('pB3',  7,   panelY, panelZ, 3.2, panelH);
-
-  // Left wall — 3 panels
-  const panelZL = -W/2 + 0.04;
-  makeWallPanel('pL0', panelZL, panelY, -4,  3.0, panelH, Math.PI/2);
-  makeWallPanel('pL1', panelZL, panelY,  0,  3.0, panelH, Math.PI/2);
-  makeWallPanel('pL2', panelZL, panelY,  4,  3.0, panelH, Math.PI/2);
-
-  // Right wall — 2 panels (fireplace takes up the rest)
-  const panelZR = W/2 - 0.04;
-  makeWallPanel('pR0', panelZR, panelY, -4,  3.0, panelH, -Math.PI/2);
-  makeWallPanel('pR1', panelZR, panelY, -0.5, 3.0, panelH, -Math.PI/2);
-
-
-
-  // ── GRAND STAIRCASE (right of centre, curving up to landing) ──────────────
-  const stairM=pbr('stairM', TEX.darkwood_d, TEX.darkwood_n, 4, 1, new BABYLON.Color3(0.32,0.22,0.1));
-  const railM=mat('railM'); railM.diffuseColor=new BABYLON.Color3(0.28,0.18,0.08); railM.specularColor=new BABYLON.Color3(0.15,0.1,0.04); railM.specularPower=16;
-  const balM=mat('balM'); balM.diffuseColor=new BABYLON.Color3(0.22,0.15,0.07); balM.specularColor=new BABYLON.Color3(0.12,0.08,0.03);
-
-  const STAIR_STEPS=12, STEPY=H*0.55/STAIR_STEPS, STEPZ=0.42, STEPX=3.8;
-  const stairOriginZ=3.0, stairOriginX=3.5;
-
-  for(let s=0;s<STAIR_STEPS;s++){
-    // Tread
-    const tread=BABYLON.MeshBuilder.CreateBox('tread'+s,{width:STEPX,height:0.06,depth:STEPZ},scene);
-    tread.position.set(stairOriginX, s*STEPY+0.06, stairOriginZ-s*STEPZ);
-    tread.material=stairM;
-    // Riser
-    const riser=BABYLON.MeshBuilder.CreateBox('riser'+s,{width:STEPX,height:STEPY,depth:0.04},scene);
-    riser.position.set(stairOriginX, s*STEPY+STEPY/2, stairOriginZ-s*STEPZ+STEPZ/2);
-    riser.material=stairM;
-    // Nosing (rounded front edge strip)
-    const nos=BABYLON.MeshBuilder.CreateCylinder('nos'+s,{diameter:0.07,height:STEPX,tessellation:10},scene);
-    nos.position.set(stairOriginX, s*STEPY+0.035, stairOriginZ-s*STEPZ+STEPZ/2);
-    nos.rotation.z=Math.PI/2; nos.material=railM;
-
-    // 2 balusters per step
-    if(s>0){
-      [0.3,0.7].forEach((t,bi)=>{
-        const baly=s*STEPY+0.06;
-        const bh=0.72;
-        // Turned baluster — base + spindle + top
-        const bbase=BABYLON.MeshBuilder.CreateCylinder('bbase'+s+bi,{diameter:0.06,height:0.08,tessellation:10},scene);
-        bbase.position.set(stairOriginX-STEPX/2+t*STEPX, baly+0.04, stairOriginZ-s*STEPZ);
-        bbase.material=balM;
-        const bspin=BABYLON.MeshBuilder.CreateCylinder('bspin'+s+bi,{diameterTop:0.035,diameterBottom:0.04,height:bh-0.16,tessellation:10},scene);
-        bspin.position.set(stairOriginX-STEPX/2+t*STEPX, baly+bh/2, stairOriginZ-s*STEPZ);
-        bspin.material=balM;
-        // Mid-swell
-        const bswl=BABYLON.MeshBuilder.CreateSphere('bswl'+s+bi,{diameter:0.065,segments:6},scene);
-        bswl.position.set(stairOriginX-STEPX/2+t*STEPX, baly+bh*0.45, stairOriginZ-s*STEPZ);
-        bswl.material=balM;
-        const btop=BABYLON.MeshBuilder.CreateCylinder('btop'+s+bi,{diameter:0.055,height:0.08,tessellation:10},scene);
-        btop.position.set(stairOriginX-STEPX/2+t*STEPX, baly+bh, stairOriginZ-s*STEPZ);
-        btop.material=balM;
-      });
-    }
-  }
-  // Handrail — box at angle following stair pitch
-  const railAngle=Math.atan2(STAIR_STEPS*STEPY, STAIR_STEPS*STEPZ);
-  const railLen=Math.sqrt(Math.pow(STAIR_STEPS*STEPY,2)+Math.pow(STAIR_STEPS*STEPZ,2));
-  const handrail=BABYLON.MeshBuilder.CreateCylinder('handrail',{diameter:0.07,height:railLen,tessellation:10},scene);
-  handrail.position.set(stairOriginX-STEPX/2+0.12, (STAIR_STEPS*STEPY)/2+0.78, stairOriginZ-(STAIR_STEPS*STEPZ)/2);
-  handrail.rotation.x=railAngle; handrail.material=railM;
-  // Newel posts (start + end)
-  [[0,0.06,stairOriginZ,0.9],[0,STAIR_STEPS*STEPY+0.06,stairOriginZ-STAIR_STEPS*STEPZ+0.2,0.5]].forEach(([,y,z,h],ni)=>{
-    const nw=BABYLON.MeshBuilder.CreateBox('newel'+ni,{width:0.14,height:h,depth:0.14},scene);
-    nw.position.set(stairOriginX-STEPX/2+0.07,y+h/2,z); nw.material=railM;
-    const nwCap=BABYLON.MeshBuilder.CreateSphere('newelCap'+ni,{diameter:0.15,segments:8},scene);
-    nwCap.position.set(stairOriginX-STEPX/2+0.07,y+h+0.075,z); nwCap.material=railM;
+    if (embers) embers.material.emissiveColor = new BABYLON.Color3(flk(0.7, 0.15, 3.7, 0.5), flk(0.22, 0.06, 3.7, 1.0), 0.02);
+    // Flicker candle flame
+    if (candleFlame) candleFlame.material.emissiveColor = new BABYLON.Color3(flk(1.0, 0.15, 4.1, 0.3), flk(0.65, 0.08, 4.1, 0.7), 0.12);
   });
 
-  // Landing platform
-  const landing=BABYLON.MeshBuilder.CreateBox('landing',{width:W/2-0.2,height:0.1,depth:3.5},scene);
-  landing.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STAIR_STEPS*STEPY+0.05, stairOriginZ-STAIR_STEPS*STEPZ+1.75);
-  landing.material=stairM;
+  // ── INTERACTABLES ───────────────────────────────────────────────────────────
+  interactables.set('cloakMesh', 'cloak');
+  interactables.set('letterMesh', 'letter');
+  interactables.set('keyBow', 'key');
+  interactables.set('keyShaft', 'key');
+  interactables.set('rosemary0', 'rosemary');
+  interactables.set('rosemary1', 'rosemary');
+  interactables.set('clockBody', 'clock');
+  interactables.set('clockFace', 'clock');
+  interactables.set('portFrame', 'portrait');
+  interactables.set('portCanvas', 'portrait');
+  interactables.set('mirGlass', 'mirror');
+  interactables.set('mirFrame', 'mirror');
+  interactables.set('firebox', 'fireplace');
+  interactables.set('embers', 'fireplace');
+  interactables.set('hearth', 'fireplace');
+  interactables.set('herb0', 'herbwall');
+  interactables.set('herb1', 'herbwall');
+  interactables.set('herb2', 'herbwall');
+  interactables.set('herb3', 'herbwall');
+  interactables.set('herb4', 'herbwall');
 
-  // Landing balustrade
-  const landRail=BABYLON.MeshBuilder.CreateBox('landRail',{width:W/2-0.2,height:0.07,depth:0.07},scene);
-  landRail.position.set(stairOriginX+(W/2-0.2)/2-STEPX/2, STAIR_STEPS*STEPY+0.78, stairOriginZ-STAIR_STEPS*STEPZ+0.12);
-  landRail.material=railM;
+  // ── DOORS ───────────────────────────────────────────────────────────────────
+  // Door to Living Room (left wall)
+  const doorLR = BABYLON.MeshBuilder.CreateBox('door_living', {width:0.1, height:2.4, depth:1.4}, scene);
+  doorLR.position.set(-W/2 + 0.05, 1.2, 3);
+  const dLR_M = mat('dLR_M'); dLR_M.alpha = 0.01; doorLR.material = dLR_M;
+  interactables.set('door_living', 'door_living');
 
-  // ── FIREPLACE (right wall) ─────────────────────────────────────────────────
-  const fpX=W/2-0.12, fpZ=1.5;
+  // Door to Library (right wall)
+  const doorLib = BABYLON.MeshBuilder.CreateBox('door_library', {width:0.1, height:2.4, depth:1.4}, scene);
+  doorLib.position.set(W/2 - 0.05, 1.2, 3);
+  const dLib_M = mat('dLib_M'); dLib_M.alpha = 0.01; doorLib.material = dLib_M;
+  interactables.set('door_library', 'door_library');
 
-  // Fireplace: corbelled arch surround
-  // Side pilasters (base + shaft + capital)
-  [[fpZ-1.18],[fpZ+1.18]].forEach(([pz],pi)=>{
-    // Base block
-    const base=BABYLON.MeshBuilder.CreateBox('fpBase'+pi,{width:0.35,height:0.22,depth:0.68},scene);
-    base.position.set(fpX-0.18,0.11,pz); base.material=fpStoneM;
-    // Shaft
-    const shaft=BABYLON.MeshBuilder.CreateBox('fpShaft'+pi,{width:0.28,height:2.55,depth:0.56},scene);
-    shaft.position.set(fpX-0.14,1.39,pz); shaft.material=fpStoneM;
-    // Capital (stepped)
-    const cap=BABYLON.MeshBuilder.CreateBox('fpCap'+pi,{width:0.36,height:0.18,depth:0.68},scene);
-    cap.position.set(fpX-0.18,2.75,pz); cap.material=fpStoneM;
-    const cap2=BABYLON.MeshBuilder.CreateBox('fpCap2'+pi,{width:0.32,height:0.12,depth:0.62},scene);
-    cap2.position.set(fpX-0.16,2.90,pz); cap2.material=fpStoneM;
-  });
-  // Arch spanning lintel — segments approximate a round arch
-  const archSteps=7;
-  for(let ai=0;ai<archSteps;ai++){
-    const ang=(ai/(archSteps-1))*Math.PI; // 0 to PI
-    const r=1.2;
-    const ax=fpX-0.16;
-    const ay=3.05+Math.sin(ang)*0.55;
-    const az=fpZ+Math.cos(ang)*r;
-    const block=BABYLON.MeshBuilder.CreateBox('archB'+ai,{width:0.3,height:0.38,depth:0.34},scene);
-    block.position.set(ax,ay,az);
-    block.rotation.x=-ang+Math.PI/2;
-    block.material=fpStoneM;
-  }
-  // Keystone
-  const keystone=BABYLON.MeshBuilder.CreateBox('keystone',{width:0.32,height:0.42,depth:0.28},scene);
-  keystone.position.set(fpX-0.14,3.62,fpZ); keystone.material=fpStoneM.clone('ksm');
-  keystone.material.diffuseColor=new BABYLON.Color3(0.32,0.4,0.46);
+  // Door to Kitchen (back wall, right of fireplace)
+  const doorKit = BABYLON.MeshBuilder.CreateBox('door_kitchen', {width:1.2, height:2.4, depth:0.1}, scene);
+  doorKit.position.set(W/2 - 2.5, 1.2, -D/2 + 0.05);
+  const dKit_M = mat('dKit_M'); dKit_M.alpha = 0.01; doorKit.material = dKit_M;
+  interactables.set('door_kitchen', 'door_kitchen');
 
-  // Mantelshelf — thick with stepped profile
-  const mantel=BABYLON.MeshBuilder.CreateBox('mantel',{width:0.48,height:0.12,depth:3.1},scene);
-  mantel.position.set(fpX-0.22,3.15,fpZ); mantel.material=darkWoodM;
-  const mantelFront=BABYLON.MeshBuilder.CreateBox('mantelFront',{width:0.06,height:0.22,depth:3.1},scene);
-  mantelFront.position.set(fpX-0.44,3.09,fpZ); mantelFront.material=darkWoodM;
-  // Bracket corbels under mantel (2 of them)
-  [fpZ-0.8,fpZ+0.8].forEach((bz,bi)=>{
-    const brk=BABYLON.MeshBuilder.CreateBox('corbel'+bi,{width:0.14,height:0.28,depth:0.14},scene);
-    brk.position.set(fpX-0.35,2.96,bz); brk.material=darkWoodM;
-    // Angled cut face
-    const brkA=BABYLON.MeshBuilder.CreateBox('corbelA'+bi,{width:0.12,height:0.16,depth:0.12},scene);
-    brkA.position.set(fpX-0.36,2.84,bz); brkA.rotation.x=0.4; brkA.material=darkWoodM;
-  });
-  // Gold rail along mantel front edge
-  const mantelEdge=BABYLON.MeshBuilder.CreateBox('mantelEdge',{width:0.03,height:0.06,depth:3.12},scene);
-  mantelEdge.position.set(fpX-0.46,3.17,fpZ); mantelEdge.material=goldM;
-
-  // Flanking columns (stone, full height)
-  [fpZ-1.35, fpZ+1.35].forEach((cz,ci)=>{
-    const cBase=BABYLON.MeshBuilder.CreateCylinder('colBase'+ci,{diameter:0.32,height:0.22,tessellation:16},scene);
-    cBase.position.set(fpX-0.16,0.11,cz); cBase.material=fpStoneM;
-    const cShaft=BABYLON.MeshBuilder.CreateCylinder('colShaft'+ci,{diameterTop:0.22,diameterBottom:0.26,height:3.0,tessellation:16},scene);
-    cShaft.position.set(fpX-0.16,1.72,cz); cShaft.material=fpStoneM;
-    const cCap=BABYLON.MeshBuilder.CreateCylinder('colCap'+ci,{diameter:0.34,height:0.18,tessellation:16},scene);
-    cCap.position.set(fpX-0.16,3.31,cz); cCap.material=fpStoneM;
-    const cAbac=BABYLON.MeshBuilder.CreateBox('colAbac'+ci,{width:0.38,height:0.12,depth:0.38},scene);
-    cAbac.position.set(fpX-0.16,3.46,cz); cAbac.material=fpStoneM;
-  });
-
-  // Log pile in firebox
-  const logM=mat('logM'); logM.diffuseColor=new BABYLON.Color3(0.18,0.1,0.04);
-  [[0,-0.55,0.22],[0,-0.55,-0.22],[0.04,-0.42,0],[0.04,-0.42,0.44],[0.04,-0.42,-0.44]].forEach(([lx,ly,lz],li)=>{
-    const log=BABYLON.MeshBuilder.CreateCylinder('log'+li,{diameter:0.09,height:2.0,tessellation:8},scene);
-    log.position.set(fpX+lx,0.15+(-ly),fpZ+lz); log.rotation.x=Math.PI/2;
-    log.material=logM;
-  });
-
-  // Firebox
-  const fbM=mat('fbM'); fbM.diffuseColor=new BABYLON.Color3(0.04,0.02,0.01); fbM.emissiveColor=new BABYLON.Color3(0.02,0.01,0);
-  const firebox=BABYLON.MeshBuilder.CreateBox('firebox',{width:0.12,height:1.35,depth:2.2},scene);
-  firebox.position.set(fpX,0.75,fpZ); firebox.material=fbM;
-
-  // Iron grate
-  const grateM=mat('grateM'); grateM.diffuseColor=new BABYLON.Color3(0.12,0.1,0.1);
-  [-0.6,-0.3,0,0.3,0.6].forEach((gz,gi)=>{
-    const bar=BABYLON.MeshBuilder.CreateCylinder('gr'+gi,{diameter:0.04,height:0.7,tessellation:6},scene);
-    bar.position.set(fpX-0.04,0.35,fpZ+gz); bar.material=grateM;
-  });
-
-  // Ash tile (hearth)
-  const hearth=BABYLON.MeshBuilder.CreateBox('hearth',{width:0.35,height:0.02,depth:2.4},scene);
-  hearth.position.set(fpX-0.3,0.01,fpZ); hearth.material=fpStoneM;
-
-  // Ember glow layer
-  const emberM=mat('emberM');
-  emberM.emissiveColor=new BABYLON.Color3(0.6,0.18,0.02);
-  emberM.diffuseColor =new BABYLON.Color3(0.4,0.1,0.01);
-  const embers=BABYLON.MeshBuilder.CreateBox('embers',{width:0.06,height:0.04,depth:1.8},scene);
-  embers.position.set(fpX-0.01,0.04,fpZ); embers.material=emberM;
-
-  // Fireback tile (decorative back panel)
-  const firebackM=mat('firebackM');
-  firebackM.diffuseColor=new BABYLON.Color3(0.08,0.06,0.05);
-  firebackM.emissiveColor=new BABYLON.Color3(0.04,0.01,0);
-  const fireback=BABYLON.MeshBuilder.CreateBox('fireback',{width:0.06,height:1.4,depth:2.0},scene);
-  fireback.position.set(fpX+0.01,0.8,fpZ); fireback.material=firebackM;
-
-  // Chequered tile floor before fireplace
-  for(let tx=-4;tx<=4;tx++){
-    for(let tz=-2;tz<=1;tz++){
-      const t=BABYLON.MeshBuilder.CreateBox(`ftile_${tx}_${tz}`,{width:0.48,height:0.01,depth:0.48},scene);
-      t.position.set(W/2-1.0-tx*0.5,0.006,fpZ+tz*0.5);
-      const dm=(tx+tz)%2===0;
-      const tm=mat(`ftm_${tx}_${tz}`); tm.diffuseColor=new BABYLON.Color3(dm?0.06:0.22,dm?0.04:0.14,dm?0.06:0.20);
-      t.material=tm;
-    }
-  }
-
-
-  // ── STONE STATUE (flanking staircase foot — gothic manor style) ──────────
-  const statM=pbr('statM', TEX.mstone_d, TEX.mstone_n, 1, 1, new BABYLON.Color3(0.35,0.42,0.48));
-  statM.emissiveColor=new BABYLON.Color3(0.01,0.015,0.02);
-  const statX=1.0, statZ=4.2;
-  // Plinth
-  const plinth=BABYLON.MeshBuilder.CreateBox('plinth',{width:0.44,height:0.5,depth:0.44},scene);
-  plinth.position.set(statX,0.25,statZ); plinth.material=statM;
-  // Plinth top step
-  const pTop=BABYLON.MeshBuilder.CreateBox('plinthTop',{width:0.36,height:0.08,depth:0.36},scene);
-  pTop.position.set(statX,0.54,statZ); pTop.material=statM;
-  // Robes/body
-  const body=BABYLON.MeshBuilder.CreateCylinder('statBody',{diameterTop:0.3,diameterBottom:0.38,height:1.0,tessellation:14},scene);
-  body.position.set(statX,1.08,statZ); body.material=statM;
-  // Torso
-  const torso=BABYLON.MeshBuilder.CreateCylinder('statTorso',{diameterTop:0.26,diameterBottom:0.3,height:0.55,tessellation:14},scene);
-  torso.position.set(statX,1.83,statZ); torso.material=statM;
-  // Head
-  const head=BABYLON.MeshBuilder.CreateSphere('statHead',{diameter:0.24,segments:10},scene);
-  head.position.set(statX,2.23,statZ); head.scaling.y=1.15; head.material=statM;
-  // Hood/cowl
-  const hood=BABYLON.MeshBuilder.CreateCylinder('statHood',{diameterTop:0.06,diameterBottom:0.28,height:0.28,tessellation:14},scene);
-  hood.position.set(statX,2.32,statZ); hood.material=statM;
-  // Arms (outstretched slightly)
-  [[-1,0.05],[1,-0.05]].forEach(([dir,tilt],ai)=>{
-    const arm=BABYLON.MeshBuilder.CreateCylinder('statArm'+ai,{diameterTop:0.05,diameterBottom:0.08,height:0.48,tessellation:8},scene);
-    arm.position.set(statX+dir*0.28,1.76,statZ); arm.rotation.z=dir*0.7+tilt; arm.material=statM;
-    // Hand
-    const hand=BABYLON.MeshBuilder.CreateSphere('statHand'+ai,{diameter:0.1,segments:6},scene);
-    hand.position.set(statX+dir*0.56,1.58,statZ); hand.material=statM;
-  });
-
-  // ── BOOKSHELF (left wall) ──────────────────────────────────────────────────
-  const bsX=-W/2+0.18, bsZ=-1;
-
-  const bsBack=BABYLON.MeshBuilder.CreateBox('bsBack',{width:0.32,height:4.4,depth:4.2},scene);
-  bsBack.position.set(bsX,2.2,bsZ); bsBack.material=darkWoodM;
-
-  // Side panels
-  [-2.1,2.1].forEach((oz,si)=>{
-    const side=BABYLON.MeshBuilder.CreateBox('bsSide'+si,{width:0.32,height:4.4,depth:0.12},scene);
-    side.position.set(bsX+0.08,2.2,bsZ+oz); side.material=darkWoodM;
-  });
-
-  const BOOK_COLS=['#7a1a1a','#1a3a6b','#2d5a1a','#6b4a1a','#4a1a5a','#1a4a3a','#8b5a10','#2a1a6a'];
-  for(let sh=0;sh<5;sh++){
-    const shelfY=0.55+sh*0.78;
-    const shelf=BABYLON.MeshBuilder.CreateBox('shelf'+sh,{width:0.38,height:0.07,depth:4.1},scene);
-    shelf.position.set(bsX+0.04,shelfY,bsZ); shelf.material=darkWoodM;
-    // Books
-    let bz=bsZ-1.9;
-    while(bz<bsZ+1.9){
-      const bw=0.08+Math.random()*0.14;
-      const bh=0.38+Math.random()*0.24;
-      const tilt=(Math.random()-0.5)*0.12;
-      const book=BABYLON.MeshBuilder.CreateBox('bk'+sh+'_'+Math.floor(bz*10),{width:0.14,height:bh,depth:bw},scene);
-      book.position.set(bsX+0.14,shelfY+bh/2+0.04,bz+bw/2);
-      book.rotation.x=tilt;
-      const col=BOOK_COLS[Math.floor(Math.random()*BOOK_COLS.length)];
-      // Book spine — solid colour from BOOK_COLS palette with dark wood texture overlay
-      const bm=mat('bm'+sh+Math.floor(bz*10));
-      bm.diffuseTexture=new BABYLON.Texture(TEX.darkwood_d,scene);
-      bm.diffuseTexture.uScale=1; bm.diffuseTexture.vScale=4;
-      // Parse hex colour string as diffuse tint
-      const r=parseInt(col.slice(1,3),16)/255;
-      const g=parseInt(col.slice(3,5),16)/255;
-      const b=parseInt(col.slice(5,7),16)/255;
-      bm.diffuseColor=new BABYLON.Color3(r*1.4,g*1.4,b*1.4);
-      bm.specularColor=new BABYLON.Color3(0.04,0.04,0.04);
-      book.material=bm;
-      bz+=bw+0.008;
-    }
-  }
-
-  // ── GRANDFATHER CLOCK ──────────────────────────────────────────────────────
-  const ckX=-W/2+0.22, ckZ=4;
-  const ckBM=mat('ckBM'); ckBM.diffuseColor=new BABYLON.Color3(0.16,0.08,0.03);
-  const ckBox=BABYLON.MeshBuilder.CreateBox('ckBody',{width:0.56,height:2.9,depth:0.56},scene);
-  ckBox.position.set(ckX,1.55,ckZ); ckBox.material=ckBM;
-  const ckHood=BABYLON.MeshBuilder.CreateBox('ckHood',{width:0.64,height:0.5,depth:0.6},scene);
-  ckHood.position.set(ckX,3.28,ckZ); ckHood.material=ckBM;
-  const ckBase2=BABYLON.MeshBuilder.CreateBox('ckBase',{width:0.62,height:0.28,depth:0.6},scene);
-  ckBase2.position.set(ckX,0.14,ckZ); ckBase2.material=ckBM;
-  // Clock glass panel (dark)
-  const ckGlassM=mat('ckGlass'); ckGlassM.diffuseColor=new BABYLON.Color3(0.02,0.01,0.04); ckGlassM.alpha=0.7;
-  const ckGlass=BABYLON.MeshBuilder.CreateBox('ckGlass',{width:0.08,height:1.5,depth:0.4},scene);
-  ckGlass.position.set(ckX+0.28,1.5,ckZ); ckGlass.material=ckGlassM;
-  // Clock face (emissive)
-  const ckFaceM=mat('ckFaceM'); ckFaceM.emissiveColor=new BABYLON.Color3(0.55,0.5,0.35);
-  const ckFace=BABYLON.MeshBuilder.CreatePlane('ckFace',{width:0.36,height:0.36},scene);
-  ckFace.position.set(ckX+0.29,2.88,ckZ); ckFace.rotation.y=-Math.PI/2; ckFace.material=ckFaceM;
-
-  // ── CAULDRON (centre left floor) ──────────────────────────────────────────
-  const cauldM=mat('cauldM'); cauldM.diffuseColor=new BABYLON.Color3(0.1,0.08,0.1);
-  cauldM.specularColor=new BABYLON.Color3(0.12,0.12,0.12); cauldM.specularPower=16;
-  const cauldron=BABYLON.MeshBuilder.CreateSphere('cauldron_mesh',{diameter:0.88,segments:12},scene);
-  cauldron.position.set(-3,0.38,2); cauldron.scaling.y=0.72; cauldron.material=cauldM;
-  // Cauldron legs
-  [[-0.28,-0.22],[-0.28,0.22],[0.32,0]].forEach(([lx,lz],li)=>{
-    const leg=BABYLON.MeshBuilder.CreateCylinder('cauldLeg'+li,{diameter:0.07,height:0.35,tessellation:6},scene);
-    leg.position.set(-3+lx,0.18,2+lz); leg.material=cauldM;
-  });
-  // Liquid surface glow
-  const brewM=mat('brewM'); brewM.emissiveColor=new BABYLON.Color3(0.05,0.35,0.12); brewM.alpha=0.75;
-  const brew=BABYLON.MeshBuilder.CreateDisc('brew',{radius:0.34,tessellation:20},scene);
-  brew.position.set(-3,0.58,2); brew.rotation.x=Math.PI/2; brew.material=brewM;
-
-  // ── DRYING HERB BUNDLES (back wall) ───────────────────────────────────────
-  const herbPositions=[[-6,4.2,D/2-0.1],[-3,4.0,D/2-0.1],[1,4.3,D/2-0.1],[4,4.1,D/2-0.1]];
-  herbPositions.forEach(([hx,hy,hz],hi)=>{
-    // Hanging string
-    const strM=mat('strM'+hi); strM.diffuseColor=new BABYLON.Color3(0.55,0.4,0.2);
-    const str=BABYLON.MeshBuilder.CreateCylinder('herbStr'+hi,{diameter:0.015,height:0.35,tessellation:4},scene);
-    str.position.set(hx,hy+0.18,hz); str.material=strM;
-    // Bundle
-    const hm=mat('hm'+hi); hm.diffuseColor=new BABYLON.Color3(0.28+hi*0.04,0.32,0.14);
-    const bundle=BABYLON.MeshBuilder.CreateCylinder('herbwall_mesh_'+hi,{diameterTop:0.05,diameterBottom:0.14,height:0.4,tessellation:8},scene);
-    bundle.position.set(hx,hy-0.02,hz); bundle.material=hm;
-  });
-
-
-  // ── TALL GOTHIC WINDOW REVEALS (front wall, flanking entrance) ──────────
-  const winStoneM=fpStoneM.clone('winStoneM');
-  winStoneM.diffuseColor=new BABYLON.Color3(0.2,0.26,0.32);
-  [[-5.5],[5.5]].forEach(([wx],wi)=>{
-    // Deep stone reveal (side jambs)
-    [[-0.48],[0.48]].forEach(([wo],ji)=>{
-      const jamb=BABYLON.MeshBuilder.CreateBox('jamb'+wi+'_'+ji,{width:0.38,height:3.0,depth:0.55},scene);
-      jamb.position.set(wx+wo,-D/2+0.3+3.0/2+0.1,-D/2+0.3);
-      jamb.rotation.y=0; jamb.position.z=-D/2+0.3;
-      jamb.position.set(wx+wo,2.2,-D/2+0.3); jamb.material=winStoneM;
-    });
-    // Sill
-    const sill=BABYLON.MeshBuilder.CreateBox('sill'+wi,{width:1.2,height:0.12,depth:0.55},scene);
-    sill.position.set(wx,0.85,-D/2+0.3); sill.material=winStoneM;
-    // Lintel (flat arch)
-    const wlin=BABYLON.MeshBuilder.CreateBox('wlin'+wi,{width:1.2,height:0.2,depth:0.45},scene);
-    wlin.position.set(wx,3.62,-D/2+0.28); wlin.material=winStoneM;
-    // Window glass (dark teal, slightly emissive — cold outside light)
-    const glassM=mat('glassM'+wi);
-    glassM.diffuseColor=new BABYLON.Color3(0.08,0.14,0.22);
-    glassM.emissiveColor=new BABYLON.Color3(0.06,0.12,0.2);
-    glassM.alpha=0.82;
-    const glass=BABYLON.MeshBuilder.CreatePlane('glass'+wi,{width:0.85,height:2.65},scene);
-    glass.position.set(wx,2.2,-D/2+0.12); glass.material=glassM;
-    // Window mullion (vertical centre bar)
-    const mull=BABYLON.MeshBuilder.CreateBox('mull'+wi,{width:0.04,height:2.65,depth:0.06},scene);
-    mull.position.set(wx,2.2,-D/2+0.14); mull.material=winStoneM;
-    // Horizontal transom
-    const trans=BABYLON.MeshBuilder.CreateBox('trans'+wi,{width:0.88,height:0.04,depth:0.06},scene);
-    trans.position.set(wx,2.5,-D/2+0.14); trans.material=winStoneM;
-  });
-
-  // ── PORTRAIT (back wall) ───────────────────────────────────────────────────
-  const portM=mat('portM'); portM.diffuseColor=new BABYLON.Color3(0.2,0.1,0.15); portM.emissiveColor=new BABYLON.Color3(0.04,0.02,0.03);
-  const portMesh=BABYLON.MeshBuilder.CreatePlane('portrait_mesh',{width:1.6,height:2.1},scene);
-  portMesh.position.set(-4,2.8,D/2-0.06); portMesh.material=portM;
-  const pfM=goldM.clone('pfM');
-  const portFrame=BABYLON.MeshBuilder.CreateBox('portFrame',{width:1.78,height:2.28,depth:0.06},scene);
-  portFrame.position.set(-4,2.8,D/2-0.04); portFrame.material=pfM;
-  // Ornate moulding strips on frame
-  const fOrnM=goldM.clone('fOrnM');
-  [[0,1.14,0.07],[0,-1.14,0.07],[0.89,0,0.07],[-0.89,0,0.07]].forEach(([ox,oy,oz],fi)=>{
-    const isH=fi<2;
-    const fstrip=BABYLON.MeshBuilder.CreateBox('fstrip'+fi,{width:isH?1.78:0.08,height:isH?0.08:2.28,depth:0.04},scene);
-    fstrip.position.set(-4+ox,2.8+oy,D/2-0.04+oz); fstrip.material=fOrnM;
-  });
-  // Corner rosettes
-  [[-0.89,-1.14],[0.89,-1.14],[-0.89,1.14],[0.89,1.14]].forEach(([rx,ry],ri)=>{
-    const ros=BABYLON.MeshBuilder.CreateCylinder('rosette'+ri,{diameter:0.13,height:0.05,tessellation:14},scene);
-    ros.position.set(-4+rx,2.8+ry,D/2-0.01); ros.rotation.x=Math.PI/2; ros.material=goldM;
-    const rosC=BABYLON.MeshBuilder.CreateSphere('rosetteC'+ri,{diameter:0.065,segments:6},scene);
-    rosC.position.set(-4+rx,2.8+ry,D/2+0.02); rosC.material=goldM;
-  });
-
-  // ── MIRROR (back wall right) ───────────────────────────────────────────────
-  const mirM=mat('mirM'); mirM.diffuseColor=new BABYLON.Color3(0.35,0.3,0.42); mirM.specularColor=new BABYLON.Color3(0.6,0.55,0.7); mirM.specularPower=64; mirM.emissiveColor=new BABYLON.Color3(0.03,0.02,0.05);
-  const mirMesh=BABYLON.MeshBuilder.CreatePlane('mirror_mesh',{width:1.0,height:2.4},scene);
-  mirMesh.position.set(4,2.7,D/2-0.06); mirMesh.material=mirM;
-  const mfM=goldM.clone('mfM');
-  const mirFrame=BABYLON.MeshBuilder.CreateBox('mirFrame',{width:1.14,height:2.55,depth:0.06},scene);
-  mirFrame.position.set(4,2.7,D/2-0.04); mirFrame.material=mfM;
-
-  // ── CLOAK (hook near front door) ──────────────────────────────────────────
-  const cloakM=mat('cloakM'); cloakM.diffuseColor=new BABYLON.Color3(0.06,0.08,0.12);
-  const cloak=BABYLON.MeshBuilder.CreateBox('cloak_mesh',{width:0.6,height:1.4,depth:0.15},scene);
-  cloak.position.set(-6,1.1,-D/2+0.4); cloak.material=cloakM;
-  // Coat hook
-  const hookM=goldM.clone('hookM');
-  const hook=BABYLON.MeshBuilder.CreateTorus('hook',{diameter:0.12,thickness:0.02,tessellation:12},scene);
-  hook.position.set(-6,1.9,-D/2+0.24); hook.rotation.x=Math.PI/2; hook.material=hookM;
-
-  // ── STAFF (leaning left wall) ──────────────────────────────────────────────
-  const stM=mat('stM'); stM.diffuseColor=new BABYLON.Color3(0.24,0.14,0.06);
-  const staff=BABYLON.MeshBuilder.CreateCylinder('staff_mesh',{diameterTop:0.04,diameterBottom:0.07,height:1.9,tessellation:8},scene);
-  staff.position.set(-W/2+0.42,0.95,-2.5); staff.rotation.z=0.2; staff.material=stM;
-  const tipM=mat('tipM'); tipM.emissiveColor=new BABYLON.Color3(0.1,0.6,0.55); tipM.diffuseColor=new BABYLON.Color3(0.05,0.3,0.28);
-  const tip=BABYLON.MeshBuilder.CreateSphere('staffTip',{diameter:0.11},scene);
-  tip.position.set(-W/2+0.58,1.88,-2.6); tip.material=tipM;
-
-  // ── KEY (on mantelshelf) ───────────────────────────────────────────────────
-  const keyM=mat('keyM'); keyM.diffuseColor=new BABYLON.Color3(0.3,0.28,0.3); keyM.specularColor=new BABYLON.Color3(0.5,0.5,0.5); keyM.specularPower=32;
-  const key=BABYLON.MeshBuilder.CreateCylinder('key_mesh',{diameter:0.1,height:0.03,tessellation:14},scene);
-  key.position.set(fpX-0.5,3.32,fpZ+0.6); key.rotation.x=Math.PI/2; key.material=keyM;
-
-  // ── LETTER (on mantelshelf) ────────────────────────────────────────────────
-  const letM=mat('letM'); letM.diffuseColor=new BABYLON.Color3(0.82,0.75,0.58); letM.emissiveColor=new BABYLON.Color3(0.04,0.03,0.01);
-  const letter=BABYLON.MeshBuilder.CreateBox('letter_mesh',{width:0.22,height:0.02,depth:0.3},scene);
-  letter.position.set(fpX-0.5,3.31,fpZ-0.55); letter.material=letM;
-  // Wax seal disc
-  const sealM=mat('sealM'); sealM.diffuseColor=new BABYLON.Color3(0.5,0.08,0.08); sealM.emissiveColor=new BABYLON.Color3(0.08,0.01,0.01);
-  const seal=BABYLON.MeshBuilder.CreateCylinder('seal',{diameter:0.06,height:0.025,tessellation:8},scene);
-  seal.position.set(fpX-0.5,3.33,fpZ-0.55); seal.material=sealM;
-
-  // ── ROSEMARY (above front door frame) ─────────────────────────────────────
-  const roseM=mat('roseM'); roseM.diffuseColor=new BABYLON.Color3(0.22,0.38,0.16); roseM.emissiveColor=new BABYLON.Color3(0.02,0.05,0.01);
-  const rosemary=BABYLON.MeshBuilder.CreateCylinder('rosemary_mesh',{diameterTop:0.04,diameterBottom:0.1,height:0.4,tessellation:8},scene);
-  rosemary.position.set(0,2.8,-D/2+0.16); rosemary.rotation.z=Math.PI/2; rosemary.material=roseM;
-  // Red thread tie
-  const threadM=mat('threadM'); threadM.emissiveColor=new BABYLON.Color3(0.5,0.05,0.05);
-  const thread=BABYLON.MeshBuilder.CreateCylinder('thread',{diameter:0.12,height:0.04,tessellation:10},scene);
-  thread.position.set(0,2.8,-D/2+0.14); thread.rotation.z=Math.PI/2; thread.material=threadM;
-
-  // ── CHANDELIER: wrought iron with wax tapers ──────────────────────────────
-  const chanY=H-0.3;
-  const ironM=mat('ironM'); ironM.diffuseColor=new BABYLON.Color3(0.12,0.12,0.14); ironM.specularColor=new BABYLON.Color3(0.25,0.25,0.28); ironM.specularPower=24;
-
-  // Ceiling rose
-  const rose=BABYLON.MeshBuilder.CreateCylinder('chanRose',{diameter:0.28,height:0.08,tessellation:20},scene);
-  rose.position.set(0,chanY-0.01,0); rose.material=ironM;
-  // Chain links (stacked rings)
-  for(let cl=0;cl<5;cl++){
-    const lnk=BABYLON.MeshBuilder.CreateTorus('clink'+cl,{diameter:0.06,thickness:0.015,tessellation:10},scene);
-    lnk.position.set(0,chanY-0.12-cl*0.14,0); lnk.rotation.x=(cl%2)*Math.PI/2; lnk.material=ironM;
-  }
-  // Central hub (turned iron ball)
-  const hub=BABYLON.MeshBuilder.CreateSphere('chanHub',{diameter:0.22,segments:10},scene);
-  hub.position.set(0,chanY-0.9,0); hub.material=ironM;
-  // Decorative bottom finial
-  const fin=BABYLON.MeshBuilder.CreateCylinder('chanFin',{diameterTop:0.0,diameterBottom:0.1,height:0.22,tessellation:10},scene);
-  fin.position.set(0,chanY-1.07,0); fin.rotation.x=Math.PI; fin.material=ironM;
-
-  // 6 curved arms with S-scroll suggestion
-  for(let a=0;a<6;a++){
-    const angle=(a/6)*Math.PI*2;
-    const ax=Math.sin(angle), az=Math.cos(angle);
-    // Inner arm segment
-    const arm1=BABYLON.MeshBuilder.CreateCylinder('arm1_'+a,{diameter:0.028,height:0.55,tessellation:8},scene);
-    arm1.position.set(ax*0.28,chanY-0.9,az*0.28);
-    arm1.rotation.z= Math.cos(angle)*0.55; arm1.rotation.x=-Math.sin(angle)*0.55;
-    arm1.material=ironM;
-    // Outer arm segment
-    const arm2=BABYLON.MeshBuilder.CreateCylinder('arm2_'+a,{diameter:0.022,height:0.48,tessellation:8},scene);
-    arm2.position.set(ax*0.65,chanY-1.08,az*0.65);
-    arm2.rotation.z= Math.cos(angle)*0.18; arm2.rotation.x=-Math.sin(angle)*0.18;
-    arm2.material=ironM;
-    // Candle cup (bobèche)
-    const cup=BABYLON.MeshBuilder.CreateCylinder('cup_'+a,{diameterTop:0.14,diameterBottom:0.06,height:0.06,tessellation:14},scene);
-    cup.position.set(ax*0.82,chanY-1.22,az*0.82); cup.material=ironM;
-    // Candle taper (white, slightly off-vertical per candle)
-    const tilt=(Math.random()-0.5)*0.06;
-    const taper=BABYLON.MeshBuilder.CreateCylinder('taper_'+a,{diameterTop:0.03,diameterBottom:0.045,height:0.28,tessellation:10},scene);
-    taper.position.set(ax*0.82,chanY-1.07,az*0.82); taper.rotation.z=tilt;
-    const waxM=mat('wax'+a); waxM.diffuseColor=new BABYLON.Color3(0.93,0.88,0.78); waxM.emissiveColor=new BABYLON.Color3(0.04,0.03,0.01);
-    taper.material=waxM;
-    // Wax drip
-    const drip=BABYLON.MeshBuilder.CreateCylinder('drip_'+a,{diameterTop:0.04,diameterBottom:0.02,height:0.07,tessellation:8},scene);
-    drip.position.set(ax*0.82+0.01,chanY-1.21,az*0.82); drip.material=waxM;
-    // Flame
-    const fl=BABYLON.MeshBuilder.CreateSphere('cf'+a,{diameter:0.055,segments:6},scene);
-    fl.position.set(ax*0.82,chanY-0.92,az*0.82); fl.scaling.y=1.8;
-    fl.material=emitM('cfm'+a,1,0.62,0.12,1.0);
-  }
-
-  // ── WALL SCONCES ──────────────────────────────────────────────────────────
-  [[-W/2+0.14,-3,0],[W/2-0.14,-3,Math.PI]].forEach(([sx,sz,ry],i)=>{
-    const bkt=BABYLON.MeshBuilder.CreateBox('scBkt'+i,{width:0.09,height:0.32,depth:0.2},scene);
-    bkt.position.set(sx+(i?-0.1:0.1),2.7,sz); bkt.rotation.y=ry; bkt.material=goldM;
-    const sfl=BABYLON.MeshBuilder.CreateSphere('sfl'+i,{diameter:0.07},scene);
-    sfl.position.set(sx+(i?-0.2:0.2),2.82,sz); sfl.scaling.y=1.4;
-    sfl.material=emitM('sfm'+i,1,0.6,0.15,0.9);
-  });
-
-  // ── INTERACTABLES MAP ──────────────────────────────────────────────────────
-  interactables=new Map([
-    ['cloak_mesh','cloak'],['hook','cloak'],
-    ['staff_mesh','staff'],['staffTip','staff'],
-    ['key_mesh','key'],
-    ['letter_mesh','letter'],['seal','letter'],
-    ['rosemary_mesh','rosemary'],['thread','rosemary'],
-    ['portrait_mesh','portrait'],['portFrame','portrait'],
-    ['mirror_mesh','mirror'],['mirFrame','mirror'],
-    ['ckBody','clock'],['ckHood','clock'],['ckFace','clock'],['ckGlass','clock'],
-    ['bsBack','bookshelf'],
-    ['fpL','fireplace'],['fpR','fireplace'],['lintel','fireplace'],['firebox','fireplace'],['mantel','fireplace'],['embers','fireplace'],
-    ['cauldron_mesh','cauldron'],['brew','cauldron'],
-  ]);
-  // Herb bundles
-  for(let hi=0;hi<4;hi++) interactables.set('herbwall_mesh_'+hi,'herbwall');
-
-  // ── LIGHTS ────────────────────────────────────────────────────────────────
-
-  // Gloomy overcast window light (simulates grey daylight through tall windows)
-  const windowLight = new BABYLON.PointLight('winLight', new BABYLON.Vector3(0, 3.5, -D/2+1), scene);
-  windowLight.diffuse   = new BABYLON.Color3(0.3, 0.5, 0.75); // cold blue moonlight
-  windowLight.specular  = new BABYLON.Color3(0.1, 0.1, 0.15);
-  windowLight.intensity = 2.0;
-  windowLight.range     = 26;
-
-  // Second fill — from the staircase landing (mysterious light from upstairs)
-  const stairLight = new BABYLON.PointLight('stairLight', new BABYLON.Vector3(3, 4.2, 2), scene);
-  stairLight.diffuse   = new BABYLON.Color3(0.28, 0.45, 0.65);
-  stairLight.intensity = 1.0;
-  stairLight.range     = 16;
-
-
-
-  // Dark red environmental glow — emanates from the walls/floor, like cursed hearth light
-  const redEnvLight = new BABYLON.PointLight('redEnv', new BABYLON.Vector3(0, 0.4, 0), scene);
-  redEnvLight.diffuse   = new BABYLON.Color3(0.72, 0.08, 0.04);
-  redEnvLight.specular  = new BABYLON.Color3(0.3, 0.02, 0.0);
-  redEnvLight.intensity = 1.2;
-  redEnvLight.range     = 30;
-
-  // Second red fill — from the far end of the room (back wall bleed)
-  const redBackLight = new BABYLON.PointLight('redBack', new BABYLON.Vector3(0, 1.5, D/2 - 1), scene);
-  redBackLight.diffuse   = new BABYLON.Color3(0.6, 0.05, 0.03);
-  redBackLight.specular  = new BABYLON.Color3(0.0, 0.0, 0.0);
-  redBackLight.intensity = 0.8;
-  redBackLight.range     = 22;
-
-  const ambient=new BABYLON.HemisphericLight('amb',new BABYLON.Vector3(0,1,0),scene);
-  ambient.intensity=0.65; ambient.diffuse=new BABYLON.Color3(0.48,0.58,0.72);
-  ambient.groundColor=new BABYLON.Color3(0.18,0.06,0.06);
-
-  const chanLight=new BABYLON.PointLight('chanL',new BABYLON.Vector3(0,chanY-1.1,0),scene);
-  chanLight.diffuse=new BABYLON.Color3(0.6,0.72,0.88); chanLight.intensity=1.4; chanLight.range=28;
-
-  const fireLight=new BABYLON.PointLight('fireL',new BABYLON.Vector3(fpX-0.8,0.9,fpZ),scene);
-  fireLight.diffuse=new BABYLON.Color3(1.0,0.6,0.18); fireLight.intensity=3.5; fireLight.range=18;
-
-  // Green cauldron glow
-  const cauldLight=new BABYLON.PointLight('cauldL',new BABYLON.Vector3(-3,0.7,2),scene);
-  cauldLight.diffuse=new BABYLON.Color3(0.1,0.75,0.55); cauldLight.intensity=0.8; cauldLight.range=7;
-
-  const sconceL=new BABYLON.PointLight('scL',new BABYLON.Vector3(-6,2.8,-3),scene);
-  sconceL.diffuse=new BABYLON.Color3(0.5,0.68,0.88); sconceL.intensity=0.9; sconceL.range=14;
-  const sconceR=new BABYLON.PointLight('scR',new BABYLON.Vector3(6,2.8,-3),scene);
-  sconceR.diffuse=new BABYLON.Color3(0.5,0.68,0.88); sconceR.intensity=0.9; sconceR.range=14;
-
-  // ── FLICKER ───────────────────────────────────────────────────────────────
-  let ft=0;
-  function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
-  scene.registerBeforeRender(()=>{
-    ft+=engine.getDeltaTime()*0.001;
-    chanLight.intensity=flk(1.4,0.2,2.1,0);
-    fireLight.intensity=flk(3.5,0.6,3.7,1.2);
-    cauldLight.intensity=flk(0.55,0.18,1.8,3.0);
-    sconceL.intensity  =flk(0.9,0.15,1.8,0.6);
-    sconceR.intensity  =flk(0.9,0.15,2.4,2.1);
-    // Ember pulse
-    if(embers) embers.material.emissiveColor=new BABYLON.Color3(flk(0.6,0.15,3.7,0.5),flk(0.18,0.06,3.7,1.0),0.02);
-    // Cauldron brew shimmer
-    if(brew) brew.material.emissiveColor=new BABYLON.Color3(0.03,flk(0.35,0.1,1.8,3.0),0.1);
-    if(redEnvLight) redEnvLight.intensity=flk(1.2,0.2,0.8,1.5);
-  });
-
-  // Door triggers — invisible boxes at exits
-  const doorLiving = BABYLON.MeshBuilder.CreateBox('door_living',{width:0.1,height:2.4,depth:1.4},scene);
-  doorLiving.position.set(-W/2+0.05, 1.2, 0);
-  const doorMat = mat('doorMat_living'); doorMat.alpha = 0.01; doorLiving.material = doorMat;
-  interactables.set('door_living','door_living');
-
-  const doorKitchen = BABYLON.MeshBuilder.CreateBox('door_kitchen',{width:1.4,height:2.4,depth:0.1},scene);
-  doorKitchen.position.set(0, 1.2, D/2-0.05);
-  const dkm = mat('doorMat_kitchen'); dkm.alpha = 0.01; doorKitchen.material = dkm;
-  interactables.set('door_kitchen','door_kitchen');
-
-  const doorLibrary = BABYLON.MeshBuilder.CreateBox('door_library',{width:0.1,height:2.4,depth:1.4},scene);
-  doorLibrary.position.set(-W/2+0.05, 1.2, -D/2+2);
-  const dlm = mat('doorMat_library'); dlm.alpha = 0.01; doorLibrary.material = dlm;
-  interactables.set('door_library','door_library');
-
-  const doorBathroom = BABYLON.MeshBuilder.CreateBox('door_bathroom',{width:0.1,height:2.4,depth:1.4},scene);
-  doorBathroom.position.set(W/2-0.05, 1.2, -3);
-  const dbm = mat('doorMat_bathroom'); dbm.alpha = 0.01; doorBathroom.material = dbm;
-  interactables.set('door_bathroom','door_bathroom');
+  // Door to Bathroom (back wall, left of fireplace)
+  const doorBath = BABYLON.MeshBuilder.CreateBox('door_bathroom', {width:1.2, height:2.4, depth:0.1}, scene);
+  doorBath.position.set(-W/2 + 2.5, 1.2, -D/2 + 0.05);
+  const dBath_M = mat('dBath_M'); dBath_M.alpha = 0.01; doorBath.material = dBath_M;
+  interactables.set('door_bathroom', 'door_bathroom');
 }
 
-// ─── LIVING ROOM ──────────────────────────────────────────────────────────────
 function buildLivingRoom(){
   const W=16, D=12, H=4.5;
   const wallM = pbr('lr_wallM', TEX.plaster_d, TEX.plaster_n, 3, 2, new BABYLON.Color3(0.28,0.24,0.30));
