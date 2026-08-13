@@ -161,47 +161,39 @@ function transitionToRoom(roomId){
   const canvas = $('game-canvas');
   canvas.style.transition = 'opacity 0.4s';
   canvas.style.opacity = '0.3';
-  setTimeout(() => {
-    try {
-      if(scene) scene.dispose();
-      interactables = new Map();
-      scene = new BABYLON.Scene(engine);
-      scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
-      scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
-      scene.fogColor   = new BABYLON.Color3(0.06,0.12,0.18);
-      scene.fogDensity = 0.025;
-      const r = ROOMS[roomId];
-      camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(r.camPos[0],r.camPos[1],r.camPos[2]), scene);
-      camera.setTarget(new BABYLON.Vector3(0,1.7,0));
-      camera.minZ=0.1; camera.maxZ=60; camera.fov=1.1;
-      camera.inputs.clear();
-      camYaw=r.camYaw; camPitch=0; applyRot();
-      
-      // TEST: bright green box in front of camera (before build)
-      const testBox = BABYLON.MeshBuilder.CreateBox('testBox', {size:1}, scene);
-      testBox.position.set(0, 1.5, 3);
-      const tbm = new BABYLON.StandardMaterial('tbm', scene);
-      tbm.emissiveColor = new BABYLON.Color3(0, 1, 0);
-      testBox.material = tbm;
-      
-      r.build();
-      
-      console.log('BUILT: meshes=' + scene.meshes.length + ' lights=' + scene.lights.length + ' activeCam=' + (scene.activeCamera ? scene.activeCamera.name : 'NONE'));
-      
-      state.currentRoom = roomId;
-      $('room-name').textContent = r.name;
-      canvas.style.opacity = '1';
-      isTransitioning = false;
-    } catch(e) {
-      console.error('Room build failed:', roomId, e);
-      isTransitioning = false;
-      canvas.style.opacity = '1';
-      const el = document.createElement('div');
-      el.style.cssText = 'position:fixed;top:60px;left:10px;right:10px;background:#300;color:#faa;padding:12px;font-family:monospace;font-size:12px;z-index:9999;white-space:pre-wrap;max-height:70vh;overflow:auto;border:1px solid #f66';
-      el.textContent = 'ROOM BUILD ERROR (' + roomId + '):\n' + e.message + '\n\n' + (e.stack||'');
-      document.body.appendChild(el);
-    }
-  }, 400);
+  try {
+    if(scene) scene.dispose();
+    interactables = new Map();
+    scene = new BABYLON.Scene(engine);
+    scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
+    scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
+    scene.fogColor   = new BABYLON.Color3(0.06,0.12,0.18);
+    scene.fogDensity = 0.025;
+    const r = ROOMS[roomId];
+    camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(r.camPos[0],r.camPos[1],r.camPos[2]), scene);
+    // FIX: use a valid forward target, not the camera's own position (degenerate → NaN rotation)
+    camera.setTarget(new BABYLON.Vector3(r.camPos[0],r.camPos[1],r.camPos[2]+1));
+    camera.minZ=0.1; camera.maxZ=60; camera.fov=1.1;
+    camera.inputs.clear();
+    // FIX: explicitly reset rotation before applyRot to clear any stale state
+    camera.rotation = new BABYLON.Vector3(0,0,0);
+    camYaw=r.camYaw; camPitch=0; applyRot();
+    // FIX: force view matrix recompute to discard any cached NaN
+    camera.getViewMatrix(true);
+    r.build();
+    state.currentRoom = roomId;
+    $('room-name').textContent = r.name;
+    canvas.style.opacity = '1';
+    isTransitioning = false;
+  } catch(e) {
+    console.error('Room build failed:', roomId, e);
+    isTransitioning = false;
+    canvas.style.opacity = '1';
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:60px;left:10px;right:10px;background:#300;color:#faa;padding:12px;font-family:monospace;font-size:12px;z-index:9999;white-space:pre-wrap;max-height:70vh;overflow:auto;border:1px solid #f66';
+    el.textContent = 'ROOM BUILD ERROR (' + roomId + '):\n' + e.message + '\n\n' + (e.stack||'');
+    document.body.appendChild(el);
+  }
 }
 
 // ─── RAYPICK ─────────────────────────────────────────────────────────────────
@@ -308,51 +300,9 @@ function initEngine(){
   $('btn-recentre').addEventListener('click', recentreView);
 
   // Render loop
-  let renderCount = 0;
   engine.runRenderLoop(()=>{
-    if(scene) { scene.render(); renderCount++; }
+    if(scene) scene.render();
   });
-  
-  // Independent diagnostic — runs regardless of render loop
-  const diagEl = document.createElement('div');
-  diagEl.style.cssText = 'position:fixed;bottom:60px;right:10px;background:rgba(0,0,0,0.95);color:#0f0;font-family:monospace;font-size:11px;padding:8px;z-index:99999;border:1px solid #0f0;white-space:pre;max-width:400px';
-  diagEl.textContent = 'waiting...';
-  document.body.appendChild(diagEl);
-  setInterval(()=>{
-    try {
-    diagEl.textContent = 'FIRED';
-    let info = 'scene: ' + (scene ? 'OK' : 'NULL') + '\n';
-    if(scene) {
-      info += 'meshes: ' + scene.meshes.length + '\n';
-      info += 'lights: ' + scene.lights.length + '\n';
-      info += 'activeCam: ' + (scene.activeCamera ? scene.activeCamera.name : 'NONE') + '\n';
-      info += 'renderCalls: ' + renderCount + '\n';
-      if(camera) {
-        info += 'camPos: ' + camera.position.toString() + '\n';
-        const fr = camera.getForwardRay();
-        info += 'camForward: ' + fr.direction.toString() + ' len=' + fr.length + '\n';
-        info += 'camFov: ' + camera.fov + ' minZ: ' + camera.minZ + ' maxZ: ' + camera.maxZ + '\n';
-        const tgt = camera.getTarget ? camera.getTarget() : null;
-        info += 'camTarget: ' + (tgt ? tgt.toString() : 'N/A') + '\n';
-        info += 'camRotation: ' + camera.rotation.toString() + '\n';
-      }
-      // Check test box specifically
-      const tb = scene.getMeshByName('testBox');
-      if(tb) {
-        info += 'testBox: pos=' + tb.position.toString() + ' inFrustum=' + scene.isInFrustum(tb) + ' vis=' + tb.isVisible + ' en=' + tb.isEnabled() + '\n';
-        if(tb.material) {
-          info += 'testBoxMat: emissive=' + (tb.material.emissiveColor ? tb.material.emissiveColor.toString() : 'none') + ' alpha=' + tb.material.alpha + '\n';
-        }
-      } else { info += 'testBox: NOT FOUND\n'; }
-      // Check canvas
-      info += 'canvas: ' + canvas.width + 'x' + canvas.height + ' disp=' + getComputedStyle(canvas).display + '\n';
-      // Manually render
-      try { scene.render(); renderCount++; info += 'manualRender: OK\n'; } catch(e) { info += 'manualRender ERR: ' + e.message + '\n'; }
-    }
-    info += 'canvasOpacity: ' + canvas.style.opacity;
-    diagEl.textContent = info;
-    } catch(e) { diagEl.textContent = 'INTERVAL ERR: ' + e.message; }
-  }, 1000);
   window.addEventListener('resize',()=>engine.resize(),{passive:true});
 
   // Load first room
