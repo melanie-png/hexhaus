@@ -117,6 +117,8 @@ function emitM(name,r,g,b,ei=0.8){ const m=mat(name); m.diffuseColor=new BABYLON
 // ─── MODEL LOADER ───────────────────────────────────────────────────────────
 const MODEL_BASE = 'models/';
 function loadModel(fileName, pos, scale, rotY, interactableKey) {
+  if (typeof BABYLON.SceneLoader === 'undefined') { console.error('SceneLoader not available!'); return; }
+  var dbg = document.getElementById('dbgLoad'); if (dbg) dbg.textContent += fileName + '... | ';
   BABYLON.SceneLoader.ImportMesh(null, MODEL_BASE, fileName, scene, function(meshes) {
     const root = meshes[0];
     if (!root) return;
@@ -158,7 +160,7 @@ function loadModel(fileName, pos, scale, rotY, interactableKey) {
       });
     }
     console.log('[Hexhaus] Loaded model:', fileName, 'meshes:', meshes.length);
-  }, null, function(s,msg,e){ console.warn('[Hexhaus] Model load failed:', fileName, msg); });
+  }, null, function(scene, msg, exc){ var d=document.getElementById('dbgLoad'); if(d) d.textContent += 'FAIL:' + fileName + ' (' + msg + ') | '; console.warn('[Hexhaus] Model load failed:', fileName, msg, exc); });
 }
 
 
