@@ -123,11 +123,29 @@ function loadModel(fileName, pos, scale, rotY, interactableKey) {
     root.position.set(pos[0], pos[1], pos[2]);
     root.scaling.set(scale, scale, scale);
     if (rotY) root.rotation.y = rotY;
+    // Convert PBR materials to StandardMaterial so they work with the scene's point lights
     meshes.forEach(function(m) {
-      if (m.material) {
-        m.material = m.material.clone(m.name + '_m');
-        if (m.material.diffuseColor) m.material.diffuseColor = m.material.diffuseColor.scale(0.82);
-        m.material.specularColor = new BABYLON.Color3(0.04, 0.04, 0.04);
+      if (m.material && m.material.getClassName) {
+        var cls = m.material.getClassName();
+        var stdMat = new BABYLON.StandardMaterial(m.name + '_std', scene);
+        if (m.material.albedoTexture) {
+          stdMat.diffuseTexture = m.material.albedoTexture.clone();
+        } else if (m.material.diffuseTexture) {
+          stdMat.diffuseTexture = m.material.diffuseTexture.clone();
+        }
+        if (m.material.albedoColor) {
+          stdMat.diffuseColor = m.material.albedoColor.clone();
+        } else if (m.material.diffuseColor) {
+          stdMat.diffuseColor = m.material.diffuseColor.clone();
+        } else {
+          stdMat.diffuseColor = new BABYLON.Color3(0.6, 0.5, 0.4);
+        }
+        if (m.material.bumpTexture) {
+          stdMat.bumpTexture = m.material.bumpTexture.clone();
+        }
+        stdMat.specularColor = new BABYLON.Color3(0.08, 0.08, 0.08);
+        stdMat.specularPower = 16;
+        m.material = stdMat;
       }
     });
     if (interactableKey) {
@@ -135,7 +153,8 @@ function loadModel(fileName, pos, scale, rotY, interactableKey) {
         if (m.getTotalVertices && m.getTotalVertices() > 0) interactables.set(m.name, interactableKey);
       });
     }
-  }, null, function(s,msg,e){ console.warn('Model load failed:', fileName, msg); });
+    console.log('[Hexhaus] Loaded model:', fileName, 'meshes:', meshes.length);
+  }, null, function(s,msg,e){ console.warn('[Hexhaus] Model load failed:', fileName, msg); });
 }
 
 
