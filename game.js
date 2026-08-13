@@ -325,14 +325,27 @@ function initEngine(){
       info += 'lights: ' + scene.lights.length + '\n';
       info += 'activeCam: ' + (scene.activeCamera ? scene.activeCamera.name : 'NONE') + '\n';
       info += 'renderCalls: ' + renderCount + '\n';
-      if(camera) info += 'camPos: ' + camera.position.toString() + '\n';
-      // Test: manually render and check
-      try { scene.render(); renderCount++; info += 'manualRender: OK\n'; } catch(e) { info += 'manualRender ERR: ' + e.message + '\n'; }
-      // Check first 5 meshes
-      for(let i=0;i<Math.min(5,scene.meshes.length);i++){
-        const m=scene.meshes[i];
-        info += 'm['+i+'] '+m.name+' pos='+m.position.toString().substring(0,20)+' mat='+(m.material?m.material.name:'none')+' vis='+m.isVisible+' en='+m.isEnabled()+'\n';
+      if(camera) {
+        info += 'camPos: ' + camera.position.toString() + '\n';
+        const fr = camera.getForwardRay();
+        info += 'camForward: ' + fr.direction.toString() + ' len=' + fr.length + '\n';
+        info += 'camFov: ' + camera.fov + ' minZ: ' + camera.minZ + ' maxZ: ' + camera.maxZ + '\n';
+        const tgt = camera.getTarget ? camera.getTarget() : null;
+        info += 'camTarget: ' + (tgt ? tgt.toString() : 'N/A') + '\n';
+        info += 'camRotation: ' + camera.rotation.toString() + '\n';
       }
+      // Check test box specifically
+      const tb = scene.getMeshByName('testBox');
+      if(tb) {
+        info += 'testBox: pos=' + tb.position.toString() + ' inFrustum=' + scene.isInFrustum(tb) + ' vis=' + tb.isVisible + ' en=' + tb.isEnabled() + '\n';
+        if(tb.material) {
+          info += 'testBoxMat: emissive=' + (tb.material.emissiveColor ? tb.material.emissiveColor.toString() : 'none') + ' alpha=' + tb.material.alpha + '\n';
+        }
+      } else { info += 'testBox: NOT FOUND\n'; }
+      // Check canvas
+      info += 'canvas: ' + canvas.width + 'x' + canvas.height + ' disp=' + getComputedStyle(canvas).display + '\n';
+      // Manually render
+      try { scene.render(); renderCount++; info += 'manualRender: OK\n'; } catch(e) { info += 'manualRender ERR: ' + e.message + '\n'; }
     }
     info += 'canvasOpacity: ' + canvas.style.opacity;
     diagEl.textContent = info;
