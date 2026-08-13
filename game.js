@@ -114,6 +114,31 @@ function pbr(name, diffUrl, norUrl, usc=2, vsc=2, tint=null, alpha=1.0) {
 
 function emitM(name,r,g,b,ei=0.8){ const m=mat(name); m.diffuseColor=new BABYLON.Color3(r,g,b); m.emissiveColor=new BABYLON.Color3(r*ei,g*ei,b*ei); return m; }
 
+// ─── MODEL LOADER ───────────────────────────────────────────────────────────
+const MODEL_BASE = 'models/';
+function loadModel(fileName, pos, scale, rotY, interactableKey) {
+  BABYLON.SceneLoader.ImportMesh(null, MODEL_BASE, fileName, scene, function(meshes) {
+    const root = meshes[0];
+    if (!root) return;
+    root.position.set(pos[0], pos[1], pos[2]);
+    root.scaling.set(scale, scale, scale);
+    if (rotY) root.rotation.y = rotY;
+    meshes.forEach(function(m) {
+      if (m.material) {
+        m.material = m.material.clone(m.name + '_m');
+        if (m.material.diffuseColor) m.material.diffuseColor = m.material.diffuseColor.scale(0.82);
+        m.material.specularColor = new BABYLON.Color3(0.04, 0.04, 0.04);
+      }
+    });
+    if (interactableKey) {
+      meshes.forEach(function(m) {
+        if (m.getTotalVertices && m.getTotalVertices() > 0) interactables.set(m.name, interactableKey);
+      });
+    }
+  }, null, function(s,msg,e){ console.warn('Model load failed:', fileName, msg); });
+}
+
+
 // ─── CAMERA ──────────────────────────────────────────────────────────────────
 function applyRot(){
   const f=new BABYLON.Vector3(
@@ -712,6 +737,38 @@ function buildEntranceHall(){
   interactables.set('herb4', 'herbwall');
 
   // ── DOORS ───────────────────────────────────────────────────────────────────
+  // ── REAL 3D MODELS (Quaternius CC0) ───────────────────────────────────────
+  // Fireplace model on back wall
+  loadModel('Fireplace.glb', [0, 0, -D/2 + 0.6], 2.0, 0, 'fireplace');
+  
+  // Chandelier hanging from ceiling
+  loadModel('Light_Chandelier.glb', [0, H - 1.0, 0], 1.5, 0, null);
+  
+  // Large carpet in center of room
+  loadModel('Carpet_1.glb', [0, 0.02, 0], 3.5, 0, null);
+  
+  // Two chairs flanking the fireplace
+  loadModel('Chair_1.glb', [-2.5, 0, -D/2 + 2.5], 1.2, Math.PI/4, null);
+  loadModel('Chair_2.glb', [2.5, 0, -D/2 + 2.5], 1.2, -Math.PI/4, null);
+  
+  // Bookshelf on left wall
+  loadModel('Bookshelf.glb', [-W/2 + 0.5, 0, 2], 1.8, Math.PI/2, 'bookshelf');
+  
+  // Cauldron near the fireplace (witch's house!)
+  loadModel('Cauldron.glb', [3.5, 0, -D/2 + 1.5], 0.8, 0, 'cauldron');
+  
+  // Round table near the front
+  loadModel('Table_RoundSmall.glb', [0, 0, 3], 1.3, 0, 'tea');
+  
+  // Bone decoration in corner
+  loadModel('Bone.glb', [-W/2 + 1.5, 0, D/2 - 1.5], 0.6, 0, 'bones');
+  
+  // Scythe on the wall (classic witch prop)
+  loadModel('Scythe.glb', [W/2 - 0.5, 1.8, -1], 1.0, -Math.PI/2, null);
+  
+  // Chest in corner
+  loadModel('Chest_Closed.glb', [-W/2 + 1.0, 0, -D/2 + 1.0], 1.2, 0, null);
+
   // Door to Living Room (left wall)
   const doorLR = BABYLON.MeshBuilder.CreateBox('door_living', {width:0.1, height:2.4, depth:1.4}, scene);
   doorLR.position.set(-W/2 + 0.05, 1.2, 3);
