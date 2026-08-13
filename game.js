@@ -319,6 +319,8 @@ function initEngine(){
   diagEl.textContent = 'waiting...';
   document.body.appendChild(diagEl);
   setInterval(()=>{
+    try {
+    diagEl.textContent = 'FIRED';
     let info = 'scene: ' + (scene ? 'OK' : 'NULL') + '\n';
     if(scene) {
       info += 'meshes: ' + scene.meshes.length + '\n';
@@ -349,6 +351,7 @@ function initEngine(){
     }
     info += 'canvasOpacity: ' + canvas.style.opacity;
     diagEl.textContent = info;
+    } catch(e) { diagEl.textContent = 'INTERVAL ERR: ' + e.message; }
   }, 1000);
   window.addEventListener('resize',()=>engine.resize(),{passive:true});
 
