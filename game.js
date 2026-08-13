@@ -190,7 +190,6 @@ function loadModel(fileName, pos, scale, rotY, interactableKey) {
     console.error('[Hexhaus] Model load FAILED:', fileName, err);
   });
 }
-}
 
 
 // ─── CAMERA ──────────────────────────────────────────────────────────────────
