@@ -482,6 +482,10 @@ function buildEntranceHall(){
   loadModel('Chalice.glb', [-0.26, 0.59, 3], 25, 0, 'tea');
   loadModel('Chalice.glb', [0.26, 0.59, 3], 25, 0, 'tea');
 
+  // A well-worn firewood crate and a grimoire beside the two teacups.
+  loadModel('Crate.glb', [-4.2, 0, -4.2], 350, -0.25, null);
+  loadModel('Book3_Open.glb', [0, 0.585, 2.75], 45, 0, 'grimoire');
+
   // Door to Living Room (left wall)
   const doorLR = BABYLON.MeshBuilder.CreateBox('door_living', {width:0.1, height:2.4, depth:1.4}, scene);
   doorLR.position.set(-W/2 + 0.05, 1.2, 3);

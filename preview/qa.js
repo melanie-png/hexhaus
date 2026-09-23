@@ -10,7 +10,8 @@ if (new URLSearchParams(location.search).has('qa')) {
     try{
       const roomIds=['entrance','living','kitchen','library','bathroom','pantry','basement','attic'];
       for(let i=0;i<3;i++) check(interactables.get('specimenJar'+i)==='jars','specimen jar '+i+' is selectable');
-      for(const [model,min] of [['Houseplant_3',1],['Barrel',1],['Chalice',2]]){
+      check(ITEMS.grimoire?.collectible===false,'open grimoire has its own inspect text');
+      for(const [model,min] of [['Houseplant_3',1],['Barrel',1],['Chalice',2],['Crate',1],['Book3_Open',1]]){
         const meshes=scene.meshes.filter(m=>m.name.includes('_'+model)&&m.getTotalVertices()>0);
         check(meshes.length>=min,model+' loaded ('+meshes.length+' visible meshes)');
         for(const m of meshes){
