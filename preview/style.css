@@ -1,0 +1,287 @@
+/* ═══════════════════════════════════════════
+   HEXHAUS — style.css
+   First-person 3D Babylon.js UI layer
+   © 2026 Melanie Mizzi. All rights reserved.
+   ═══════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0a0510;
+  --purple:   #2a0d45;
+  --mauve:    #5a2878;
+  --gold:     #c9a84c;
+  --gold-dim: #7a5a20;
+  --amber:    #e8941a;
+  --text:     #e8d4f8;
+  --text-dim: #8a6898;
+  --white:    #f8f0ff;
+  --danger:   #c0392b;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Text', Georgia, serif;
+  overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hidden { display: none !important; }
+
+/* ─── LOADING SCREEN ─── */
+#loading-screen {
+  position: fixed; inset: 0; z-index: 100;
+  background: radial-gradient(ellipse at 50% 30%, #2a0845 0%, #0a0510 70%);
+  display: flex; align-items: center; justify-content: center;
+}
+.load-inner { text-align: center; }
+.load-symbol {
+  font-size: 4rem; color: var(--gold);
+  animation: loadPulse 1.5s ease-in-out infinite;
+}
+.load-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.4rem; letter-spacing: 0.4em;
+  color: var(--white); margin: 0.5rem 0 1.5rem;
+}
+.load-bar-wrap {
+  width: 220px; height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px; margin: 0 auto 1rem;
+  overflow: hidden;
+}
+.load-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.load-text { font-size: 1rem; color: var(--text-dim); letter-spacing: 0.1em; }
+
+@keyframes loadPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.1); }
+}
+
+/* ─── TITLE SCREEN ─── */
+#title-screen {
+  position: fixed; inset: 0; z-index: 90;
+  background: radial-gradient(ellipse at 50% 20%, #3a0860 0%, #0a0510 65%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+}
+.title-candles {
+  display: flex; gap: 2rem; padding: 1rem;
+  font-size: 1.8rem;
+}
+.title-candles.bottom { margin-top: auto; }
+.tc { animation: candleFlicker 2.5s ease-in-out infinite; }
+.tc:nth-child(2) { animation-delay: 0.7s; }
+.tc:nth-child(3) { animation-delay: 1.4s; }
+.tc:nth-child(4) { animation-delay: 0.3s; }
+
+.title-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
+.title-hex { font-size: 3.5rem; color: var(--gold); animation: loadPulse 3s ease-in-out infinite; }
+.title-main {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2.8rem, 8vw, 5rem);
+  letter-spacing: 0.5em; color: var(--white);
+  text-shadow: 0 0 40px rgba(180, 100, 255, 0.5);
+}
+.title-sub {
+  font-style: italic; font-size: 1.1rem;
+  color: var(--text-dim); line-height: 1.7;
+  max-width: 320px;
+}
+.btn-enter {
+  margin-top: 1rem;
+  padding: 0.85rem 2.5rem;
+  font-family: 'Cinzel', serif;
+  font-size: 1rem; letter-spacing: 0.2em;
+  color: var(--gold); background: transparent;
+  border: 1px solid var(--gold-dim);
+  border-radius: 2px; cursor: pointer;
+  transition: all 0.25s ease;
+}
+.btn-enter:hover, .btn-enter:active {
+  background: rgba(201, 168, 76, 0.12);
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.3);
+}
+.title-hint { font-size: 0.8rem; color: var(--text-dim); letter-spacing: 0.15em; margin-top: 0.5rem; }
+
+@keyframes candleFlicker {
+  0%, 100% { opacity: 0.7; transform: scale(1) rotate(-2deg); }
+  33%       { opacity: 1;   transform: scale(1.05) rotate(1deg); }
+  66%       { opacity: 0.85; transform: scale(0.98) rotate(-1deg); }
+}
+
+/* ─── GAME CANVAS ─── */
+#game-canvas {
+  position: fixed; inset: 0;
+  width: 100% !important; height: 100% !important;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+#game-canvas:active { cursor: grabbing; }
+
+/* ─── HUD ─── */
+#hud {
+  position: fixed; inset: 0; z-index: 10;
+  pointer-events: none;
+  display: flex; flex-direction: column;
+}
+#hud-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 1rem 1.2rem;
+}
+#room-name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem; letter-spacing: 0.2em;
+  color: var(--gold); text-shadow: 0 0 12px rgba(201,168,76,0.4);
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+  padding: 0.4rem 0.9rem; border-radius: 2px;
+  border-left: 2px solid var(--gold-dim);
+}
+#item-count {
+  font-size: 0.8rem; letter-spacing: 0.12em;
+  color: var(--text-dim);
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+  padding: 0.4rem 0.9rem; border-radius: 2px;
+}
+#crosshair {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem; color: rgba(255,255,255,0.35);
+  line-height: 1; pointer-events: none;
+  text-shadow: 0 0 8px rgba(255,255,255,0.2);
+}
+
+/* ─── INVENTORY BAR ─── */
+#inventory-bar {
+  margin-top: auto;
+  padding: 0.75rem 1rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  background: linear-gradient(0deg, rgba(0,0,0,0.75) 0%, transparent 100%);
+}
+.inv-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem; letter-spacing: 0.25em;
+  color: var(--gold-dim);
+}
+#inv-slots {
+  display: flex; gap: 0.5rem; flex-wrap: wrap;
+}
+.inv-slot {
+  width: 44px; height: 44px;
+  background: rgba(42, 13, 69, 0.7);
+  border: 1px solid var(--gold-dim);
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  animation: slotPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes slotPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ─── EXAMINE MODAL ─── */
+#examine-modal {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+}
+.modal-box {
+  position: relative; z-index: 1;
+  background: linear-gradient(160deg, #1a0830 0%, #0e0520 100%);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding: 2rem 1.8rem 2.5rem;
+  width: 100%; max-width: 480px;
+  text-align: center;
+  animation: modalSpring 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+@keyframes modalSpring {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.modal-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+.modal-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem; color: var(--gold);
+  margin-bottom: 0.75rem; letter-spacing: 0.1em;
+}
+.modal-desc {
+  font-style: italic; font-size: 1rem;
+  color: var(--text); line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+.modal-actions { display: flex; gap: 0.75rem; justify-content: center; }
+.modal-btn {
+  padding: 0.7rem 1.8rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem; letter-spacing: 0.15em;
+  border-radius: 2px; cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid;
+}
+.modal-btn.collect {
+  background: rgba(201,168,76,0.15);
+  color: var(--gold); border-color: var(--gold-dim);
+}
+.modal-btn.collect:hover {
+  background: rgba(201,168,76,0.3);
+  box-shadow: 0 0 16px rgba(201,168,76,0.35);
+}
+.modal-btn.close {
+  background: transparent;
+  color: var(--text-dim); border-color: rgba(255,255,255,0.15);
+}
+.modal-btn.close:hover { border-color: rgba(255,255,255,0.35); color: var(--text); }
+
+/* ─── TOAST NOTIFICATION ─── */
+#toast {
+  position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+  background: rgba(42,13,69,0.92); border: 1px solid var(--gold-dim);
+  color: var(--gold); padding: 0.6rem 1.4rem;
+  font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.15em;
+  border-radius: 2px; z-index: 60;
+  animation: toastIn 0.3s ease, toastOut 0.4s ease 2s forwards;
+  pointer-events: none; white-space: nowrap;
+}
+@keyframes toastIn  { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* ─── COPYRIGHT ─── */
+#copyright {
+  position: fixed; bottom: 0.5rem; right: 0.9rem;
+  font-size: 0.65rem; color: rgba(138, 104, 152, 0.45);
+  letter-spacing: 0.08em; pointer-events: none; z-index: 5;
+}
+
+/* ─── RECENTRE BUTTON ─── */
+#btn-recentre {
+  font-family: Cinzel, serif;
+  font-size: 0.72rem; letter-spacing: 0.15em;
+  color: var(--text-dim); background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 2px; padding: 0.35rem 0.8rem;
+  cursor: pointer; backdrop-filter: blur(6px);
+  transition: all 0.2s; pointer-events: auto;
+  text-transform: uppercase;
+}
+#btn-recentre:hover { color: var(--gold); border-color: var(--gold-dim); background: rgba(42,13,69,0.7); }
+#btn-recentre:active { transform: scale(0.95); }
+
