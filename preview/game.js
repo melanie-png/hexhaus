@@ -135,7 +135,7 @@ function loadModel(fileName, pos, scale, rotY, interactableKey, placement='floor
   console.log('[Hexhaus] Loading model from:', fullUrl);
   
   BABYLON.SceneLoader.ImportMeshAsync(null, MODEL_BASE, fileName, targetScene).then(function(result) {
-    if (targetScene !== scene || targetScene.isDisposed()) return;
+    if (targetScene !== scene) return;
     var meshes = result.meshes;
     // Babylon GLBs reuse names such as __root__; make picks unambiguous per instance.
     meshes.forEach((m, i) => { m.name = 'model_' + instance + '_' + i + '_' + m.name; });
