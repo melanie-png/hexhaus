@@ -95,10 +95,11 @@ let interactables = new Map();
 const TAP = 10, SENS = 0.0025, PMIN = -0.52, PMAX = 0.52;
 
 // ─── SHARED HELPERS ───────────────────────────────────────────────────────────
-function mat(name){ const m=new BABYLON.StandardMaterial(name,scene); m.specularColor=new BABYLON.Color3(0.04,0.04,0.04); return m; }
+function mat(name){ const m=new BABYLON.StandardMaterial(name,scene); m.maxSimultaneousLights=8; m.specularColor=new BABYLON.Color3(0.04,0.04,0.04); return m; }
 
 function pbr(name, diffUrl, norUrl, usc=2, vsc=2, tint=null, alpha=1.0) {
   const m = new BABYLON.StandardMaterial(name, scene);
+  m.maxSimultaneousLights = 8;
   const dt = new BABYLON.Texture(diffUrl, scene);
   dt.uScale = usc; dt.vScale = vsc;
   m.diffuseTexture = dt;
@@ -168,6 +169,7 @@ function loadModel(fileName, pos, scale, rotY, interactableKey, placement='floor
         const sourceMaterial = m.material;
         if (materialCache.has(sourceMaterial)) { m.material = materialCache.get(sourceMaterial); return; }
         var stdMat = new BABYLON.StandardMaterial(m.name + '_std', targetScene);
+        stdMat.maxSimultaneousLights = 8;
         if (m.material.albedoTexture) {
           stdMat.diffuseTexture = m.material.albedoTexture.clone();
         } else if (m.material.diffuseTexture) {
@@ -784,7 +786,7 @@ function buildEntranceHall(){
 
   // Ambient (very low, warm)
   const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
-  ambient.intensity = 0.45; ambient.diffuse = new BABYLON.Color3(0.5, 0.45, 0.4); ambient.groundColor = new BABYLON.Color3(0.25, 0.2, 0.15);
+  ambient.intensity = 0.95; ambient.diffuse = new BABYLON.Color3(0.5, 0.45, 0.4); ambient.groundColor = new BABYLON.Color3(0.25, 0.2, 0.15);
   ambient.diffuse = new BABYLON.Color3(0.32, 0.28, 0.22);
   ambient.groundColor = new BABYLON.Color3(0.14, 0.10, 0.06);
 
