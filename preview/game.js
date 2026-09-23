@@ -234,13 +234,13 @@ function recentreView(){
 // ─── ROOM REGISTRY ───────────────────────────────────────────────────────────
 const ROOMS = {
   entrance: { name:'The Entrance Hall',    build:buildEntranceHall,    camPos:[0,1.7,0],     camYaw:Math.PI },
-  living:   { name:'The Living Room',       build:buildLivingRoom,      camPos:[0,1.7,5],     camYaw:Math.PI },
-  kitchen:  { name:'The Kitchen',          build:buildKitchen,         camPos:[0,1.7,5],     camYaw:Math.PI },
-  library:  { name:'The Library',           build:buildLibrary,        camPos:[0,1.7,5],     camYaw:Math.PI },
-  bathroom: { name:'The Bathroom',          build:buildBathroom,        camPos:[0,1.7,2],     camYaw:Math.PI },
-  pantry:   { name:'The Pantry',            build:buildPantry,          camPos:[0,1.7,3],     camYaw:Math.PI },
-  basement: { name:'The Basement',          build:buildBasement,        camPos:[0,1.7,3],     camYaw:Math.PI },
-  attic:    { name:'The Attic',             build:buildAttic,           camPos:[0,1.7,2],     camYaw:Math.PI },
+  living:   { name:'The Living Room',       build:buildLivingRoom,      camPos:[0,1.7,0],     camYaw:Math.PI },
+  kitchen:  { name:'The Kitchen',          build:buildKitchen,         camPos:[0,1.7,0],     camYaw:Math.PI },
+  library:  { name:'The Library',           build:buildLibrary,        camPos:[0,1.7,0],     camYaw:Math.PI },
+  bathroom: { name:'The Bathroom',          build:buildBathroom,        camPos:[0,1.7,0],     camYaw:Math.PI },
+  pantry:   { name:'The Pantry',            build:buildPantry,          camPos:[0,1.7,0],     camYaw:Math.PI },
+  basement: { name:'The Basement',          build:buildBasement,        camPos:[0,1.7,0],     camYaw:Math.PI },
+  attic:    { name:'The Attic',             build:buildAttic,           camPos:[0,1.7,0],     camYaw:Math.PI },
 };
 
 // ─── TRANSITION ──────────────────────────────────────────────────────────────
@@ -485,8 +485,13 @@ function buildEntranceHall(){
 
   // ── FIREPLACE (back wall, stone with fire) ─────────────────────────────────
   const fpX = 0, fpZ = -D/2 + 0.4;
-  const hearth = BABYLON.MeshBuilder.CreateBox('hearth', {width:3.2, height:2.6, depth:0.7}, scene);
-  hearth.position.set(fpX, 1.3, fpZ); hearth.material = stoneM;
+  const hearth = BABYLON.MeshBuilder.CreateBox('hearth', {width:3.2, height:2.6, depth:0.12}, scene);
+  hearth.position.set(fpX, 1.3, fpZ - 0.22); hearth.material = stoneM;
+  [-1.35,1.35].forEach((x,i)=>{
+    const pillar=BABYLON.MeshBuilder.CreateBox('hearthPillar'+i,{width:0.5,height:2.6,depth:0.7},scene);
+    pillar.position.set(x,1.3,fpZ+0.12); pillar.material=stoneM;
+    interactables.set(pillar.name,'fireplace');
+  });
 
   // Arch over fireplace opening
   for (let a = 0; a < 7; a++) {
@@ -502,18 +507,18 @@ function buildEntranceHall(){
   fbM.diffuseColor = new BABYLON.Color3(0.03, 0.02, 0.01);
   fbM.emissiveColor = new BABYLON.Color3(0.015, 0.008, 0.002);
   const firebox = BABYLON.MeshBuilder.CreateBox('firebox', {width:1.6, height:1.4, depth:0.4}, scene);
-  firebox.position.set(fpX, 0.8, fpZ + 0.1); firebox.material = fbM;
+  firebox.position.set(fpX, 0.8, fpZ + 0.38); firebox.material = fbM;
 
   // Glowing embers
   const emberM = mat('emberM');
   emberM.emissiveColor = new BABYLON.Color3(0.7, 0.22, 0.04);
   const embers = BABYLON.MeshBuilder.CreateBox('embers', {width:1.2, height:0.04, depth:0.35}, scene);
-  embers.position.set(fpX, 0.12, fpZ + 0.05); embers.material = emberM;
+  embers.position.set(fpX, 0.12, fpZ + 0.53); embers.material = emberM;
 
   // Small flame cones
   for (let f = 0; f < 3; f++) {
     const flame = BABYLON.MeshBuilder.CreateCylinder('flame'+f, {diameterTop:0.02, diameterBottom:0.15, height:0.35+f*0.08, tessellation:6}, scene);
-    flame.position.set(fpX - 0.3 + f*0.3, 0.3, fpZ + 0.05);
+    flame.position.set(fpX - 0.3 + f*0.3, 0.3, fpZ + 0.55);
     flame.material = emitM('flameM'+f, 0.9, 0.45, 0.1, 0.8);
   }
 
@@ -837,7 +842,7 @@ function buildEntranceHall(){
   // ── DOORS ───────────────────────────────────────────────────────────────────
   // ── REAL 3D MODELS (Quaternius CC0) ───────────────────────────────────────
   // Fireplace model on back wall
-  loadModel('Fireplace.glb', [0, 0, -D/2 + 0.6], 90, 0, 'fireplace');
+  // Use the open procedural hearth; the imported solid mesh concealed its flames.
   
   // Chandelier hanging from ceiling
   loadModel('Light_Chandelier.glb', [0, H - 1.0, 0], 200, 0, null, 'ceiling');
