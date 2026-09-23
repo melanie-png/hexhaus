@@ -337,6 +337,25 @@ function buildEntranceHall(){
   const mullion = BABYLON.MeshBuilder.CreateBox('mullion', {width:0.04, height:2.0, depth:0.06}, scene);
   mullion.position.set(4.5, 2.8, D/2 - 0.06); mullion.material = winFrameM;
 
+  // ── HERBALIST'S SHELF (to the left of the hearth, clear of the bathroom door) ──
+  const specimenShelf = BABYLON.MeshBuilder.CreateBox('specimenShelf',
+    {width:1.42,height:0.09,depth:0.34},scene);
+  specimenShelf.position.set(-4.15,1.45,-D/2+0.42); specimenShelf.material=woodM;
+  const glassTints = [[0.34,0.25,0.11],[0.13,0.26,0.16],[0.26,0.15,0.23]];
+  glassTints.forEach(([r,g,b],i)=>{
+    const x=-4.56+i*0.41, z=-D/2+0.46;
+    const jarM=mat('specimenJarM'+i);
+    jarM.diffuseColor=new BABYLON.Color3(r,g,b);
+    jarM.emissiveColor=new BABYLON.Color3(r*0.12,g*0.12,b*0.12);
+    const jar=BABYLON.MeshBuilder.CreateCylinder('specimenJar'+i,
+      {diameter:0.15,height:0.29,tessellation:12},scene);
+    jar.position.set(x,1.64,z);jar.material=jarM;
+    const lid=BABYLON.MeshBuilder.CreateCylinder('specimenLid'+i,
+      {diameter:0.16,height:0.055,tessellation:12},scene);
+    lid.position.set(x,1.81,z);lid.material=woodM;
+    interactables.set(jar.name,'jars');interactables.set(lid.name,'jars');
+  });
+
   // Model diagnostics are opt-in: add ?debug=1 to the URL.
   if(new URLSearchParams(location.search).get('debug') === '1'){
     const dbgEl=document.createElement('div'); dbgEl.id='dbgLoad';
@@ -455,6 +474,13 @@ function buildEntranceHall(){
   
   // Chest in corner
   loadModel('Chest_Closed.glb', [-W/2 + 1.0, 0, -D/2 + 1.0], 100, 0, null);
+
+  // Lived-in details at the edges of the room; keep the center and door sightlines open.
+  loadModel('Houseplant_3.glb', [-7.1, 0, -1.1], 300, 0, null);
+  loadModel('Barrel.glb', [7.1, 0, 0.5], 350, 0, null);
+  // Two small cups complete the already-interactive tea table.
+  loadModel('Chalice.glb', [-0.26, 0.59, 3], 25, 0, 'tea');
+  loadModel('Chalice.glb', [0.26, 0.59, 3], 25, 0, 'tea');
 
   // Door to Living Room (left wall)
   const doorLR = BABYLON.MeshBuilder.CreateBox('door_living', {width:0.1, height:2.4, depth:1.4}, scene);
