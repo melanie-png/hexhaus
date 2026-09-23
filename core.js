@@ -15,6 +15,7 @@ const ITEMS = {
   rosemary:  { name:'Dried Rosemary',     icon:'🌿', collectible:true,  desc:"Tied with red thread. Hung above a doorway, rosemary keeps what shouldn't enter from entering." },
   spellbook: { name:'Spell Book',        icon:'📓', collectible:true,  desc:'Leather-bound, locked with a clasp. The pages whisper when you open it. They whisper your name.' },
   crystalball:{ name:'Crystal Ball',     icon:'🔮', collectible:false, desc:'Swirling mist inside. You see yourself — but younger. Or older. The image is not clear.' },
+  grimoire:  { name:'The Open Grimoire', icon:'📖', collectible:false, desc:'The margins are crowded with herbs, measurements and warnings. Several pages have been torn out.' },
   tea:       { name:'Tea Set',           icon:'☕', collectible:false,  desc:'Two cups. One still warm. The other has a film of dust. She was expecting someone.' },
   raven:     { name:'The Raven',         icon:'🦅', collectible:false, desc:'It watches you. It has watched everyone who has entered this room. It does not blink.' },
   portrait:  { name:'Family Portrait',    icon:'🖼️', collectible:false, desc:'Four figures. Three look outward. One — the smallest — faces the wall. The paint is old. The posture is not.' },
@@ -116,7 +117,7 @@ function pbr(name, diffUrl, norUrl, usc=2, vsc=2, tint=null, alpha=1.0) {
 function emitM(name,r,g,b,ei=0.8){ const m=mat(name); m.diffuseColor=new BABYLON.Color3(r,g,b); m.emissiveColor=new BABYLON.Color3(r*ei,g*ei,b*ei); return m; }
 
 // ─── MODEL LOADER ───────────────────────────────────────────────────────────
-const MODEL_BASE = 'models/';
+const MODEL_BASE = location.pathname.includes('/preview/') ? '../models/' : 'models/';
 let modelInstance = 0;
 function loadModel(fileName, pos, scale, rotY, interactableKey, placement='floor') {
   const targetScene = scene;
