@@ -117,7 +117,7 @@ function pbr(name, diffUrl, norUrl, usc=2, vsc=2, tint=null, alpha=1.0) {
 function emitM(name,r,g,b,ei=0.8){ const m=mat(name); m.diffuseColor=new BABYLON.Color3(r,g,b); m.emissiveColor=new BABYLON.Color3(r*ei,g*ei,b*ei); return m; }
 
 // ─── MODEL LOADER ───────────────────────────────────────────────────────────
-const MODEL_BASE = 'models/';
+const MODEL_BASE = location.pathname.includes('/preview/') ? '../models/' : 'models/';
 let modelInstance = 0;
 function loadModel(fileName, pos, scale, rotY, interactableKey, placement='floor') {
   const targetScene = scene;
