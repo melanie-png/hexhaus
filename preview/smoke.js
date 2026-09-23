@@ -10,6 +10,10 @@ if (new URLSearchParams(location.search).has('smoke')) {
     if (!scene || !camera || state.currentRoom !== 'entrance') return;
     const originalYaw=camYaw, originalPitch=camPitch;
     log('Entrance Hall ready: '+scene.meshes.length+' meshes; '+interactables.size+' hotspots.');
+    for(const file of ['Bone','Scythe','Fireplace','Carpet_1','Light_Chandelier']) {
+      const matches=scene.meshes.filter(m=>m.name.includes('_'+file) && m.getTotalVertices() > 0);
+      for(const m of matches.slice(0,2)){m.computeWorldMatrix(true);const b=m.getBoundingInfo().boundingBox;log(file+' bounds '+b.minimumWorld.asArray().map(x=>x.toFixed(1))+' to '+b.maximumWorld.asArray().map(x=>x.toFixed(1)));}
+    }
     for (const name of targets) {
       const mesh=scene.getMeshByName(name);
       if(!mesh){log('MISSING '+name);continue;}
