@@ -145,7 +145,9 @@ function loadModel(fileName, pos, scale, rotY, interactableKey, placement='floor
     
     var root = meshes[0];
     if (!root) return;
-    root.scaling.set(scale, scale, scale);
+    // Quaternius GLBs have an internal 100x authoring node; divide legacy scene scales once.
+    const normalizedScale = scale * 0.01;
+    root.scaling.set(normalizedScale, normalizedScale, normalizedScale);
     if (rotY) root.rotation.y = rotY;
     root.position.set(pos[0], pos[1], pos[2]);
     
