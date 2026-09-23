@@ -9,6 +9,17 @@ if (new URLSearchParams(location.search).has('qa')) {
   const run=()=>{
     try{
       const roomIds=['entrance','living','kitchen','library','bathroom','pantry','basement','attic'];
+      for(let i=0;i<3;i++) check(interactables.get('specimenJar'+i)==='jars','specimen jar '+i+' is selectable');
+      for(const [model,min] of [['Houseplant_3',1],['Barrel',1],['Chalice',2]]){
+        const meshes=scene.meshes.filter(m=>m.name.includes('_'+model)&&m.getTotalVertices()>0);
+        check(meshes.length>=min,model+' loaded ('+meshes.length+' visible meshes)');
+        for(const m of meshes){
+          m.computeWorldMatrix(true);
+          const b=m.getBoundingInfo().boundingBox;
+          const lo=b.minimumWorld,hi=b.maximumWorld;
+          check(lo.y>=-0.05&&hi.y<=4.8&&lo.x>=-9&&hi.x<=9&&lo.z>=-6&&hi.z<=6,model+' within room bounds '+lo.asArray().map(n=>n.toFixed(2))+' / '+hi.asArray().map(n=>n.toFixed(2)));
+        }
+      }
       for(const roomId of roomIds){
         if(state.currentRoom!==roomId)transitionToRoom(roomId);
         check(state.currentRoom===roomId,roomId+' builds');
