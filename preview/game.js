@@ -416,22 +416,22 @@ function buildEntranceHall(){
   // ── MATERIALS ──────────────────────────────────────────────────────────────
   // Dark plaster walls with warm green-brown tint (witch's cottage, not Victorian)
   const wallM = pbr('wallM', TEX.plaster_d, TEX.plaster_n, 3, 2,
-    new BABYLON.Color3(0.20, 0.22, 0.18));
+    new BABYLON.Color3(0.52, 0.55, 0.46));
 
-  const floorM = pbr('floorM', TEX.wood_d, TEX.wood_n, 5, 4, new BABYLON.Color3(0.28, 0.20, 0.12));
+  const floorM = pbr('floorM', TEX.wood_d, TEX.wood_n, 5, 4, new BABYLON.Color3(0.48, 0.36, 0.25));
   floorM.specularColor = new BABYLON.Color3(0.06, 0.04, 0.02); floorM.specularPower = 20;
 
   // Dark wood beam ceiling
   const ceilM = pbr('ceilM', TEX.beam_d, TEX.beam_n, 4, 3,
-    new BABYLON.Color3(0.12, 0.08, 0.04));
+    new BABYLON.Color3(0.25, 0.19, 0.12));
 
   // Dark wood for furniture/trim
   const woodM = pbr('woodM', TEX.darkwood_d, TEX.darkwood_n, 3, 2,
-    new BABYLON.Color3(0.25, 0.18, 0.10));
+    new BABYLON.Color3(0.42, 0.31, 0.19));
 
   // Stone for fireplace
   const stoneM = pbr('stoneM', TEX.rock_d, TEX.rock_n, 2, 2,
-    new BABYLON.Color3(0.22, 0.20, 0.18));
+    new BABYLON.Color3(0.54, 0.51, 0.46));
 
   // ── ROOM SHELL ─────────────────────────────────────────────────────────────
   const W=18, D=12, H=4.8;
@@ -787,8 +787,8 @@ function buildEntranceHall(){
   // Ambient (very low, warm)
   const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
   ambient.intensity = 0.95; ambient.diffuse = new BABYLON.Color3(0.5, 0.45, 0.4); ambient.groundColor = new BABYLON.Color3(0.25, 0.2, 0.15);
-  ambient.diffuse = new BABYLON.Color3(0.32, 0.28, 0.22);
-  ambient.groundColor = new BABYLON.Color3(0.14, 0.10, 0.06);
+  ambient.diffuse = new BABYLON.Color3(0.75, 0.67, 0.56);
+  ambient.groundColor = new BABYLON.Color3(0.42, 0.34, 0.26);
 
   // ── FLICKERING ──────────────────────────────────────────────────────────────
   let ft = 0;
