@@ -90,7 +90,8 @@ function buildLibrary(){
   const parts=[];
   const shelfPart=(name,opts,px,py,pz)=>{
     const m=BABYLON.MeshBuilder.CreateBox(name,opts,scene);
-    m.position.set(px,py,pz); m.material=shWood; parts.push(m); return m;
+    // px/pz are offsets from the hinge; convert to world before parenting
+    m.position.set(SPx+px,py,hingeZ+pz); m.material=shWood; parts.push(m); return m;
   };
   // carcass (relative to pivot: back at x=0, opening faces +x into the room)
   shelfPart('lib_ssBack',{width:SPd,height:SPh,depth:SPw},0,SPh/2,SPw/2);
@@ -100,8 +101,8 @@ function buildLibrary(){
   const bookCols=[[0.25,0.08,0.06],[0.13,0.1,0.2],[0.1,0.17,0.1],[0.28,0.2,0.09],[0.18,0.12,0.16],[0.09,0.14,0.13]];
   for(let r=0;r<4;r++){ let z=0.12;
     while(z<SPw-0.12){ const bw=0.09+((r*7+Math.round(z*10))%3)*0.03, bh=0.5+((r*5+Math.round(z*13))%3)*0.06;
-      if(!((r===2)&&(z>1.2))){ // the gap on the third shelf
-        const b=shelfPart('lib_ssBook'+r+'_'+Math.round(z*100),{width:bw,height:bh,depth:0.22},0.14,0.38+r*0.72+bh/2,z+bw/2);
+      if(!((r===2)&&(z>1.2)&&(z<1.7))){ // the gap where one book is missing
+        const b=shelfPart('lib_ssBook'+r+'_'+Math.round(z*100),{width:0.22,height:bh,depth:bw},0.28,0.38+r*0.72+bh/2,z+bw/2);
         const bm=mat('lib_ssbm'+r+'_'+Math.round(z*100)); bm.diffuseColor=new BABYLON.Color3(...bookCols[(r+Math.round(z*10))%6]); b.material=bm;
       }
       z+=bw+0.02;
@@ -115,7 +116,7 @@ function buildLibrary(){
   interactables.set('passage_hole','passage_hole');
   const jambM=mat('lib_jambM'); jambM.diffuseColor=new BABYLON.Color3(0.2,0.19,0.17);
   [[-0.95,0],[0.95,0]].forEach(([jz],i)=>{ const j=BABYLON.MeshBuilder.CreateBox('lib_jamb'+i,{width:0.28,height:2.6,depth:0.16},scene); j.position.set(-W/2+0.14,1.32,SPz+jz); j.material=jambM; });
-  for(let s=0;s<3;s++){ const st=BABYLON.MeshBuilder.CreateBox('lib_pstep'+s,{width:0.26-s*0.05,height:0.14,depth:1.7},scene); st.position.set(-W/2+0.3-s*0.22,0.66-s*0.2,SPz); st.material=jambM; }
+  for(let s=0;s<2;s++){ const st=BABYLON.MeshBuilder.CreateBox('lib_pstep'+s,{width:0.24,height:0.14,depth:1.7},scene); st.position.set(-W/2+0.32-s*0.12,0.52-s*0.2,SPz); st.material=jambM; }
   // passage glow — only once the shelf is open (builds open on revisit, too)
   let passageLight=null;
   const addPassageGlow=()=>{
