@@ -11,7 +11,7 @@ const ITEMS = {
   cloak:     { name:'The Black Cloak',    icon:'🧥', collectible:true,  desc:'Heavy wool, charcoal-black. A silver clasp shaped like a moth. It smells of woodsmoke and something older.' },
   staff:     { name:'Gnarled Staff',      icon:'🪄', collectible:true,  desc:'Twisted hawthorn wood, taller than you. Three runes carved near the tip. One is still warm.' },
   key:       { name:'Iron Key',           icon:'🗝️', collectible:true,  desc:'Heavy old iron. The bow is shaped like a crescent moon. It opens something important.' },
-  letter:    { name:'Sealed Letter',      icon:'📜', collectible:true,  desc:'Black wax seal, pressed with a hexagon. The paper is warm. It hums faintly when held close.' },
+  letter:    { name:'Sealed Letter',      icon:'📜', collectible:true,  desc:'Black wax seal, pressed with a hexagon. The wax broke at your touch, as if it had been waiting. Her handwriting inside: "What I keep below, the books keep above."' },
   rosemary:  { name:'Dried Rosemary',     icon:'🌿', collectible:true,  desc:"Tied with red thread. Hung above a doorway, rosemary keeps what shouldn't enter from entering." },
   spellbook: { name:'Spell Book',        icon:'📓', collectible:true,  desc:'Leather-bound, locked with a clasp. The pages whisper when you open it. They whisper your name.' },
   crystalball:{ name:'Crystal Ball',     icon:'🔮', collectible:false, desc:'Swirling mist inside. You see yourself — but younger. Or older. The image is not clear.' },
@@ -33,9 +33,11 @@ const ITEMS = {
   herbs_dried:{ name:'Hanging Garlic',   icon:'🧄', collectible:false, desc:'Plaited and hung from the ceiling. Some bulbs are fresh. Some are dust. The smell keeps other things away.' },
   spider:    { name:'Spider Web',        icon:'🕸️', collectible:false, desc:'The web spans the entire corner. The spider is somewhere in it. It is bigger than your hand.' },
   attic_box: { name:'Storage Box',       icon:'📦', collectible:false, desc:'Dusty, unlabelled. Something shifts inside when you tilt it. You decide not to tilt it.' },
+  locked_door:{ name:'The Basement Door', icon:'🔒', collectible:false, desc:'Heavy oak, bound in iron. The keyhole is shaped like a crescent moon. It does not rattle. It does not want to.' },
+  secretshelf:{ name:'The Whispering Shelf', icon:'📖', collectible:false, desc:'Every book here is named, not titled. The shelf hums, very faintly, like paper about to speak.' },
 };
 
-const state = { inventory:[], activeModal:null, currentRoom:'entrance' };
+const state = { inventory:[], activeModal:null, currentRoom:'entrance', passageOpen:false, basementUnlocked:false };
 const $ = id => document.getElementById(id);
 
 // ─── LOADING ──────────────────────────────────────────────────────────────────
@@ -294,11 +296,42 @@ function tryPick(cx,cy){
   if(pick.hit&&pick.pickedMesh){
     const key=interactables.get(pick.pickedMesh.name);
     if(!key) return;
-    if(key.startsWith('door_')){
-      transitionToRoom(key.slice(5));
+    handleInteract(key);
+  }
+}
+
+// ─── INTERACTION LOGIC (playable loop) ───────────────────────────────────────
+function handleInteract(key){
+  // The pantry basement door is locked until the iron key is used.
+  if(key==='door_basement' && state.currentRoom==='pantry' && !state.basementUnlocked){
+    if(state.inventory.includes('key')){
+      state.basementUnlocked=true;
+      showToast('🗝️ The iron key turns. The lock gives way.');
+      setTimeout(()=>{ if(state.currentRoom==='pantry' && !state.activeModal) transitionToRoom('basement'); },700);
     } else {
-      openModal(key);
+      openModal('locked_door');
     }
+    return;
+  }
+  // The whispering shelf swings open for whoever carries the spellbook.
+  if(key==='secretshelf' && state.currentRoom==='library' && !state.passageOpen){
+    if(state.inventory.includes('spellbook') && typeof openPassage==='function'){
+      openPassage();
+    } else {
+      openModal('secretshelf');
+    }
+    return;
+  }
+  // The revealed passage leads down.
+  if(key==='passage_hole'){
+    state.basementUnlocked=true;
+    transitionToRoom('basement');
+    return;
+  }
+  if(key.startsWith('door_')){
+    transitionToRoom(key.slice(5));
+  } else {
+    openModal(key);
   }
 }
 
@@ -312,6 +345,15 @@ function openModal(key){
   $('examine-modal').classList.remove('hidden');
 }
 function closeModal(){ $('examine-modal').classList.add('hidden'); state.activeModal=null; }
+// Re-reading an item already carried — no collect button, same voice.
+function openInspect(key){
+  if(state.activeModal) return;
+  const item=ITEMS[key]; if(!item) return;
+  state.activeModal=key;
+  $('modal-icon').textContent=item.icon; $('modal-name').textContent=item.name; $('modal-desc').textContent=item.desc;
+  $('modal-collect').style.display='none';
+  $('examine-modal').classList.remove('hidden');
+}
 
 $('modal-backdrop').addEventListener('click',closeModal);
 $('modal-close').addEventListener('click',closeModal);
@@ -330,6 +372,8 @@ function updateInv(){
     const item=ITEMS[key];
     const slot=document.createElement('div'); slot.className='inv-slot';
     slot.textContent=item.icon; slot.title=item.name;
+    slot.style.cursor='pointer';
+    slot.addEventListener('click',()=>openInspect(key));
     $('inv-slots').appendChild(slot);
   });
   const total=Object.values(ITEMS).filter(i=>i.collectible).length;

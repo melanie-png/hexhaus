@@ -80,8 +80,68 @@ function buildLibrary(){
   interactables.set('door_entrance','door_entrance');
   const doorA=BABYLON.MeshBuilder.CreateBox('door_attic',{width:1.2,height:2.4,depth:0.1},scene); doorA.position.set(soX+STS*0.2,1.2+STS*SY/2,soZ-STS*SZ+0.2); const daM=mat('lib_daM'); daM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorA.material=daM;
   interactables.set('door_attic','door_attic');
-  const doorBs=BABYLON.MeshBuilder.CreateBox('door_basement',{width:0.1,height:2.0,depth:1.0},scene); doorBs.position.set(-W/2+0.05,1.0,-D/2+3); const dbm2=mat('lib_dbm'); dbm2.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorBs.material=dbm2;
-  interactables.set('door_basement','door_basement');
+  // ── SECRET PASSAGE — the whispering shelf ──────────────────────────────────
+  // A bookshelf against the west wall hides a stairwell down to the basement.
+  // Carrying the spellbook makes it swing open (openPassage below, core.js routes it).
+  const SPx=-W/2+0.26, SPz=-4.6, SPw=2.2, SPh=2.7, SPd=0.34;
+  const hingeZ=SPz-SPw/2;                                       // hinge at the south edge
+  const pivot=new BABYLON.TransformNode('lib_shelfPivot',scene); pivot.position.set(SPx,0,hingeZ);
+  const shWood=mat('lib_shWoodM'); shWood.diffuseColor=new BABYLON.Color3(0.16,0.09,0.05);
+  const parts=[];
+  const shelfPart=(name,opts,px,py,pz)=>{
+    const m=BABYLON.MeshBuilder.CreateBox(name,opts,scene);
+    m.position.set(px,py,pz); m.material=shWood; parts.push(m); return m;
+  };
+  // carcass (relative to pivot: back at x=0, opening faces +x into the room)
+  shelfPart('lib_ssBack',{width:SPd,height:SPh,depth:SPw},0,SPh/2,SPw/2);
+  for(let r=0;r<4;r++) shelfPart('lib_ssBoard'+r,{width:SPd-0.06,height:0.05,depth:SPw-0.06},0.02,0.35+r*0.72,SPw/2);
+  shelfPart('lib_ssTop',{width:SPd+0.04,height:0.08,depth:SPw+0.04},0,SPh+0.04,SPw/2);
+  // named books — each a different dark colour, one gap where a book is missing
+  const bookCols=[[0.25,0.08,0.06],[0.13,0.1,0.2],[0.1,0.17,0.1],[0.28,0.2,0.09],[0.18,0.12,0.16],[0.09,0.14,0.13]];
+  for(let r=0;r<4;r++){ let z=0.12;
+    while(z<SPw-0.12){ const bw=0.09+((r*7+Math.round(z*10))%3)*0.03, bh=0.5+((r*5+Math.round(z*13))%3)*0.06;
+      if(!((r===2)&&(z>1.2))){ // the gap on the third shelf
+        const b=shelfPart('lib_ssBook'+r+'_'+Math.round(z*100),{width:bw,height:bh,depth:0.22},0.14,0.38+r*0.72+bh/2,z+bw/2);
+        const bm=mat('lib_ssbm'+r+'_'+Math.round(z*100)); bm.diffuseColor=new BABYLON.Color3(...bookCols[(r+Math.round(z*10))%6]); b.material=bm;
+      }
+      z+=bw+0.02;
+    }
+  }
+  parts.forEach(m=>{ m.setParent(pivot); interactables.set(m.name,'secretshelf'); });
+  // the dark stairwell behind the shelf — visible once it swings open
+  const holeM=mat('lib_holeM'); holeM.diffuseColor=new BABYLON.Color3(0.005,0.006,0.008); holeM.emissiveColor=new BABYLON.Color3(0.0,0.004,0.003); holeM.backFaceCulling=false;
+  const hole=BABYLON.MeshBuilder.CreatePlane('passage_hole',{width:1.8,height:2.5},scene);
+  hole.position.set(-W/2+0.03,1.3,SPz); hole.rotation.y=Math.PI/2; hole.material=holeM;
+  interactables.set('passage_hole','passage_hole');
+  const jambM=mat('lib_jambM'); jambM.diffuseColor=new BABYLON.Color3(0.2,0.19,0.17);
+  [[-0.95,0],[0.95,0]].forEach(([jz],i)=>{ const j=BABYLON.MeshBuilder.CreateBox('lib_jamb'+i,{width:0.28,height:2.6,depth:0.16},scene); j.position.set(-W/2+0.14,1.32,SPz+jz); j.material=jambM; });
+  for(let s=0;s<3;s++){ const st=BABYLON.MeshBuilder.CreateBox('lib_pstep'+s,{width:0.26-s*0.05,height:0.14,depth:1.7},scene); st.position.set(-W/2+0.3-s*0.22,0.66-s*0.2,SPz); st.material=jambM; }
+  // passage glow — only once the shelf is open (builds open on revisit, too)
+  let passageLight=null;
+  const addPassageGlow=()=>{
+    if(passageLight) return;
+    passageLight=new BABYLON.PointLight('lib_pl',new BABYLON.Vector3(-W/2+0.6,1.0,SPz),scene);
+    passageLight.diffuse=new BABYLON.Color3(0.15,0.45,0.3); passageLight.intensity=0.7; passageLight.range=7;
+  };
+  if(state.passageOpen){ pivot.rotation.y=1.05; addPassageGlow(); }
+
+  // Called by core.js when the spellbook is carried and the shelf is clicked.
+  window.openPassage=function(){
+    if(state.passageOpen) return false;
+    state.passageOpen=true;
+    showToast('📓 The spellbook hums. The shelf swings open.');
+    addPassageGlow();
+    let t0=null;
+    const anim=(ts)=>{
+      const node=scene&&scene.getTransformNodeByName('lib_shelfPivot');
+      if(!node){ return; }
+      t0??=ts; const k=Math.min(1,(ts-t0)/1400); const e=1-Math.pow(1-k,3);
+      node.rotation.y=1.05*e;
+      if(k<1) requestAnimationFrame(anim);
+    };
+    requestAnimationFrame(anim);
+    return true;
+  };
 }
 
 // ─── BATHROOM ──────────────────────────────────────────────────────────────────
