@@ -158,7 +158,7 @@ if (new URLSearchParams(location.search).has('qa')) {
             if(hm){
               check(interactables.get('app_helga')==='helga_apparition','helga is examineable');
               check(hm.material.backFaceCulling===false,'helga sprite is two-sided');
-              check(hm.material.diffuseTexture.getAlphaFromRGB===true&&hm.material.alpha===1,'helga sprite alpha comes from the art');
+              check(hm.material.useAlphaFromDiffuseTexture===true,'helga sprite alpha comes from the art');
               camera.setTarget(hm.getAbsolutePosition());
               setTimeout(()=>{
                 try{

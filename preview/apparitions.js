@@ -4,7 +4,7 @@
 // with the sound pass — the beats are timed to leave room for it.)
 // The cat lives in the kitchen. Sometimes you catch her sitting there.
 
-const APP_TEX = 'textures/helga_apparition.webp?v=20260928a4';
+const APP_TEX = 'textures/helga_apparition.webp?v=20260928a5';
 
 // Spots are inset from the walls, near furniture lines, facing the room centre.
 const HELGA_SPOTS = {   // where the sighting can stand in each room
@@ -52,12 +52,13 @@ function spawnHelgaStanding(roomId){
   const sc = scene;
   const tex = new BABYLON.Texture(APP_TEX, sc, true);
   tex.hasAlpha = true;
-  tex.getAlphaFromRGB = true;   // luminance = opacity, engine-side
+  tex.hasAlpha = true;   // opacity comes from the art's alpha channel
   const hH = 1.72, hW = hH * 280/831;
   const plane = BABYLON.MeshBuilder.CreatePlane('app_helga',{width:hW,height:hH},sc);
   plane.position.set(sx, hH/2 + 0.02, sz);
   const m = new BABYLON.StandardMaterial('app_helgaM',sc);
   m.diffuseTexture = tex;
+  m.useAlphaFromDiffuseTexture = true;
   m.emissiveTexture = tex;
   m.emissiveColor = new BABYLON.Color3(0.92,0.85,0.72);   // candle-warm self-light
   m.specularColor = new BABYLON.Color3(0,0,0);
@@ -100,12 +101,13 @@ function helgaSighting(roomId){
   const sc = scene;
   const tex = new BABYLON.Texture(APP_TEX, sc, true);
   tex.hasAlpha = true;
-  tex.getAlphaFromRGB = true;
+  tex.hasAlpha = true;
   const hH = 1.72, hW = hH * 280/831;
   const plane = BABYLON.MeshBuilder.CreatePlane('app_helga',{width:hW,height:hH},sc);
   plane.position.set(sx, hH/2 + 0.02, sz);
   const m = new BABYLON.StandardMaterial('app_helgaM',sc);
   m.diffuseTexture = tex;
+  m.useAlphaFromDiffuseTexture = true;
   m.emissiveTexture = tex;
   m.emissiveColor = new BABYLON.Color3(0.92,0.85,0.72);
   m.specularColor = new BABYLON.Color3(0,0,0);
