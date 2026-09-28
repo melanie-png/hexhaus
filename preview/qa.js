@@ -140,7 +140,7 @@ if (new URLSearchParams(location.search).has('qa')) {
             check(scene.getMeshByName('lib_helgaP')?.material?.diffuseTexture?.isReady()===true,'portrait texture loaded');
             check(scene.meshes.find(m=>m.material?.name==='lib_wallM')?.material?.diffuseTexture?.isReady()===true,'control wall texture loaded');
             // apparitions
-            window.HEXQA_SPAWN='cat'; spawnApparitions('library');
+            window.HEXQA_SPAWN='cat'; spawnApparitions('kitchen');
             const catB=scene.getMeshByName('app_cat_body');
             check(!!catB,'the cat spawns on demand');
             if(catB){
