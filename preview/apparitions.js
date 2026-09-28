@@ -69,7 +69,7 @@ function spawnHelgaStanding(roomId){
     if (dying && alpha <= 0.012) plane.setEnabled(false);
   });
   const die = ()=>{ dying = true; };
-  const timer = setTimeout(die, 26000);
+  const timer = setTimeout(die, 180000);   // QA-only standing sprite: hold for inspection
   interactables.set('app_helga','helga_apparition');
 
   // Examining her (or leaving) lets her go.
