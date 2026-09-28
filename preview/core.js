@@ -86,7 +86,7 @@ const TEX = {
   beam_n:    'textures/wood_planks_nor_gl_1k.webp',
   mstone_d:  'textures/medieval_blocks_02_diff_1k.webp',
   mstone_n:  'textures/medieval_blocks_02_nor_gl_1k.webp',
-  helga_p:   'textures/helga_portrait.webp',
+  helga_p:   'textures/helga_portrait.webp?v=20260928p13',
 };
 
 // ─── ENGINE GLOBALS ──────────────────────────────────────────────────────────
