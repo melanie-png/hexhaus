@@ -254,7 +254,7 @@ function spawnCat(roomId){
       if (k>=1){ parts.forEach(p=>p.setEnabled(false)); sc.onBeforeRenderObservable.remove(o2); }
     });
   };
-  const timer = setTimeout(dash, 30000);
+  const timer = setTimeout(dash, window.HEXQA_SPAWN ? 150000 : 30000);   // QA dwell cat lingers for visual inspection
   const watch = setInterval(()=>{
     if (sc.isDisposed || dashed) { clearInterval(watch); return; }
     if (state.activeModal === 'helga_cat') { clearInterval(watch); dash(); }
