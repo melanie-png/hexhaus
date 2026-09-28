@@ -203,6 +203,12 @@ function spawnCat(roomId){
   root.position.set(sx,0,sz);
   root.rotation.y = Math.atan2(-sx,-sz);          // facing the room centre
 
+  // a faint hearth-glow so her silhouette reads against the dark kitchen
+  const glow = new BABYLON.PointLight('app_catL', new BABYLON.Vector3(sx,0.75,sz+0.45), sc);
+  glow.diffuse = new BABYLON.Color3(0.72,0.55,0.32);
+  glow.specular = new BABYLON.Color3(0.15,0.1,0.06);
+  glow.intensity = 0.35; glow.range = 5;
+
   const t0=performance.now();
   let nextBlink=t0+2500+(Math.random()*3000), blinkT=0;
   let nextTwitch=t0+3500+(Math.random()*4500), twitchT=0;
@@ -256,6 +262,6 @@ function spawnCat(roomId){
 
   appCleanup = ()=>{
     clearTimeout(timer); clearInterval(watch);
-    if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); parts.forEach(p=>p.dispose()); root.dispose(); }
+    if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); parts.forEach(p=>p.dispose()); glow.dispose(); root.dispose(); }
   };
 }
