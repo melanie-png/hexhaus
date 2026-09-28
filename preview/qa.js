@@ -47,6 +47,8 @@ if (new URLSearchParams(location.search).has('qa')) {
         camera.setTarget(hpMesh.getBoundingInfo().boundingSphere.centerWorld);camera.getViewMatrix(true);scene.render();
         const ppick=scene.pick(engine.getRenderWidth()/2,engine.getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled());
         check(interactables.get(ppick?.pickedMesh?.name)==='helga_portrait','portrait ray-selects from center view' + (interactables.get(ppick?.pickedMesh?.name)==='helga_portrait' ? '' : ' (picked: '+(ppick?.pickedMesh?.name||'nothing')+')'));}
+      const hptx=hpMesh?.material?.diffuseTexture;
+      check(!!hptx&&hptx.isReady(),'portrait texture loaded');
       check(ITEMS.helga_portrait?.collectible===false&&!!ITEMS.helga_portrait?.desc,'portrait has inspect text and is not collectible');
       handleInteract('helga_portrait');
       check(state.activeModal==='helga_portrait','portrait opens the examine modal');
