@@ -151,7 +151,9 @@ function helgaSighting(roomId){
   };
 }
 
-// ── THE CAT — sits, watches with green eyes, and is gone when you look ──────
+// ── THE CAT — a proper sitting silhouette: haunches, chest, paws, wrapped tail.
+// She watches you (head tracks the camera), blinks, twitches an ear — and is
+// still gone the moment you try to examine her.
 function spawnCat(roomId){
   const spots = CAT_SPOTS[roomId]; if (!spots || !spots.length) return;
   const [sx,sz] = spots[(Math.random()*spots.length)|0];
@@ -159,38 +161,78 @@ function spawnCat(roomId){
   const root = new BABYLON.TransformNode('app_cat',sc);
   const fur = new BABYLON.StandardMaterial('app_catM',sc);
   fur.diffuseColor = new BABYLON.Color3(0.025,0.025,0.032);
-  fur.specularColor = new BABYLON.Color3(0.02,0.02,0.026);
+  fur.specularColor = new BABYLON.Color3(0.05,0.05,0.06);
   const eyeM = new BABYLON.StandardMaterial('app_catEyeM',sc);
   eyeM.emissiveColor = new BABYLON.Color3(0.25,0.95,0.45);
   eyeM.diffuseColor = new BABYLON.Color3(0,0,0);
   eyeM.specularColor = new BABYLON.Color3(0,0,0);
 
-  const mk = (n,fn)=>{ const me = fn(n); me.parent = root; return me; };
-  const body = mk('app_cat_body',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameterX:0.5,diameterY:0.3,diameterZ:0.26},sc));
-  body.position.set(0,0.17,0); body.material = fur;
-  const head = mk('app_cat_head',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameter:0.16},sc));
-  head.position.set(0.3,0.26,0); head.scaling.set(0.85,0.8,0.9); head.material = fur;
-  const e1 = mk('app_cat_e1',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameter:0.028},sc));
-  e1.position.set(0.365,0.28,0.045); e1.material = eyeM;
-  const e2 = mk('app_cat_e2',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameter:0.028},sc));
-  e2.position.set(0.365,0.28,-0.045); e2.material = eyeM;
-  const tail = mk('app_cat_tail',n=>BABYLON.MeshBuilder.CreateCylinder(n,{diameterTop:0.02,diameterBottom:0.03,height:0.4},sc));
-  tail.position.set(-0.26,0.33,0); tail.rotation.z = 0.6; tail.material = fur;
-  const ear1 = mk('app_cat_ear1',n=>BABYLON.MeshBuilder.CreateCylinder(n,{diameterTop:0.006,diameterBottom:0.05,height:0.07},sc));
-  ear1.position.set(0.3,0.36,0.05); ear1.material = fur;
-  const ear2 = mk('app_cat_ear2',n=>BABYLON.MeshBuilder.CreateCylinder(n,{diameterTop:0.006,diameterBottom:0.05,height:0.07},sc));
-  ear2.position.set(0.3,0.36,-0.05); ear2.material = fur;
+  const parts=[];
+  const mk=(n,fn)=>{const me=fn(n);me.parent=root;me.material=fur;parts.push(me);return me;};
+  // haunches + chest: the sitting pear
+  const body=mk('app_cat_body',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameterX:0.34,diameterY:0.36,diameterZ:0.3},sc));
+  body.position.set(-0.07,0.18,0);
+  const chest=mk('app_cat_chest',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameterX:0.24,diameterY:0.3,diameterZ:0.22},sc));
+  chest.position.set(0.08,0.2,0);
+  // front legs, straight and prim
+  for(const z of [-0.055,0.055]){
+    const leg=mk('app_cat_leg'+(z<0?'l':'r'),n=>BABYLON.MeshBuilder.CreateCylinder(n,{diameter:0.045,height:0.34},sc));
+    leg.position.set(0.14,0.17,z);
+    const paw=mk('app_cat_paw'+(z<0?'l':'r'),n=>BABYLON.MeshBuilder.CreateSphere(n,{diameter:0.075},sc));
+    paw.position.set(0.15,0.035,z); paw.scaling.y=0.55;
+  }
+  // head with a muzzle; eyes ride on the head so they follow her gaze
+  const head=mk('app_cat_head',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameter:0.15},sc));
+  head.position.set(0.17,0.42,0); head.scaling.set(1,0.92,0.95);
+  const muzzle=mk('app_cat_muzzle',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameter:0.07},sc));
+  muzzle.parent=head; muzzle.position.set(0.05,-0.012,0); muzzle.scaling.set(0.9,0.7,1);
+  const e1=BABYLON.MeshBuilder.CreateSphere('app_cat_e1',{diameter:0.027},sc);
+  const e2=BABYLON.MeshBuilder.CreateSphere('app_cat_e2',{diameter:0.027},sc);
+  for(const e of [e1,e2]){ e.parent=head; e.material=eyeM; parts.push(e); }
+  e1.position.set(0.072,0.028,0.04); e2.position.set(0.072,0.028,-0.04);
+  // cone ears
+  const ear1=mk('app_cat_ear1',n=>BABYLON.MeshBuilder.CreateCylinder(n,{diameterTop:0.004,diameterBottom:0.045,height:0.078},sc));
+  ear1.parent=head; ear1.position.set(-0.005,0.083,0.048); ear1.rotation.x=-0.22;
+  const ear2=mk('app_cat_ear2',n=>BABYLON.MeshBuilder.CreateCylinder(n,{diameterTop:0.004,diameterBottom:0.045,height:0.078},sc));
+  ear2.parent=head; ear2.position.set(-0.005,0.083,-0.048); ear2.rotation.x=0.22;
+  // tail: a tube that curls from her haunches around the front paws
+  const tp=[[-0.19,0.05,0.12],[-0.235,0.04,0.0],[-0.18,0.035,-0.13],[-0.05,0.03,-0.21],[0.09,0.03,-0.215],[0.16,0.035,-0.14],[0.19,0.055,-0.05]]
+    .map(v=>new BABYLON.Vector3(v[0],v[1],v[2]));
+  const tail=mk('app_cat_tail',n=>BABYLON.MeshBuilder.CreateTube(n,{path:tp,radius:0.017,tessellation:8,cap:BABYLON.Mesh.CAP_ALL},sc));
 
   root.position.set(sx,0,sz);
   root.rotation.y = Math.atan2(-sx,-sz);          // facing the room centre
 
-  const t0 = performance.now();
-  const obs = sc.onBeforeRenderObservable.add(()=>{
-    tail.rotation.z = 0.6 + Math.sin((performance.now()-t0)/380)*0.12;
+  const t0=performance.now();
+  let nextBlink=t0+2500+(Math.random()*3000), blinkT=0;
+  let nextTwitch=t0+3500+(Math.random()*4500), twitchT=0;
+  const obs=sc.onBeforeRenderObservable.add(()=>{
+    const t=performance.now()-t0;
+    // tail sway
+    tail.rotation.y=Math.sin(t/650)*0.07;
+    // breathing
+    chest.scaling.y=1+Math.sin(t/1100)*0.035;
+    // she watches you: head turns toward the camera (clamped, smoothed)
+    try{
+      const inv=root.getWorldMatrix().clone().invert();
+      const local=BABYLON.Vector3.TransformCoordinates(camera.position,inv);
+      const yaw=Math.max(-0.85,Math.min(0.85,Math.atan2(-local.z,Math.max(0.05,local.x))));
+      const pitch=Math.max(-0.3,Math.min(0.45,Math.atan2(local.y-0.42,Math.hypot(local.x,local.z))));
+      head.rotation.y+=(yaw-head.rotation.y)*0.06;
+      head.rotation.z+=(pitch-head.rotation.z)*0.06;
+    }catch(e){}
+    // blink
+    if(t+ t0>nextBlink){ blinkT=performance.now(); nextBlink=performance.now()+2800+Math.random()*4200; }
+    const bo=performance.now()-(blinkT||-1e9);
+    const es=(bo>=0&&bo<140)?0.1:1;
+    e1.scaling.y=es; e2.scaling.y=es;
+    // ear twitch
+    if(performance.now()>nextTwitch){ twitchT=performance.now(); nextTwitch=performance.now()+4000+Math.random()*6000; }
+    const wo=performance.now()-(twitchT||-1e9);
+    if(wo>=0&&wo<220){ ear1.rotation.x=-0.22+Math.sin(wo/35)*0.3; }
+    else ear1.rotation.x=-0.22;
   });
-  const parts = [body,head,e1,e2,tail,ear1,ear2];
-  ['app_cat_body','app_cat_head','app_cat_e1','app_cat_e2','app_cat_tail','app_cat_ear1','app_cat_ear2']
-    .forEach(n=>interactables.set(n,'helga_cat'));
+  parts.forEach(p=>interactables.set(p.name,'helga_cat'));
 
   // Examined or ignored too long: one dash, and it is not there at all.
   let dashed = false;
