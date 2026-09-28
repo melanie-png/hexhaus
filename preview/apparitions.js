@@ -21,6 +21,10 @@ const CAT_SPOTS = {    // the kitchen is hers
   kitchen:  [[4,3],[-4,-3],[0,-4.4]]
 };
 
+// Demo hook: open the game with ?apparition=helga (or =cat) and the resident
+// stands in every room you enter — no dice rolls, no fading away. For looking.
+try { window.HEXAPP_FORCE = new URLSearchParams(location.search).get('apparition'); } catch(e) {}
+
 let appCleanup = null;
 
 function spawnApparitions(roomId){
@@ -28,6 +32,8 @@ function spawnApparitions(roomId){
   const qa = (typeof window !== 'undefined' && window.HEXQA_SPAWN) || null;
   if (qa === 'helga') { spawnHelgaStanding(roomId); return; }
   if (qa === 'cat')   { spawnCat(roomId); return; }
+  if (window.HEXAPP_FORCE === 'helga') { spawnHelgaStanding(roomId); return; }
+  if (window.HEXAPP_FORCE === 'cat')   { spawnCat(roomId); return; }
   // Natural play: the sighting, once, in the living room.
   if (roomId === 'living' && !state.helgaSeen) {
     state.helgaSeen = true;
