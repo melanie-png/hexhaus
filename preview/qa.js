@@ -4,7 +4,6 @@ if (new URLSearchParams(location.search).has('qa')) {
   const log=s=>{report.textContent+=s+'\n';console.log('[qa]',s)};
   let failures=0,checks=0;
   const check=(v,msg)=>{checks++;if(!v)failures++;log((v?'PASS':'FAIL')+' '+msg)};
-  const texState={};
   addEventListener('error',e=>log('ERROR '+e.message));
   addEventListener('unhandledrejection',e=>log('REJECTION '+e.reason));
   const run=()=>{
@@ -52,13 +51,7 @@ if (new URLSearchParams(location.search).has('qa')) {
       handleInteract('helga_portrait');
       check(state.activeModal==='helga_portrait','portrait opens the examine modal');
       closeModal();
-      // texture readiness is async and the scene dies on the next transition —
-      // record load/error events now, assert the recorded result at the end
-      const texProbe=(tx,label)=>{texState[label]=tx?.isReady()?'loaded':'pending';
-        tx?.onLoadObservable?.add(()=>texState[label]='loaded');
-        tx?.onErrorObservable?.add(()=>texState[label]='error');};
-      texProbe(hpMesh?.material?.diffuseTexture,'helga');
-      texProbe(scene.meshes.find(m=>m.material?.name==='lib_wallM')?.material?.diffuseTexture,'wall');
+
       for(const roomId of roomIds){
         if(state.currentRoom!==roomId)transitionToRoom(roomId);
         check(state.currentRoom===roomId,roomId+' builds');
@@ -131,9 +124,14 @@ if (new URLSearchParams(location.search).has('qa')) {
           openInspect('letter');
           check(state.activeModal==='letter'&&document.getElementById('modal-collect').style.display==='none','inventory re-reads the letter clue');
           closeModal();
-          check(texState.helga==='loaded','portrait texture loaded ('+texState.helga+')');
-          check(texState.wall==='loaded','control wall texture loaded ('+texState.wall+')');
-          log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
+          // textures load async and rooms die fast — return to the library and
+          // give the live scene a real 2.5s dwell before asserting readiness
+          transitionToRoom('library');
+          setTimeout(()=>{
+            check(scene.getMeshByName('lib_helgaP')?.material?.diffuseTexture?.isReady()===true,'portrait texture loaded');
+            check(scene.meshes.find(m=>m.material?.name==='lib_wallM')?.material?.diffuseTexture?.isReady()===true,'control wall texture loaded');
+            log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
+          },2500);
           }catch(e){log('FATAL '+e.stack)}
         },1800);
         }catch(e){log('FATAL '+e.stack)}
