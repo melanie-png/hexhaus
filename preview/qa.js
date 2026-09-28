@@ -132,6 +132,7 @@ if (new URLSearchParams(location.search).has('qa')) {
             check(scene.meshes.find(m=>m.material?.name==='lib_wallM')?.material?.diffuseTexture?.isReady()===true,'control wall texture loaded');
             log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
           },2500);
+          setTimeout(()=>{report.style.display='none'},4500);
           }catch(e){log('FATAL '+e.stack)}
         },1800);
         }catch(e){log('FATAL '+e.stack)}
