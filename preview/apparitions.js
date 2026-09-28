@@ -1,11 +1,13 @@
 // ─── APPARITIONS — Helga and her cat ──────────────────────────────────────────
-// Rare residents. On most visits the house is empty. Sometimes it isn't.
-// Spawned after each room build: never both at once, usually neither.
+// The house's rare residents. Helga appears exactly once per visit, as a
+// sighting: she screams, a door slams, and that is it. (Audio comes later,
+// with the sound pass — the beats are timed to leave room for it.)
+// The cat lives in the kitchen. Sometimes you catch her sitting there.
 
 const APP_TEX = 'textures/helga_apparition.webp?v=20260928a1';
 
 // Spots are inset from the walls, near furniture lines, facing the room centre.
-const HELGA_SPOTS = {
+const HELGA_SPOTS = {   // where the sighting can stand in each room
   entrance: [[0,-4.4],[-6.5,1.5],[6.5,-1.5]],
   living:   [[0,-4.4],[-6,2.5],[6,-2.5]],
   kitchen:  [[0,-4.4],[5,2]],
@@ -15,15 +17,8 @@ const HELGA_SPOTS = {
   basement: [[0,-4.4],[5,2.5]],
   attic:    [[0,-2.4],[-3,1.6]]
 };
-const CAT_SPOTS = {
-  entrance: [[4.5,-2.5],[-4.5,2.5]],
-  living:   [[5,3.2],[-5,-3]],
-  kitchen:  [[4,3],[-4,-3]],
-  library:  [[4.5,-4],[-4.5,4]],
-  bathroom: [[1.4,-0.8]],
-  pantry:   [[2.2,1.5],[-2.2,-1.5]],
-  basement: [[4,3.5],[-4,-3.5]],
-  attic:    [[2,1.8],[-2,-1.8]]
+const CAT_SPOTS = {    // the kitchen is hers
+  kitchen:  [[4,3],[-4,-3],[0,-4.4]]
 };
 
 let appCleanup = null;
@@ -31,19 +26,20 @@ let appCleanup = null;
 function spawnApparitions(roomId){
   if (appCleanup) { appCleanup(); appCleanup = null; }
   const qa = (typeof window !== 'undefined' && window.HEXQA_SPAWN) || null;
-  let kind = null;
-  if (qa) kind = qa;
-  else {
-    const roll = Math.random();
-    if (roll < 0.14) kind = 'helga';
-    else if (roll < 0.42) kind = 'cat';
+  if (qa === 'helga') { spawnHelgaStanding(roomId); return; }
+  if (qa === 'cat')   { spawnCat(roomId); return; }
+  // Natural play: the sighting, once, in the living room.
+  if (roomId === 'living' && !state.helgaSeen) {
+    state.helgaSeen = true;
+    helgaSighting('living');
+    return;
   }
-  if (!kind) return;
-  if (kind === 'helga') spawnHelga(roomId); else spawnCat(roomId);
+  // Natural play: the cat, sometimes, in her kitchen.
+  if (roomId === 'kitchen' && Math.random() < 0.55) { spawnCat(roomId); return; }
 }
 
 // ── HELGA — a candlelit figure that watches, and fades when seen up close ────
-function spawnHelga(roomId){
+function spawnHelgaStanding(roomId){
   const spots = HELGA_SPOTS[roomId]; if (!spots || !spots.length) return;
   const [sx,sz] = spots[(Math.random()*spots.length)|0];
   const sc = scene;
@@ -85,6 +81,58 @@ function spawnHelga(roomId){
   appCleanup = ()=>{
     clearTimeout(timer); clearInterval(watch);
     if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); plane.dispose(); }
+  };
+}
+
+// ── THE SIGHTING — she screams, a door slams, and that is it ────────────────
+function helgaSighting(roomId){
+  const spots = HELGA_SPOTS[roomId]; if (!spots || !spots.length) return;
+  const [sx,sz] = spots[(Math.random()*spots.length)|0];
+  const sc = scene;
+  const tex = new BABYLON.Texture(APP_TEX, sc, true);
+  tex.hasAlpha = true;
+  const hH = 1.72, hW = hH * 280/831;
+  const plane = BABYLON.MeshBuilder.CreatePlane('app_helga',{width:hW,height:hH},sc);
+  plane.position.set(sx, hH/2 + 0.02, sz);
+  const m = new BABYLON.StandardMaterial('app_helgaM',sc);
+  m.diffuseTexture = tex;
+  m.useAlphaFromDiffuseTexture = true;
+  m.emissiveTexture = tex;
+  m.emissiveColor = new BABYLON.Color3(0.75,0.68,0.58);
+  m.specularColor = new BABYLON.Color3(0,0,0);
+  m.backFaceCulling = false;
+  plane.material = m;
+  plane.rotation.y = Math.atan2(-sx,-sz) + Math.PI;
+  interactables.set('app_helga','helga_apparition');
+
+  // Timeline: fade in 1.1s → scream hold 1.7s → door slams (shake) → she is gone.
+  const t0 = performance.now();
+  const FADE_IN = 1100, HOLD = 1700, SLAM = 260, FADE_OUT = 550;
+  const door = sc.getMeshByName('door_entrance');
+  const doorBase = door ? door.position.clone() : null;
+  const camBase = camera.position.clone();
+  let alpha = 0, phase = 0, shake = 0;
+  const obs = sc.onBeforeRenderObservable.add(()=>{
+    if (plane.isEnabled() === false) { sc.onBeforeRenderObservable.remove(obs); return; }
+    const t = performance.now() - t0;
+    if (t < FADE_IN) { alpha = t / FADE_IN; }
+    else if (t < FADE_IN + HOLD) { alpha = 1; phase = 1; }
+    else if (t < FADE_IN + HOLD + SLAM) {
+      phase = 2; alpha = 1; shake = 1;
+      if (door && doorBase) { door.position.x = doorBase.x + (Math.random()-0.5)*0.05; door.position.y = doorBase.y + (Math.random()-0.5)*0.03; }
+    }
+    else if (t < FADE_IN + HOLD + SLAM + FADE_OUT) { alpha = 1 - (t - FADE_IN - HOLD - SLAM)/FADE_OUT; }
+    else { alpha = 0; plane.setEnabled(false); if (door && doorBase) door.position.copyFrom(doorBase); camera.position.copyFrom(camBase); sc.onBeforeRenderObservable.remove(obs); return; }
+    m.alpha = alpha;
+    plane.position.y = hH/2 + 0.02 + Math.sin(t/900)*0.008;
+    if (shake > 0 && phase === 2) {
+      camera.position.x = camBase.x + (Math.random()-0.5)*0.05;
+      camera.position.y = camBase.y + (Math.random()-0.5)*0.035;
+      camera.position.z = camBase.z + (Math.random()-0.5)*0.05;
+    } else if (phase >= 2) { camera.position.copyFrom(camBase); }
+  });
+  appCleanup = ()=>{
+    if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); if (door && doorBase) door.position.copyFrom(doorBase); camera.position.copyFrom(camBase); plane.dispose(); }
   };
 }
 

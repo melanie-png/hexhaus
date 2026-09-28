@@ -40,7 +40,7 @@ const ITEMS = {
   secretshelf:{ name:'The Whispering Shelf', icon:'📖', collectible:false, desc:'Every book here is named, not titled. The shelf hums, very faintly, like paper about to speak.' },
 };
 
-const state = { inventory:[], activeModal:null, currentRoom:'entrance', passageOpen:false, basementUnlocked:false };
+const state = { inventory:[], activeModal:null, currentRoom:'entrance', passageOpen:false, basementUnlocked:false, helgaSeen:false };
 const $ = id => document.getElementById(id);
 
 // ─── LOADING ──────────────────────────────────────────────────────────────────

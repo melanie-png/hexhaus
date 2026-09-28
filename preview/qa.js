@@ -148,11 +148,15 @@ if (new URLSearchParams(location.search).has('qa')) {
               const ec=scene.getMeshByName('app_cat_e1').material.emissiveColor;
               check(ec.g>0.5&&ec.g>ec.r,'the cat has green eyes');
             }
+            window.HEXQA_SPAWN=null;
+            check(state.helgaSeen===true,'the first sighting happened when the living room was entered');
+            spawnApparitions('living');
+            check(!scene.getMeshByName('app_helga'),'the sighting never repeats');
             window.HEXQA_SPAWN='helga'; spawnApparitions('library');
             const hm=scene.getMeshByName('app_helga');
-            check(!!hm,'helga apparition spawns on demand');
+            check(!!hm,'helga sprite renders for inspection');
             if(hm){
-              check(interactables.get('app_helga')==='helga_apparition','helga apparition is examineable');
+              check(interactables.get('app_helga')==='helga_apparition','helga is examineable');
               check(hm.material.backFaceCulling===false,'helga sprite is two-sided');
               check(hm.material.useAlphaFromDiffuseTexture===true,'helga sprite alpha comes from the art');
               camera.setTarget(hm.getAbsolutePosition());
