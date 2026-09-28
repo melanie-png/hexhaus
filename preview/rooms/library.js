@@ -55,6 +55,7 @@ function buildLibrary(){
   hpT.uScale=1; hpT.vScale=1; hpM.diffuseTexture=hpT; hpM.specularColor=new BABYLON.Color3(0.02,0.02,0.02);
   // candlelit source reads black under scene lights — self-lit canvas with a warm tint
   hpM.emissiveTexture=hpT; hpM.emissiveColor=new BABYLON.Color3(0.8,0.72,0.6);
+  hpM.backFaceCulling=false; // default plane normal faces the wall — without this the canvas is culled and you see the wall through the frame
   hpCanvas.material=hpM;
   const frameM=mat('lib_frameM'); frameM.diffuseColor=new BABYLON.Color3(0.13,0.09,0.04);
   const fw=1.35, fh=1.35, frt=0.07;
