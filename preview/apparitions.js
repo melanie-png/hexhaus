@@ -46,7 +46,8 @@ function spawnApparitions(roomId){
 
 // ── HELGA — a candlelit figure that watches, and fades when seen up close ────
 function spawnHelgaStanding(roomId){
-  const spots = HELGA_SPOTS[roomId]; if (!spots || !spots.length) return;
+  // rooms without dedicated spots still get her: demo + future rooms need a place to stand
+  const spots = HELGA_SPOTS[roomId] || [[0,-4.4],[-4.5,2.5],[4.5,-2.5]];
   const [sx,sz] = spots[(Math.random()*spots.length)|0];
   const sc = scene;
   const tex = new BABYLON.Texture(APP_TEX, sc, true);
@@ -92,7 +93,8 @@ function spawnHelgaStanding(roomId){
 
 // ── THE SIGHTING — she screams, a door slams, and that is it ────────────────
 function helgaSighting(roomId){
-  const spots = HELGA_SPOTS[roomId]; if (!spots || !spots.length) return;
+  // rooms without dedicated spots still get her: demo + future rooms need a place to stand
+  const spots = HELGA_SPOTS[roomId] || [[0,-4.4],[-4.5,2.5],[4.5,-2.5]];
   // Demo mode: always stand where the default view can see her.
   const [sx,sz] = window.HEXAPP_FORCE === 'helga' ? spots[0] : spots[(Math.random()*spots.length)|0];
   const sc = scene;
