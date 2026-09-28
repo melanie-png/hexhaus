@@ -128,6 +128,15 @@ if (new URLSearchParams(location.search).has('qa')) {
           // give the live scene a real 2.5s dwell before asserting readiness
           transitionToRoom('library');
           setTimeout(()=>{
+            // ground-truth probe: material state + actual framebuffer pixels at the painting
+            try{
+              const hpP=scene.getMeshByName('lib_helgaP'); const hpM2=hpP.material; const tx2=hpM2.diffuseTexture;
+              log('PROBE url='+(tx2?.url||'?')+' ready='+(tx2?.isReady())+' size='+(tx2?.getSize?JSON.stringify(tx2.getSize()):'?')+' emisTx='+(hpM2.emissiveTexture?'set':'none')+' emisCol='+(hpM2.emissiveColor?hpM2.emissiveColor.asArray().map(n=>n.toFixed(2)):'?')+' alpha='+hpM2.alpha+' cull='+hpM2.backFaceCulling+' vis='+hpP.visibility+' en='+hpP.isEnabled());
+              const proj=BABYLON.Vector3.Project(hpP.getAbsolutePosition(),BABYLON.Matrix.Identity(),scene.getTransformMatrix(),camera.viewport.toGlobal(engine.getRenderWidth(),engine.getRenderHeight()));
+              scene.render();
+              const buf=engine.readPixels(Math.max(0,Math.round(proj.x)-1),Math.max(0,Math.round(proj.y)-1),3,3);
+              log('PROBE pixel @'+Math.round(proj.x)+','+Math.round(proj.y)+' = '+(buf?Array.from(buf.slice(0,12)).join(','):'null'));
+            }catch(e){log('PROBE error '+e.message);}
             check(scene.getMeshByName('lib_helgaP')?.material?.diffuseTexture?.isReady()===true,'portrait texture loaded');
             check(scene.meshes.find(m=>m.material?.name==='lib_wallM')?.material?.diffuseTexture?.isReady()===true,'control wall texture loaded');
             log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
