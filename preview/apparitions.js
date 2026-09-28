@@ -32,7 +32,7 @@ function spawnApparitions(roomId){
   const qa = (typeof window !== 'undefined' && window.HEXQA_SPAWN) || null;
   if (qa === 'helga') { spawnHelgaStanding(roomId); return; }
   if (qa === 'cat')   { spawnCat(roomId); return; }
-  if (window.HEXAPP_FORCE === 'helga') { spawnHelgaStanding(roomId); return; }
+  if (window.HEXAPP_FORCE === 'helga') { state.helgaSeen = true; window.HEXAPP_FORCE = null; spawnHelgaStanding(roomId); return; }   // demo: ONE sighting, never again — like the real house
   if (window.HEXAPP_FORCE === 'cat')   { spawnCat(roomId); return; }
   // Natural play: the sighting, once, in the living room.
   if (roomId === 'living' && !state.helgaSeen) {
