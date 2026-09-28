@@ -7,8 +7,8 @@ function buildBasement(){
   const floor=BABYLON.MeshBuilder.CreateGround('bs_floor',{width:W,height:D,subdivisions:4},scene); floor.material=floorM; floor.receiveShadows=true;
   const ceil=BABYLON.MeshBuilder.CreatePlane('bs_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
   function bsWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
-  bsWall('bs_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); bsWall('bs_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
-  bsWall('bs_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); bsWall('bs_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  bsWall('bs_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); bsWall('bs_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); bsWall('bs_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  doorwayWall('bs_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.3,dh:2.3}]);
 
   // Domed leaded window
   const winM=mat('bs_winM'); winM.diffuseColor=new BABYLON.Color3(0.04,0.1,0.06); winM.emissiveColor=new BABYLON.Color3(0.06,0.16,0.08); winM.alpha=0.82;
@@ -85,7 +85,7 @@ function buildBasement(){
   interactables.set('bs_pent','pentagram'); interactables.set('bs_pline0','pentagram');
   interactables.set('bs_bone','bones');
 
-  const doorP=BABYLON.MeshBuilder.CreateBox('door_pantry',{width:1.2,height:2.2,depth:0.1},scene); doorP.position.set(0,1.1,D/2-0.05); const dpM=mat('bs_dpM'); dpM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorP.material=dpM;
+  buildDoor('door_pantry', 0, D/2, Math.PI, 1.14, 2.18);
   interactables.set('door_pantry','door_pantry');
 }
 

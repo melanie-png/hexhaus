@@ -70,6 +70,18 @@ if (new URLSearchParams(location.search).has('qa')) {
           else log('  OCCLUDED '+meshName+' by '+(pick?.pickedMesh?.name||'none'));
         }
         check(rayCount>0,roomId+' has at least one ray-selectable exit ('+rayCount+'/'+doors.length+')');
+        // Doors v2 + windows: real panels, knobs, lintels, night glass
+        if(roomId==='entrance'){
+          ['door_living','door_library','door_kitchen','door_bathroom'].forEach(dn=>{
+            check(!!scene.getMeshByName(dn),dn+' has a real panel');
+            check(!!scene.getMeshByName(dn+'_knob'),dn+' has a knob');
+            check(!!scene.getMeshByName(dn+'_lintel'),dn+' has a lintel');
+          });
+          check(interactables.get('door_kitchen_knob')==='door_kitchen','the door knob is clickable');
+          check(!!scene.getMeshByName('e_wB_seg1'),'entrance doorway wall has header fills');
+        }
+        const WINS={entrance:['win_eF1','win_eF2','win_eL1','win_eR1'],living:['win_lB1','win_lF1','win_lF2'],kitchen:['win_kB1','win_kB2'],library:['win_libR1','win_libB1'],bathroom:['win_bB1'],pantry:['win_pL1'],attic:['win_aB1']};
+        (WINS[roomId]||[]).forEach(wn=>check(!!scene.getMeshByName(wn+'_glass'),roomId+' window '+wn+' glass is in the wall'));
         // Test one door through the same ray-picking function used by clicks.
         const door=doors.find(([meshName,key])=>{
           const mesh=scene.getMeshByName(meshName);if(!mesh)return false;

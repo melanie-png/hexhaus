@@ -122,6 +122,127 @@ function pbr(name, diffUrl, norUrl, usc=2, vsc=2, tint=null, alpha=1.0) {
 
 function emitM(name,r,g,b,ei=0.8){ const m=mat(name); m.diffuseColor=new BABYLON.Color3(r,g,b); m.emissiveColor=new BABYLON.Color3(r*ei,g*ei,b*ei); return m; }
 
+
+// ─── DOORS & WINDOWS ─────────────────────────────────────────────────────────
+// Doors that behave like doors: real wall openings, framed hinged panels with
+// knobs that swing open on click. Windows: framed night glass with a cold glow.
+let DOORS = {};   // mesh name -> {hinge, open}
+
+function cloneWallMat(base, name, wRatio, hRatio){
+  const m = base.clone(name);
+  try {
+    if(base.diffuseTexture){ m.diffuseTexture = base.diffuseTexture.clone(); m.diffuseTexture.uScale = base.diffuseTexture.uScale*wRatio; m.diffuseTexture.vScale = base.diffuseTexture.vScale*hRatio; }
+    if(base.bumpTexture){ m.bumpTexture = base.bumpTexture.clone(); m.bumpTexture.uScale = base.bumpTexture.uScale*wRatio; m.bumpTexture.vScale = base.bumpTexture.vScale*hRatio; }
+  } catch(e){}
+  m.backFaceCulling = false;
+  return m;
+}
+
+// A wall with real doorways: side fills between openings + a header above each.
+// doors: [{dx,dz,dw,dh}] — doorway centres in WORLD coords, so rooms can pass
+// the same coordinates they gave the old door slabs.
+function doorwayWall(baseName, wallW, wallH, wx, wz, rotY, baseMat, doors){
+  const lx=Math.cos(rotY), lz=-Math.sin(rotY);
+  const offs=doors.map(d=>({off:(d.dx-wx)*lx+(d.dz-wz)*lz, dw:d.dw, dh:d.dh})).sort((a,b)=>a.off-b.off);
+  const node=new BABYLON.TransformNode(baseName+'_wn',scene);
+  node.position.set(wx,0,wz); node.rotation.y=rotY;
+  const half=wallW/2;
+  const fills=[]; let prev=-half;
+  for(const o of offs){
+    fills.push([prev,o.off-o.dw/2,wallH,0]);          // fill from the previous edge to this opening
+    fills.push([o.off,o.off+o.dw,wallH-o.dh,o.dh]);   // header above the opening
+    prev=o.off+o.dw/2;
+  }
+  fills.push([prev,half,wallH,0]);
+  fills.forEach((f,i)=>{
+    const [c0,c1,sh,y0]=f;
+    if(c1-c0<0.01||sh<0.01) return;
+    const m=BABYLON.MeshBuilder.CreatePlane(baseName+'_seg'+i,{width:c1-c0,height:sh},scene);
+    m.parent=node; m.position.set((c0+c1)/2,y0+sh/2,0);
+    m.material=cloneWallMat(baseMat,baseName+'_seg'+i+'_m',(c1-c0)/wallW,sh/wallH);
+  });
+  return node;
+}
+
+// The door itself: jambs, lintel, a hinged panel with inset faces and a knob.
+// The panel keeps the historic mesh name so ray-picking and QA carry over.
+function buildDoor(name, wx, wz, rotY, dw, dh, y0=0){
+  const node=new BABYLON.TransformNode(name+'_wn',scene);
+  node.position.set(wx,y0,wz); node.rotation.y=rotY;
+  const frameM=mat(name+'_frameM'); frameM.diffuseColor=new BABYLON.Color3(0.11,0.075,0.045); frameM.specularColor=new BABYLON.Color3(0.02,0.02,0.02);
+  for(const side of [-1,1]){
+    const j=BABYLON.MeshBuilder.CreateBox(name+'_jamb'+(side<0?'L':'R'),{width:0.12,height:dh+0.24,depth:0.2},scene);
+    j.parent=node; j.position.set(side*(dw/2+0.06),(dh+0.24)/2,0); j.material=frameM;
+  }
+  const lintel=BABYLON.MeshBuilder.CreateBox(name+'_lintel',{width:dw+0.36,height:0.14,depth:0.2},scene);
+  lintel.parent=node; lintel.position.set(0,dh+0.17,0); lintel.material=frameM;
+  const hinge=new BABYLON.TransformNode(name+'_hinge',scene);
+  hinge.parent=node; hinge.position.set(-dw/2+0.045,0.05,0);
+  const pw=dw-0.09, ph=dh-0.08;
+  const panel=BABYLON.MeshBuilder.CreateBox(name,{width:pw,height:ph,depth:0.055},scene);
+  panel.parent=hinge; panel.position.set(pw/2,ph/2,0);
+  const doorM=mat(name+'_m'); doorM.diffuseColor=new BABYLON.Color3(0.16,0.105,0.06); doorM.specularColor=new BABYLON.Color3(0.04,0.04,0.05); doorM.specularPower=24;
+  panel.material=doorM;
+  const insetM=mat(name+'_inM'); insetM.diffuseColor=new BABYLON.Color3(0.125,0.08,0.045); insetM.specularColor=new BABYLON.Color3(0.02,0.02,0.02);
+  [[ph*0.17,ph*0.34],[-ph*0.25,ph*0.40]].forEach(([cy,ch],i)=>{
+    for(const s of [1,-1]){
+      const q=BABYLON.MeshBuilder.CreateBox(name+'_inset'+i+(s>0?'f':'b'),{width:pw-0.18,height:ch,depth:0.014},scene);
+      q.parent=panel; q.position.set(0,cy,s*0.033); q.material=insetM;
+    }
+  });
+  const knobM=mat(name+'_knobM'); knobM.diffuseColor=new BABYLON.Color3(0.32,0.24,0.12); knobM.specularColor=new BABYLON.Color3(0.5,0.42,0.28); knobM.specularPower=48;
+  const knobY=1.02-(0.05+ph/2);
+  for(const s of [1,-1]){
+    const k=BABYLON.MeshBuilder.CreateSphere(name+(s>0?'_knob':'_knobB'),{diameter:0.07},scene);
+    k.parent=panel; k.position.set(pw-0.11,knobY,s*0.055); k.material=knobM;
+  }
+  interactables.set(name,name);
+  interactables.set(name+'_knob',name);
+  DOORS[name]={hinge,open:false};
+  return node;
+}
+
+// The swing: opens away from you, and you walk through as it passes halfway.
+function swingDoor(d, target){
+  if(new URLSearchParams(location.search).has('qa')){ if(target) transitionToRoom(target); return; }   // QA asserts instantly
+  const t0=performance.now(), T=650; let walked=false;
+  const obs=scene.onBeforeRenderObservable.add(()=>{
+    const k=Math.min(1,(performance.now()-t0)/T);
+    d.hinge.rotation.y=1.9*(1-Math.pow(1-k,3));
+    if(target&&k>0.55&&!walked){walked=true;setTimeout(()=>{if(!state.activeModal)transitionToRoom(target)},60);}
+    if(k>=1)scene.onBeforeRenderObservable.remove(obs);
+  });
+}
+
+// A window: frame, muntins, night glass, and a faint cold glow inside.
+function makeWindow(name, x, y, z, rotY, ww=1.1, wh=1.7){
+  const node=new BABYLON.TransformNode(name+'_wn',scene);
+  node.position.set(x,y,z); node.rotation.y=rotY;
+  const woodM=mat(name+'_frM'); woodM.diffuseColor=new BABYLON.Color3(0.13,0.09,0.055); woodM.specularColor=new BABYLON.Color3(0.02,0.02,0.02);
+  const bar=(n,w,h,cx,cy,cz)=>{const b=BABYLON.MeshBuilder.CreateBox(n,{width:w,height:h,depth:0.12},scene);b.parent=node;b.position.set(cx,cy,cz);b.material=woodM;return b;};
+  bar(name+'_t',ww+0.18,0.09,0,wh/2+0.045,0);
+  bar(name+'_b',ww+0.18,0.09,0,-wh/2-0.045,0);
+  bar(name+'_l',0.09,wh+0.18,-ww/2-0.045,0,0);
+  bar(name+'_r',0.09,wh+0.18,ww/2+0.045,0,0);
+  bar(name+'_mv',0.05,wh,0,0,0.005);
+  bar(name+'_mh',ww,0.05,0,0,0.005);
+  const sill=BABYLON.MeshBuilder.CreateBox(name+'_sill',{width:ww+0.34,height:0.07,depth:0.24},scene);
+  sill.parent=node; sill.position.set(0,-wh/2-0.1,0.03); sill.material=woodM;
+  const glass=BABYLON.MeshBuilder.CreatePlane(name+'_glass',{width:ww,height:wh},scene);
+  glass.parent=node; glass.position.z=-0.04;
+  const gm=mat(name+'_glM');
+  gm.diffuseColor=new BABYLON.Color3(0.01,0.01,0.02);
+  gm.emissiveColor=new BABYLON.Color3(0.07,0.10,0.17);
+  gm.specularColor=new BABYLON.Color3(0.1,0.1,0.1);
+  gm.backFaceCulling=false;
+  glass.material=gm;
+  const moon=new BABYLON.PointLight(name+'_L',new BABYLON.Vector3(0,0,0.55),scene);
+  moon.parent=node;
+  moon.diffuse=new BABYLON.Color3(0.45,0.55,0.75); moon.specular=new BABYLON.Color3(0.1,0.1,0.15);
+  moon.intensity=0.25; moon.range=4.5;
+  return node;
+}
+
 // ─── MODEL LOADER ───────────────────────────────────────────────────────────
 const MODEL_BASE = location.pathname.includes('/preview/') ? '../models/' : 'models/';
 let modelInstance = 0;
@@ -253,6 +374,7 @@ function transitionToRoom(roomId){
   try {
     if(scene) scene.dispose();
     interactables = new Map();
+    DOORS = {};
     scene = new BABYLON.Scene(engine);
     scene.clearColor = new BABYLON.Color4(0.04,0.08,0.12,1);
     scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
@@ -313,6 +435,7 @@ function handleInteract(key){
     if(state.inventory.includes('key')){
       state.basementUnlocked=true;
       showToast('🗝️ The iron key turns. The lock gives way.');
+      const db=DOORS[key]; if(db){db.open=true; swingDoor(db);}   // it creaks open, then you descend
       setTimeout(()=>{ if(state.currentRoom==='pantry' && !state.activeModal) transitionToRoom('basement'); },700);
     } else {
       openModal('locked_door');
@@ -335,7 +458,10 @@ function handleInteract(key){
     return;
   }
   if(key.startsWith('door_')){
-    transitionToRoom(key.slice(5));
+    const target=key.slice(5);
+    const d=DOORS[key];
+    if(d && !d.open){ d.open=true; swingDoor(d, target); }
+    else transitionToRoom(target);
   } else {
     openModal(key);
   }

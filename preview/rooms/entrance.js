@@ -42,10 +42,19 @@ function buildEntranceHall(){
     const wm = wallM.clone(name+'_m'); wm.backFaceCulling = false;
     m.material = wm; return m;
   }
-  wall('wBack',  W, H, new BABYLON.Vector3(0, H/2, -D/2), 0);
   wall('wFront', W, H, new BABYLON.Vector3(0, H/2,  D/2), Math.PI);
-  wall('wLeft',  D, H, new BABYLON.Vector3(-W/2, H/2, 0), Math.PI/2);
-  wall('wRight', D, H, new BABYLON.Vector3( W/2, H/2, 0), -Math.PI/2);
+  // Walls with real doorways — the doors open and close like doors.
+  doorwayWall('e_wB', W, H, 0, -D/2, 0, wallM, [
+    {dx:-W/2+2.5, dz:-D/2, dw:1.3, dh:2.5},
+    {dx: W/2-2.5, dz:-D/2, dw:1.3, dh:2.5}
+  ]);
+  doorwayWall('e_wL', D, H, -W/2, 0, Math.PI/2, wallM, [{dx:-W/2, dz:3, dw:1.5, dh:2.5}]);
+  doorwayWall('e_wR', D, H,  W/2, 0, -Math.PI/2, wallM, [{dx: W/2, dz:3, dw:1.5, dh:2.5}]);
+  // Moonlit windows
+  makeWindow('win_eF1', -4.5, 3.0, D/2, Math.PI);
+  makeWindow('win_eF2',  4.5, 3.0, D/2, Math.PI);
+  makeWindow('win_eL1', -W/2, 3.0, -4.2, Math.PI/2);
+  makeWindow('win_eR1',  W/2, 3.0, -4.2, -Math.PI/2);
 
   // Exposed ceiling beams
   const beamPositions = [-7, -3.5, 0, 3.5, 7];
@@ -486,27 +495,9 @@ function buildEntranceHall(){
   loadModel('Crate.glb', [-4.2, 0, -4.2], 350, -0.25, null);
   loadModel('Book3_Open.glb', [0, 0.585, 2.75], 45, 0, 'grimoire');
 
-  // Door to Living Room (left wall)
-  const doorLR = BABYLON.MeshBuilder.CreateBox('door_living', {width:0.1, height:2.4, depth:1.4}, scene);
-  doorLR.position.set(-W/2 + 0.05, 1.2, 3);
-  const dLR_M = mat('dLR_M'); dLR_M.diffuseColor = new BABYLON.Color3(0.18,0.12,0.07); doorLR.material = dLR_M;
-  interactables.set('door_living', 'door_living');
-
-  // Door to Library (right wall)
-  const doorLib = BABYLON.MeshBuilder.CreateBox('door_library', {width:0.1, height:2.4, depth:1.4}, scene);
-  doorLib.position.set(W/2 - 0.05, 1.2, 3);
-  const dLib_M = mat('dLib_M'); dLib_M.diffuseColor = new BABYLON.Color3(0.18,0.12,0.07); doorLib.material = dLib_M;
-  interactables.set('door_library', 'door_library');
-
-  // Door to Kitchen (back wall, right of fireplace)
-  const doorKit = BABYLON.MeshBuilder.CreateBox('door_kitchen', {width:1.2, height:2.4, depth:0.1}, scene);
-  doorKit.position.set(W/2 - 2.5, 1.2, -D/2 + 0.05);
-  const dKit_M = mat('dKit_M'); dKit_M.diffuseColor = new BABYLON.Color3(0.18,0.12,0.07); doorKit.material = dKit_M;
-  interactables.set('door_kitchen', 'door_kitchen');
-
-  // Door to Bathroom (back wall, left of fireplace)
-  const doorBath = BABYLON.MeshBuilder.CreateBox('door_bathroom', {width:1.2, height:2.4, depth:0.1}, scene);
-  doorBath.position.set(-W/2 + 2.5, 1.2, -D/2 + 0.05);
-  const dBath_M = mat('dBath_M'); dBath_M.diffuseColor = new BABYLON.Color3(0.18,0.12,0.07); doorBath.material = dBath_M;
-  interactables.set('door_bathroom', 'door_bathroom');
+  // Real doors, hinged and latched
+  buildDoor('door_living',   -W/2, 3,  Math.PI/2, 1.34, 2.38);
+  buildDoor('door_library',   W/2, 3, -Math.PI/2, 1.34, 2.38);
+  buildDoor('door_kitchen',  W/2-2.5, -D/2, 0, 1.14, 2.38);
+  buildDoor('door_bathroom', -W/2+2.5, -D/2, 0, 1.14, 2.38);
 }

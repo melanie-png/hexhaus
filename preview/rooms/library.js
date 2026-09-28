@@ -8,8 +8,10 @@ function buildLibrary(){
   const floor=BABYLON.MeshBuilder.CreateGround('lib_floor',{width:W,height:D,subdivisions:4},scene); floor.material=floorM; floor.receiveShadows=true;
   const ceil=BABYLON.MeshBuilder.CreatePlane('lib_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
   function libWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
-  libWall('lib_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); libWall('lib_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
-  libWall('lib_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); libWall('lib_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  libWall('lib_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); libWall('lib_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); libWall('lib_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  doorwayWall('lib_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.5,dh:2.5}]);
+  makeWindow('win_libR1', W/2, 3.2, 3.5, -Math.PI/2);
+  makeWindow('win_libB1', 4.8, 3.3, -D/2, 0);
   [-6,-3,0,3,6].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('lib_beam'+bx,{width:0.3,height:0.28,depth:D},scene); b.position.set(bx,H-0.16,0); const bm=mat('lib_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.16,0.08,0.04); b.material=bm; });
 
   // Display cases with skulls
@@ -97,10 +99,8 @@ function buildLibrary(){
   interactables.set('lib_cage','clock');
   interactables.set('lib_broomHandle','broom'); interactables.set('lib_broomStraw','broom');
 
-  const doorE=BABYLON.MeshBuilder.CreateBox('door_entrance',{width:1.4,height:2.4,depth:0.1},scene); doorE.position.set(0,1.2,D/2-0.05); const deM=mat('lib_deM'); deM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorE.material=deM;
-  interactables.set('door_entrance','door_entrance');
-  const doorA=BABYLON.MeshBuilder.CreateBox('door_attic',{width:1.2,height:2.4,depth:0.1},scene); doorA.position.set(soX+STS*0.2,1.2+STS*SY/2,soZ-STS*SZ+0.2); const daM=mat('lib_daM'); daM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorA.material=daM;
-  interactables.set('door_attic','door_attic');
+  buildDoor('door_entrance', 0, D/2, Math.PI, 1.34, 2.38);
+  buildDoor('door_attic', soX+STS*0.2, soZ-STS*SZ+0.2, 0, 1.1, 2.36, STS*SY/2);   // freestanding at the stair top
   // ── SECRET PASSAGE — the whispering shelf ──────────────────────────────────
   // A bookshelf against the west wall hides a stairwell down to the basement.
   // Carrying the spellbook makes it swing open (openPassage below, core.js routes it).

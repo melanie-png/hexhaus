@@ -8,8 +8,11 @@ function buildKitchen(){
   const floor=BABYLON.MeshBuilder.CreateGround('k_floor',{width:W,height:D,subdivisions:4},scene); floor.material=floorM; floor.receiveShadows=true;
   const ceil=BABYLON.MeshBuilder.CreatePlane('k_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
   function kWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
-  kWall('k_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); kWall('k_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
   kWall('k_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); kWall('k_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  doorwayWall('k_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.5,dh:2.5}]);
+  doorwayWall('k_wB',W,H,0,-D/2,0,wallM,[{dx:-W/2+3,dz:-D/2,dw:1.3,dh:2.5}]);
+  makeWindow('win_kB1',  3.2, 2.6, -D/2, 0);
+  makeWindow('win_kB2', -4.0, 2.6, -D/2, 0);
   [-4,-1,2].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('k_beam'+bx,{width:0.28,height:0.26,depth:D},scene); b.position.set(bx,H-0.14,0); const bm=mat('k_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.14,0.07,0.03); b.material=bm; });
 
   // Stone hearth with cauldron
@@ -76,9 +79,9 @@ function buildKitchen(){
   interactables.set('k_hearth','fireplace');
   interactables.set('k_garlic0','herbs_dried'); interactables.set('k_garlic1','herbs_dried');
 
-  const doorE=BABYLON.MeshBuilder.CreateBox('door_entrance',{width:1.4,height:2.4,depth:0.1},scene); doorE.position.set(0,1.2,D/2-0.05); const deM=mat('k_deM'); deM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorE.material=deM;
+  buildDoor('door_entrance', 0, D/2, Math.PI, 1.34, 2.38);
   interactables.set('door_entrance','door_entrance');
-  const doorP=BABYLON.MeshBuilder.CreateBox('door_pantry',{width:1.2,height:2.4,depth:0.1},scene); doorP.position.set(-W/2+3,1.2,-D/2+0.05); const dpM=mat('k_dpM'); dpM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorP.material=dpM;
+  buildDoor('door_pantry', -W/2+3, -D/2, 0, 1.14, 2.38);
   interactables.set('door_pantry','door_pantry');
 }
 
