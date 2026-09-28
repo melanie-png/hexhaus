@@ -4,7 +4,7 @@
 // with the sound pass — the beats are timed to leave room for it.)
 // The cat lives in the kitchen. Sometimes you catch her sitting there.
 
-const APP_TEX = 'textures/helga_apparition.webp?v=20260928a2';
+const APP_TEX = 'textures/helga_apparition.webp?v=20260928a3';
 
 // Spots are inset from the walls, near furniture lines, facing the room centre.
 const HELGA_SPOTS = {   // where the sighting can stand in each room
@@ -51,16 +51,17 @@ function spawnHelgaStanding(roomId){
   const sc = scene;
   const tex = new BABYLON.Texture(APP_TEX, sc, true);
   tex.hasAlpha = true;
+  tex.getAlphaFromRGB = true;   // luminance = opacity, engine-side
   const hH = 1.72, hW = hH * 280/831;
   const plane = BABYLON.MeshBuilder.CreatePlane('app_helga',{width:hW,height:hH},sc);
   plane.position.set(sx, hH/2 + 0.02, sz);
   const m = new BABYLON.StandardMaterial('app_helgaM',sc);
   m.diffuseTexture = tex;
-  m.useAlphaFromDiffuseTexture = true;
   m.emissiveTexture = tex;
   m.emissiveColor = new BABYLON.Color3(0.92,0.85,0.72);   // candle-warm self-light
   m.specularColor = new BABYLON.Color3(0,0,0);
   m.backFaceCulling = false;
+  m.alpha = 1;                          // no fade: she is already a ghost
   const glow = new BABYLON.PointLight('app_helgaL', new BABYLON.Vector3(sx,1.6,sz+0.6), sc);
   glow.diffuse = new BABYLON.Color3(0.85,0.6,0.3);
   glow.specular = new BABYLON.Color3(0.2,0.15,0.1);
@@ -68,17 +69,12 @@ function spawnHelgaStanding(roomId){
   plane.material = m;
   plane.rotation.y = Math.atan2(-sx,-sz) + Math.PI;         // face the room centre
 
-  let alpha = 0, dying = false;
   const t0 = performance.now();
   const obs = sc.onBeforeRenderObservable.add(()=>{
     const t = (performance.now()-t0)/1000;
-    const target = dying ? 0 : Math.min(1, t/2.2);
-    alpha += (target - alpha) * 0.035;
-    m.alpha = alpha;
     plane.position.y = hH/2 + 0.02 + Math.sin(t*1.1)*0.008;  // she breathes
-    if (dying && alpha <= 0.012) plane.setEnabled(false);
   });
-  const die = ()=>{ dying = true; };
+  const die = ()=>{ plane.setEnabled(false); };
   const timer = setTimeout(die, 180000);   // QA-only standing sprite: hold for inspection
   interactables.set('app_helga','helga_apparition');
 
@@ -102,12 +98,12 @@ function helgaSighting(roomId){
   const sc = scene;
   const tex = new BABYLON.Texture(APP_TEX, sc, true);
   tex.hasAlpha = true;
+  tex.getAlphaFromRGB = true;
   const hH = 1.72, hW = hH * 280/831;
   const plane = BABYLON.MeshBuilder.CreatePlane('app_helga',{width:hW,height:hH},sc);
   plane.position.set(sx, hH/2 + 0.02, sz);
   const m = new BABYLON.StandardMaterial('app_helgaM',sc);
   m.diffuseTexture = tex;
-  m.useAlphaFromDiffuseTexture = true;
   m.emissiveTexture = tex;
   m.emissiveColor = new BABYLON.Color3(0.92,0.85,0.72);
   m.specularColor = new BABYLON.Color3(0,0,0);
