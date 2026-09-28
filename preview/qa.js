@@ -39,6 +39,18 @@ if (new URLSearchParams(location.search).has('qa')) {
       handleInteract('secretshelf');
       check(state.activeModal==='secretshelf','shelf only hums without the spellbook');
       closeModal();
+      // ── Helga portrait: framed, visible, examineable ──
+      const hpMesh=scene.getMeshByName('lib_helgaP');
+      check(!!hpMesh,'portrait of the lady built');
+      check(interactables.get('lib_helgaP')==='helga_portrait'&&interactables.get('lib_helgaF')==='helga_portrait','portrait frame and canvas are examineable');
+      if(hpMesh){hpMesh.computeWorldMatrix(true);
+        camera.setTarget(hpMesh.getBoundingInfo().boundingSphere.centerWorld);camera.getViewMatrix(true);scene.render();
+        const ppick=scene.pick(engine.getRenderWidth()/2,engine.getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled());
+        check(interactables.get(ppick?.pickedMesh?.name)==='helga_portrait','portrait ray-selects from center view');}
+      check(ITEMS.helga_portrait?.collectible===false&&!!ITEMS.helga_portrait?.desc,'portrait has inspect text and is not collectible');
+      handleInteract('helga_portrait');
+      check(state.activeModal==='helga_portrait','portrait opens the examine modal');
+      closeModal();
       for(const roomId of roomIds){
         if(state.currentRoom!==roomId)transitionToRoom(roomId);
         check(state.currentRoom===roomId,roomId+' builds');

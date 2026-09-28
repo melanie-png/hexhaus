@@ -47,6 +47,22 @@ function buildLibrary(){
   const broomHandle=BABYLON.MeshBuilder.CreateCylinder('lib_broomHandle',{diameterTop:0.03,diameterBottom:0.04,height:2.0,tessellation:8},scene); broomHandle.position.set(W/2-0.3,2.5,-4); broomHandle.rotation.z=Math.PI/2+0.3; broomHandle.material=broomM;
   const broomStraw=BABYLON.MeshBuilder.CreateCylinder('lib_broomStraw',{diameterTop:0.04,diameterBottom:0.12,height:0.4,tessellation:8},scene); broomStraw.position.set(W/2-0.7,2.3,-4); broomStraw.rotation.z=Math.PI/2+0.3; broomStraw.material=broomM;
 
+  // Portrait of the Lady (Helga + cat) — framed, examineable
+  const hpX=-3, hpY=2.55, hpZ=D/2-0.28;
+  const hpCanvas=BABYLON.MeshBuilder.CreatePlane('lib_helgaP',{width:1.15,height:1.15},scene);
+  hpCanvas.position.set(hpX,hpY,hpZ); hpCanvas.rotation.y=Math.PI;
+  const hpM=mat('lib_helgaM'); const hpT=new BABYLON.Texture(TEX.helga_p,scene);
+  hpT.uScale=1; hpT.vScale=1; hpM.diffuseTexture=hpT; hpM.specularColor=new BABYLON.Color3(0.02,0.02,0.02);
+  hpCanvas.material=hpM;
+  const frameM=mat('lib_frameM'); frameM.diffuseColor=new BABYLON.Color3(0.13,0.09,0.04);
+  const fw=1.35, fh=1.35, frt=0.07;
+  [[0,fh/2-frt/2,fw,frt],[0,-fh/2+frt/2,fw,frt],[-fw/2+frt/2,0,frt,fh],[fw/2-frt/2,0,frt,fh]].forEach(([ox,oy,w,h])=>{
+    const bar=BABYLON.MeshBuilder.CreateBox('lib_helgaF',{width:w,height:h,depth:0.05},scene);
+    bar.position.set(hpX+ox,hpY+oy,hpZ+0.02); bar.material=frameM;
+  });
+  interactables.set('lib_helgaP','helga_portrait');
+  interactables.set('lib_helgaF','helga_portrait');
+
   // Locked cage
   const cageM=mat('lib_cageM'); cageM.diffuseColor=new BABYLON.Color3(0.12,0.1,0.08);
   const cage=BABYLON.MeshBuilder.CreateBox('lib_cage',{width:0.8,height:1.2,depth:0.4},scene); cage.position.set(3,2.5,D/2-0.25); cage.material=cageM;
