@@ -69,13 +69,15 @@ function buildLibrary(){
 
   // Floating magic wisps
   const wisps=[];
-  for(let w=0;w<5;w++){ const wp=BABYLON.MeshBuilder.CreateSphere('lib_wisp'+w,{diameter:0.15,segments:6},scene); wp.isPickable=false; wp.position.set((Math.random()-0.5)*W*0.6, 2+Math.random()*2, (Math.random()-0.5)*D*0.6); wp.material=emitM('lib_wm'+w,0.3,0.8,0.5,0.5); wp.material.alpha=0.4; wisps.push(wp); }
+  for(let w=0;w<5;w++){ const wp=BABYLON.MeshBuilder.CreateSphere('lib_wisp'+w,{diameter:0.09,segments:6},scene); wp.isPickable=false; wp.position.set((Math.random()-0.5)*W*0.6, 2+Math.random()*2, (Math.random()-0.5)*D*0.6); wp.material=emitM('lib_wm'+w,0.3,0.8,0.5,0.5); wp.material.alpha=0.22; wisps.push(wp); }
 
   // Lights
   const ambient=new BABYLON.HemisphericLight('lib_amb',new BABYLON.Vector3(0,1,0),scene);
-  ambient.intensity=0.4; ambient.diffuse=new BABYLON.Color3(0.3,0.38,0.48); ambient.groundColor=new BABYLON.Color3(0.12,0.06,0.05);
+  ambient.intensity=0.65; ambient.diffuse=new BABYLON.Color3(0.35,0.42,0.5); ambient.groundColor=new BABYLON.Color3(0.16,0.09,0.08);
   const winLight=new BABYLON.PointLight('lib_wL',new BABYLON.Vector3(0,3,-D/2+1),scene);
-  winLight.diffuse=new BABYLON.Color3(0.25,0.35,0.55); winLight.intensity=1.5; winLight.range=20;
+  winLight.diffuse=new BABYLON.Color3(0.25,0.35,0.55); winLight.intensity=2.2; winLight.range=20;
+  const helgaLight=new BABYLON.PointLight('lib_helgaL',new BABYLON.Vector3(hpX,hpY-0.1,hpZ+1.6),scene);
+  helgaLight.diffuse=new BABYLON.Color3(0.85,0.72,0.55); helgaLight.intensity=1.3; helgaLight.range=6;
   const candleLight=new BABYLON.PointLight('lib_cL',new BABYLON.Vector3(W/2-2,1.5,-2),scene);
   candleLight.diffuse=new BABYLON.Color3(0.7,0.5,0.2); candleLight.intensity=0.8; candleLight.range=8;
 
