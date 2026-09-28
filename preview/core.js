@@ -198,6 +198,7 @@ function buildDoor(name, wx, wz, rotY, dw, dh, y0=0){
   }
   interactables.set(name,name);
   interactables.set(name+'_knob',name);
+  for(const s of [1,-1]) for(const i of [0,1]) interactables.set(name+'_inset'+i+(s>0?'f':'b'),name);   // the raised inset faces are part of the door
   DOORS[name]={hinge,open:false};
   return node;
 }
