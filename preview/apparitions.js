@@ -4,7 +4,7 @@
 // with the sound pass — the beats are timed to leave room for it.)
 // The cat lives in the kitchen. Sometimes you catch her sitting there.
 
-const APP_TEX = 'textures/helga_apparition.webp?v=20260928a1';
+const APP_TEX = 'textures/helga_apparition.webp?v=20260928a2';
 
 // Spots are inset from the walls, near furniture lines, facing the room centre.
 const HELGA_SPOTS = {   // where the sighting can stand in each room
