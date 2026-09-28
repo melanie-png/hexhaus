@@ -51,6 +51,11 @@ if (new URLSearchParams(location.search).has('qa')) {
       handleInteract('helga_portrait');
       check(state.activeModal==='helga_portrait','portrait opens the examine modal');
       closeModal();
+      // texture readiness is async — assert on a delay, while this library scene is still alive
+      const hpTx=hpMesh?.material?.diffuseTexture;
+      const wallTx=scene.meshes.find(m=>m.material?.name==='lib_wallM')?.material?.diffuseTexture;
+      setTimeout(()=>{check(hpTx?.isReady()===true,'portrait texture loaded'+(hpTx?.isReady()===true?'':' (still not ready)'));
+        check(wallTx?.isReady()===true,'control wall texture loaded'+(wallTx?.isReady()===true?'':' (still not ready)'))},2500);
       for(const roomId of roomIds){
         if(state.currentRoom!==roomId)transitionToRoom(roomId);
         check(state.currentRoom===roomId,roomId+' builds');
@@ -123,8 +128,6 @@ if (new URLSearchParams(location.search).has('qa')) {
           openInspect('letter');
           check(state.activeModal==='letter'&&document.getElementById('modal-collect').style.display==='none','inventory re-reads the letter clue');
           closeModal();
-          const hptx=scene.getMeshByName('lib_helgaP')?.material?.diffuseTexture;
-          check(!!hptx&&hptx.isReady(),'portrait texture loaded');
           log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
           }catch(e){log('FATAL '+e.stack)}
         },1800);
