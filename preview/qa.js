@@ -139,6 +139,25 @@ if (new URLSearchParams(location.search).has('qa')) {
             }catch(e){log('PROBE error '+e.message);}
             check(scene.getMeshByName('lib_helgaP')?.material?.diffuseTexture?.isReady()===true,'portrait texture loaded');
             check(scene.meshes.find(m=>m.material?.name==='lib_wallM')?.material?.diffuseTexture?.isReady()===true,'control wall texture loaded');
+            // apparitions
+            window.HEXQA_SPAWN='cat'; spawnApparitions('library');
+            const catB=scene.getMeshByName('app_cat_body');
+            check(!!catB,'the cat spawns on demand');
+            if(catB){
+              check(interactables.get('app_cat_body')==='helga_cat','the cat is examineable');
+              const ec=scene.getMeshByName('app_cat_e1').material.emissiveColor;
+              check(ec.g>0.5&&ec.g>ec.r,'the cat has green eyes');
+            }
+            window.HEXQA_SPAWN='helga'; spawnApparitions('library');
+            const hm=scene.getMeshByName('app_helga');
+            check(!!hm,'helga apparition spawns on demand');
+            if(hm){
+              check(interactables.get('app_helga')==='helga_apparition','helga apparition is examineable');
+              check(hm.material.backFaceCulling===false,'helga sprite is two-sided');
+              check(hm.material.useAlphaFromDiffuseTexture===true,'helga sprite alpha comes from the art');
+              camera.setTarget(hm.getAbsolutePosition());
+            }
+            window.HEXQA_SPAWN=null;
             log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
           },2500);
           setTimeout(()=>{report.style.display='none'},4500);
