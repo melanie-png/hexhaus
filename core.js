@@ -18,6 +18,7 @@ const ITEMS = {
   grimoire:  { name:'The Open Grimoire', icon:'📖', collectible:false, desc:'The margins are crowded with herbs, measurements and warnings. Several pages have been torn out.' },
   tea:       { name:'Tea Set',           icon:'☕', collectible:false,  desc:'Two cups. One still warm. The other has a film of dust. She was expecting someone.' },
   raven:     { name:'The Raven',         icon:'🦅', collectible:false, desc:'It watches you. It has watched everyone who has entered this room. It does not blink.' },
+  helga_portrait:{ name:'Portrait of the Lady', icon:'🖼️', collectible:false, desc:'She is young here. Younger than the house. The white in her hair was already there when this was painted. The cat on her shoulders looks at you. Nothing else in the frame does.' },
   portrait:  { name:'Family Portrait',    icon:'🖼️', collectible:false, desc:'Four figures. Three look outward. One — the smallest — faces the wall. The paint is old. The posture is not.' },
   mirror:    { name:'Standing Mirror',    icon:'🪞', collectible:false, desc:"Your reflection is a half-second slow. It catches up when you stop moving. When you look away, it doesn't." },
   clock:     { name:'Grandfather Clock',  icon:'🕰️', collectible:false, desc:'Stopped at 3:17. The pendulum is still. But you heard it tick when you entered the room.' },
@@ -85,6 +86,7 @@ const TEX = {
   beam_n:    'textures/wood_planks_nor_gl_1k.webp',
   mstone_d:  'textures/medieval_blocks_02_diff_1k.webp',
   mstone_n:  'textures/medieval_blocks_02_nor_gl_1k.webp',
+  helga_p:   'textures/helga_portrait.webp?v=20260928p13',
 };
 
 // ─── ENGINE GLOBALS ──────────────────────────────────────────────────────────
