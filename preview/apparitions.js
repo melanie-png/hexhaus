@@ -156,7 +156,7 @@ function helgaSighting(roomId){
 // still gone the moment you try to examine her.
 function spawnCat(roomId){
   const spots = CAT_SPOTS[roomId]; if (!spots || !spots.length) return;
-  const [sx,sz] = spots[(Math.random()*spots.length)|0];
+  const [sx,sz] = (window.HEXQA_SPAWN || window.HEXAPP_FORCE) ? spots[0] : spots[(Math.random()*spots.length)|0];   // demo/QA: always the first spot
   const sc = scene;
   const root = new BABYLON.TransformNode('app_cat',sc);
   const fur = new BABYLON.StandardMaterial('app_catM',sc);

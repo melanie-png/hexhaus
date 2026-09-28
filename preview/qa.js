@@ -172,6 +172,22 @@ if (new URLSearchParams(location.search).has('qa')) {
             }
             window.HEXQA_SPAWN=null;
             log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
+            // final dwell: the kitchen, camera parked on the cat — for visual QA
+            setTimeout(()=>{
+              try{
+                window.HEXQA_SPAWN='cat';
+                transitionToRoom('kitchen');
+                setTimeout(()=>{
+                  const cb2=scene.getMeshByName('app_cat_body');
+                  if(cb2){
+                    const cp=cb2.getAbsolutePosition();
+                    camera.position.set(cp.x-2.1, 1.05, cp.z+2.3);
+                    camera.setTarget(new BABYLON.Vector3(cp.x, 0.45, cp.z));
+                    scene.render();
+                  }
+                },700);
+              }catch(e){log('FATAL catDwell '+e.stack)}
+            },3600);
           },2500);
           setTimeout(()=>{report.style.display='none'},4500);
           }catch(e){log('FATAL '+e.stack)}
