@@ -160,6 +160,15 @@ if (new URLSearchParams(location.search).has('qa')) {
               check(hm.material.backFaceCulling===false,'helga sprite is two-sided');
               check(hm.material.useAlphaFromDiffuseTexture===true,'helga sprite alpha comes from the art');
               camera.setTarget(hm.getAbsolutePosition());
+              setTimeout(()=>{
+                try{
+                  const vpt=camera.viewport.toGlobal(engine.getRenderWidth(),engine.getRenderHeight());
+                  const hp=BABYLON.Vector3.Project(hm.getAbsolutePosition(),BABYLON.Matrix.Identity(),scene.getTransformMatrix(),vpt);
+                  const px=Math.max(0,Math.round(hp.x)-1), py=Math.max(0,Math.round(engine.getRenderHeight()-hp.y)-1);
+                  Promise.resolve(engine.readPixels(px,py,3,3)).then(b=>{const bb=b instanceof Uint8Array?b:new Uint8Array(b.buffer||b);log('PROBE helgaFb alpha='+hm.material.alpha.toFixed(2)+' pos='+hm.position.toString()+' @'+px+','+py+' = '+Array.from(bb.slice(0,12)).join(','));}).catch(e=>log('PROBE helgaFbErr '+e.message));
+                  log('PROBE helgaTex ready='+hm.material.diffuseTexture.isReady()+' hasAlpha='+hm.material.diffuseTexture.hasAlpha+' size='+JSON.stringify(hm.material.diffuseTexture.getSize()));
+                }catch(e){log('PROBE helgaProjErr '+e.message)}
+              },3000);
             }
             window.HEXQA_SPAWN=null;
             log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
