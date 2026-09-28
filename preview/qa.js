@@ -4,6 +4,7 @@ if (new URLSearchParams(location.search).has('qa')) {
   const log=s=>{report.textContent+=s+'\n';console.log('[qa]',s)};
   let failures=0,checks=0;
   const check=(v,msg)=>{checks++;if(!v)failures++;log((v?'PASS':'FAIL')+' '+msg)};
+  const texState={};
   addEventListener('error',e=>log('ERROR '+e.message));
   addEventListener('unhandledrejection',e=>log('REJECTION '+e.reason));
   const run=()=>{
@@ -51,11 +52,13 @@ if (new URLSearchParams(location.search).has('qa')) {
       handleInteract('helga_portrait');
       check(state.activeModal==='helga_portrait','portrait opens the examine modal');
       closeModal();
-      // texture readiness is async — assert on a delay, while this library scene is still alive
-      const hpTx=hpMesh?.material?.diffuseTexture;
-      const wallTx=scene.meshes.find(m=>m.material?.name==='lib_wallM')?.material?.diffuseTexture;
-      setTimeout(()=>{check(hpTx?.isReady()===true,'portrait texture loaded'+(hpTx?.isReady()===true?'':' (still not ready)'));
-        check(wallTx?.isReady()===true,'control wall texture loaded'+(wallTx?.isReady()===true?'':' (still not ready)'))},2500);
+      // texture readiness is async and the scene dies on the next transition —
+      // record load/error events now, assert the recorded result at the end
+      const texProbe=(tx,label)=>{texState[label]=tx?.isReady()?'loaded':'pending';
+        tx?.onLoadObservable?.add(()=>texState[label]='loaded');
+        tx?.onErrorObservable?.add(()=>texState[label]='error');};
+      texProbe(hpMesh?.material?.diffuseTexture,'helga');
+      texProbe(scene.meshes.find(m=>m.material?.name==='lib_wallM')?.material?.diffuseTexture,'wall');
       for(const roomId of roomIds){
         if(state.currentRoom!==roomId)transitionToRoom(roomId);
         check(state.currentRoom===roomId,roomId+' builds');
@@ -128,6 +131,8 @@ if (new URLSearchParams(location.search).has('qa')) {
           openInspect('letter');
           check(state.activeModal==='letter'&&document.getElementById('modal-collect').style.display==='none','inventory re-reads the letter clue');
           closeModal();
+          check(texState.helga==='loaded','portrait texture loaded ('+texState.helga+')');
+          check(texState.wall==='loaded','control wall texture loaded ('+texState.wall+')');
           log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
           }catch(e){log('FATAL '+e.stack)}
         },1800);
