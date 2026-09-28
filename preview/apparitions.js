@@ -52,9 +52,13 @@ function spawnHelgaStanding(roomId){
   m.diffuseTexture = tex;
   m.useAlphaFromDiffuseTexture = true;
   m.emissiveTexture = tex;
-  m.emissiveColor = new BABYLON.Color3(0.75,0.68,0.58);   // candle-warm self-light
+  m.emissiveColor = new BABYLON.Color3(0.92,0.85,0.72);   // candle-warm self-light
   m.specularColor = new BABYLON.Color3(0,0,0);
-  m.backFaceCulling = false;                                // plane normal lesson learned
+  m.backFaceCulling = false;
+  const glow = new BABYLON.PointLight('app_helgaL', new BABYLON.Vector3(sx,1.6,sz+0.6), sc);
+  glow.diffuse = new BABYLON.Color3(0.85,0.6,0.3);
+  glow.specular = new BABYLON.Color3(0.2,0.15,0.1);
+  glow.intensity = 0.5; glow.range = 8;                                // plane normal lesson learned
   plane.material = m;
   plane.rotation.y = Math.atan2(-sx,-sz) + Math.PI;         // face the room centre
 
@@ -80,7 +84,7 @@ function spawnHelgaStanding(roomId){
 
   appCleanup = ()=>{
     clearTimeout(timer); clearInterval(watch);
-    if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); plane.dispose(); }
+    if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); plane.dispose(); glow.dispose(); }
   };
 }
 
@@ -98,9 +102,13 @@ function helgaSighting(roomId){
   m.diffuseTexture = tex;
   m.useAlphaFromDiffuseTexture = true;
   m.emissiveTexture = tex;
-  m.emissiveColor = new BABYLON.Color3(0.75,0.68,0.58);
+  m.emissiveColor = new BABYLON.Color3(0.92,0.85,0.72);
   m.specularColor = new BABYLON.Color3(0,0,0);
   m.backFaceCulling = false;
+  const glow = new BABYLON.PointLight('app_helgaL', new BABYLON.Vector3(sx,1.6,sz+0.6), sc);
+  glow.diffuse = new BABYLON.Color3(0.85,0.6,0.3);
+  glow.specular = new BABYLON.Color3(0.2,0.15,0.1);
+  glow.intensity = 0.5; glow.range = 8;
   plane.material = m;
   plane.rotation.y = Math.atan2(-sx,-sz) + Math.PI;
   interactables.set('app_helga','helga_apparition');
@@ -132,7 +140,7 @@ function helgaSighting(roomId){
     } else if (phase >= 2) { camera.position.copyFrom(camBase); }
   });
   appCleanup = ()=>{
-    if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); if (door && doorBase) door.position.copyFrom(doorBase); camera.position.copyFrom(camBase); plane.dispose(); }
+    if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); if (door && doorBase) door.position.copyFrom(doorBase); camera.position.copyFrom(camBase); plane.dispose(); glow.dispose(); }
   };
 }
 
