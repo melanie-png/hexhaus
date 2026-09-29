@@ -102,10 +102,11 @@ function buildKitchen(){
 
   // Copper kettle hung at the hearth arch
   const ketM=mat('k_ketM'); ketM.diffuseColor=new BABYLON.Color3(0.45,0.26,0.1); ketM.specularColor=new BABYLON.Color3(0.6,0.4,0.2);
-  const khook=BABYLON.MeshBuilder.CreateCylinder('k_khook',{diameter:0.012,height:0.3,tessellation:4},scene); khook.position.set(0.9,2.0,-5.4); khook.material=rackM;
-  const kettle=BABYLON.MeshBuilder.CreateSphere('k_kettle',{diameter:0.28,segments:10},scene); kettle.scaling.y=0.8; kettle.position.set(0.9,1.8,-5.4); kettle.material=ketM;
-  const kspout=BABYLON.MeshBuilder.CreateCylinder('k_kspout',{diameter:0.03,height:0.14,tessellation:6},scene); kspout.rotation.z=Math.PI/3; kspout.position.set(1.03,1.82,-5.4); kspout.material=ketM;
-  const khandle=BABYLON.MeshBuilder.CreateTorus('k_khandle',{diameter:0.14,thickness:0.014,tessellation:10},scene); khandle.rotation.x=Math.PI/2; khandle.position.set(0.9,1.9,-5.4); khandle.material=ketM;
+  const karm=BABYLON.MeshBuilder.CreateCylinder('k_karm',{diameter:0.014,height:0.45,tessellation:6},scene); karm.rotation.x=Math.PI/2; karm.position.set(0.9,2.05,-5.3); karm.material=rackM;
+  const khook=BABYLON.MeshBuilder.CreateCylinder('k_khook',{diameter:0.012,height:0.25,tessellation:4},scene); khook.position.set(0.9,1.95,-5.08); khook.material=rackM;
+  const kettle=BABYLON.MeshBuilder.CreateSphere('k_kettle',{diameter:0.28,segments:10},scene); kettle.scaling.y=0.8; kettle.position.set(0.9,1.76,-5.08); kettle.material=ketM;
+  const kspout=BABYLON.MeshBuilder.CreateCylinder('k_kspout',{diameter:0.03,height:0.14,tessellation:6},scene); kspout.rotation.z=Math.PI/3; kspout.position.set(1.03,1.78,-5.08); kspout.material=ketM;
+  const khandle=BABYLON.MeshBuilder.CreateTorus('k_khandle',{diameter:0.14,thickness:0.014,tessellation:10},scene); khandle.rotation.x=Math.PI/2; khandle.position.set(0.9,1.86,-5.08); khandle.material=ketM;
 
   // Cast-iron skillet on the butcher's block
   const skillet=BABYLON.MeshBuilder.CreateCylinder('k_skillet',{diameter:0.26,height:0.035,tessellation:14},scene); skillet.position.set(5.0,0.94,0.75); skillet.material=cauldM;
