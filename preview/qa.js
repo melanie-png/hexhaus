@@ -7,8 +7,8 @@ if (new URLSearchParams(location.search).has('qa')) {
     const [lx,ly,lz]=_lk.split(',').map(Number);
     let _ticks=0,_jumped=false;
     setInterval(()=>{
-      if(typeof camera!=='undefined'&&typeof state!=='undefined'&&state.currentRoom){
-        if(_rm&&!_jumped&&state.currentRoom!==_rm){ if(_ticks<12){_ticks++;return;} _jumped=true; transitionToRoom(_rm); return; }
+      if(typeof engine!=='undefined'&&engine&&typeof camera!=='undefined'&&camera&&typeof state!=='undefined'&&state.currentRoom){
+        if(_rm&&!_jumped&&state.currentRoom!==_rm){ if(_ticks<10){_ticks++;return;} _jumped=true; transitionToRoom(_rm); return; }
         camera.setTarget(new BABYLON.Vector3(lx,ly,lz)); camera.getViewMatrix(true); scene.render();
       }
     },300);
