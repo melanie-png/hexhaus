@@ -10,6 +10,15 @@ function buildAttic(){
   aWall('a_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); aWall('a_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); aWall('a_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
   doorwayWall('a_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.1,dh:2.1}]);
   makeWindow('win_aB1', 0, 1.75, -D/2, 0, 0.9, 1.2);
+
+  // ── house elements ──
+  makeWeb('el_at_web1',-4.6,2.75,-3.6,0,1.0);
+  makeWeb('el_at_web2',4.55,2.75,-3.6,0,1.0);
+  makeDust('el_at_dust',0,1.7,-3.3);
+  makeSheet('el_at_sheet1',-3.2,1.5,0.4,false);
+  makeSheet('el_at_sheet2',3.0,-1.5,-2.6,false);
+  makeSpiderDrop('el_at_spider',-2.0,-2.0,3.0);
+  makeRaven('el_at_raven',0.35,1.18,-3.68,0.25);
   [-3,-1,1,3].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('a_rafter'+bx,{width:0.2,height:0.2,depth:D},scene); b.position.set(bx,H-0.12,0); const bm=mat('a_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.1,0.06,0.03); b.material=bm; });
 
   // Storage boxes

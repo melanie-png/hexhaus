@@ -12,6 +12,12 @@ function buildPantry(){
   doorwayWall('p_wB',W,H,0,-D/2,0,wallM,[{dx:W/2-0.5,dz:-D/2,dw:1.1,dh:2.1}]);
   makeWindow('win_pL1', -W/2, 2.6, 1.5, Math.PI/2, 0.8, 1.1);
 
+  // ── house elements ──
+  makeWeb('el_pan_web1',-4.65,3.4,-3.55,0,0.85);
+  makeDust('el_pan_dust',-4.7,2.3,1.4);
+  makeSaltLine('el_pan_salt',4.5,-3.62,0,1.5);
+  makeRat('el_pan_rat',[{x:2.2,z:-3.2},{x:5.6,z:-3.3},{x:6.8,z:-2.0},{x:4.9,z:-3.15}],2);
+
   // Specimen jar grid
   for(let row=0;row<3;row++){ for(let col=0;col<6;col++){ const jx=-W/2+1+col*1.5; const jy=1.0+row*0.8;
     const jar=BABYLON.MeshBuilder.CreateCylinder('p_jar'+row+col,{diameterTop:0.12,diameterBottom:0.15,height:0.5,tessellation:10},scene); jar.position.set(jx,jy+0.25,-D/2+0.3); const jm=mat('p_jm'+row+col);

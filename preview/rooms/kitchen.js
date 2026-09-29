@@ -13,6 +13,15 @@ function buildKitchen(){
   doorwayWall('k_wB',W,H,0,-D/2,0,wallM,[{dx:-W/2+3,dz:-D/2,dw:1.3,dh:2.5}]);
   makeWindow('win_kB1',  3.2, 2.6, -D/2, 0);
   makeWindow('win_kB2', -4.0, 2.6, -D/2, 0);
+
+  // ── house elements ──
+  makeWeb('el_kit_web1',-6.75,3.55,-5.6,0,0.95);
+  makeDust('el_kit_dust',3.2,2.3,-5.35);
+  makeWax('el_kit_wax1',4.5,-5.85,0.10);
+  makePotionShelf('el_kit_potions',-6.85,1.5,-1.0,Math.PI/2);
+  makeHerbBundles('el_kit_herbs',[[-2.5,3.35,-2.5],[0.5,3.30,-3.0],[2.6,3.28,-1.6]]);
+  makeSaltLine('el_kit_salt',4.5,-5.72,0,1.5);
+  makeRat('el_kit_rat',[{x:1.0,z:-5.35},{x:4.3,z:-5.45},{x:6.4,z:-5.4},{x:3.0,z:-5.4}],5);
   [-4,-1,2].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('k_beam'+bx,{width:0.28,height:0.26,depth:D},scene); b.position.set(bx,H-0.14,0); const bm=mat('k_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.14,0.07,0.03); b.material=bm; });
 
   // Stone hearth with cauldron

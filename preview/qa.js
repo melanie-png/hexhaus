@@ -91,7 +91,33 @@ if (new URLSearchParams(location.search).has('qa')) {
           check(!!scene.getMeshByName('e_wB_seg1'),'entrance doorway wall has header fills');
         }
         const STAIRS={entrance:['door_library'],library:['door_entrance']};
+        const ELEMENTS={
+          entrance:[['el_entr_web1',null],['el_entr_web2',null],['el_entr_dust',null],['el_entr_wax1',null],['el_entr_hat','witchhat',1],['el_entr_board','looseboard',1],['el_entr_gram','gramophone',0],['el_entr_rat','rat',0],['el_entr_moths',null]],
+          living:[['el_liv_web1',null],['el_liv_dust',null],['el_liv_rock','rockingchair',0],['el_liv_sheet','sheeted',0],['el_liv_flowers','deadflowers',0],['el_liv_moths',null],['el_liv_wax1',null]],
+          kitchen:[['el_kit_web1',null],['el_kit_dust',null],['el_kit_potions','potions',1],['el_kit_salt','saltline',0],['el_kit_herbs',null],['el_kit_rat','rat',0],['el_kit_wax1',null]],
+          library:[['el_lib_web1',null],['el_lib_web2',null],['el_lib_dust',null],['el_lib_sheet','sheeted',0],['el_lib_doll','dollhouse',0]],
+          bathroom:[['el_bath_web1',null],['el_bath_mirror','crackedmirror',1]],
+          pantry:[['el_pan_web1',null],['el_pan_dust',null],['el_pan_salt','saltline',0],['el_pan_rat','rat',0]],
+          basement:[['el_bs_web1',null],['el_bs_web2',null],['el_bs_cauldron','cauldron',1],['el_bs_sigils','sigils',1],['el_bs_bucket','dripbucket',0]],
+          attic:[['el_at_web1',null],['el_at_web2',null],['el_at_dust',null],['el_at_sheet1','sheeted',0],['el_at_sheet2',null],['el_at_spider','spider',0],['el_at_raven','raven',1]],
+        };
         (STAIRS[roomId]||[]).forEach(sn=>check(!!scene.getMeshByName(sn+'_tread0'),roomId+' staircase '+sn+' has treads'));
+        (ELEMENTS[roomId]||[]).forEach(([mn,key,ray])=>{
+          const em=scene.getMeshByName(mn);
+          check(!!em, roomId+' element '+mn+' exists');
+          if(!em) return;
+          const bb=em.getHierarchyBoundingVectors?em.getHierarchyBoundingVectors():null;
+          if(key){
+            check(interactables.get(mn)===key||[...interactables.values()].includes(key), roomId+' element '+mn+' is examineable');
+            check(ITEMS[key]&&ITEMS[key].desc.length>10, roomId+' element '+mn+' has inspect text');
+          }
+          if(ray){
+            camera.setTarget(em.getBoundingInfo().boundingSphere.centerWorld); scene.render();
+            const pick=scene.pick(scene.getEngine().getRenderWidth()/2, scene.getEngine().getRenderHeight()/2);
+            const ok=pick.hit&&(pick.pickedMesh&&(pick.pickedMesh.name===mn||interactables.get(pick.pickedMesh.name)===key));
+            check(ok, roomId+' element '+mn+' ray-selects');
+          }
+        });
         const WINS={entrance:['win_eF1','win_eF2','win_eL1','win_eR1'],living:['win_lB1','win_lF1','win_lF2'],kitchen:['win_kB1','win_kB2'],library:['win_libR1','win_libB1'],bathroom:['win_bB1'],pantry:['win_pL1'],attic:['win_aB1']};
         (WINS[roomId]||[]).forEach(wn=>check(!!scene.getMeshByName(wn+'_glass'),roomId+' window '+wn+' glass is in the wall'));
         // Test one door through the same ray-picking function used by clicks.
