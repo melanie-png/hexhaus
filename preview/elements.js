@@ -182,7 +182,7 @@ function makeRat(name,path,seed){
     if(prog>=1){
       prog=0; seg=(seg+dir+path.length)%path.length;
       if(((seg*13+seed*7)|0)%3===0){ dir=-dir; }
-      pause=0.4+(((seg*29+seed*11)%10)/10)*1.8;
+      pause=0.4+(((seg*29+seed*11)%10)/10)*1.8; if(window.SFX&&Math.random()<0.5)SFX.skitter();   // claws on the boards as it bolts
       if(pause>1.2&&((seg*7)%4===0)) look=pause*0.6;
     }
     const nx=a.x+dx*Math.min(prog,1), nz=a.z+dz*Math.min(prog,1);
@@ -434,7 +434,7 @@ function makeRockingChair(name,x,z,rotY){
       leg.parent=node; leg.position.set(sd*0.23,0.21,zz); leg.material=wM; } }
   interactables.set(name+'_seat','rockingchair');
   let rock=0, amp=0;
-  elAnim(node,(dt,t)=>{ rock+=dt; if(rock>17) rock=0; amp=rock<11?Math.min(amp+dt*0.3,1):Math.max(amp-dt*0.4,0);
+  elAnim(node,(dt,t)=>{ rock+=dt; if(rock>17) rock=0; amp=rock<11?Math.min(amp+dt*0.3,1):Math.max(amp-dt*0.4,0); if(window.SFX&&amp>0.35&&(t%2.3)<dt)SFX.creak(0.45);   // the chair complains as it rocks
     node.rotation.x=Math.sin(t*1.9)*0.055*amp; node.position.y=-Math.abs(Math.sin(t*1.9))*0.02*amp; });
   return node;
 }

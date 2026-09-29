@@ -203,6 +203,11 @@ if (new URLSearchParams(location.search).has('qa')) {
               const ec=scene.getMeshByName('app_cat_e1').material.emissiveColor;
               check(ec.g>0.5&&ec.g>ec.r,'the cat has green eyes');
             }
+            // ── sound + animation pass ──
+            check(typeof SFX==='object'&&typeof SFX.doorCreak==='function'&&typeof SFX.slam==='function'&&typeof SFX.dropAnim==='function','SFX engine present (creak/doorCreak/thud/slam/skitter/dropAnim)');
+            check(SFX_LOG.includes('doorCreak'),'door creak fired on a door swing');
+            check(SFX_LOG.includes('creak'),'floorboard creak fired on room entry');
+            check(SFX_LOG.includes('thud'),'item drop thud fired');
             window.HEXQA_SPAWN=null;
             check(state.helgaSeen===true,'the first sighting happened when the living room was entered');
             spawnApparitions('living');

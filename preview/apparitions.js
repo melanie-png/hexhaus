@@ -126,14 +126,14 @@ function helgaSighting(roomId){
   const door = sc.getMeshByName('door_entrance');
   const doorBase = door ? door.position.clone() : null;
   const camBase = camera.position.clone();
-  let alpha = 0, phase = 0, shake = 0;
+  let alpha = 0, phase = 0, shake = 0; let slammed = false;
   const obs = sc.onBeforeRenderObservable.add(()=>{
     if (plane.isEnabled() === false) { sc.onBeforeRenderObservable.remove(obs); return; }
     const t = performance.now() - t0;
     if (t < FADE_IN) { alpha = t / FADE_IN; }
     else if (t < FADE_IN + HOLD) { alpha = 1; phase = 1; }
     else if (t < FADE_IN + HOLD + SLAM) {
-      phase = 2; alpha = 1; shake = 1;
+      phase = 2; alpha = 1; shake = 1; if(!slammed){ slammed = true; if(window.SFX) SFX.slam(); }   // the door is driven shut
       if (door && doorBase) { door.position.x = doorBase.x + (Math.random()-0.5)*0.05; door.position.y = doorBase.y + (Math.random()-0.5)*0.03; }
     }
     else if (t < FADE_IN + HOLD + SLAM + FADE_OUT) { alpha = 1 - (t - FADE_IN - HOLD - SLAM)/FADE_OUT; }
