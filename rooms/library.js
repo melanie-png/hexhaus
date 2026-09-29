@@ -13,6 +13,13 @@ function buildLibrary(){
   makeStairs('door_entrance', 0, D/2, Math.PI, {mode:'up', steps:5, rise:0.18, run:0.32, width:1.9});   // back up to the entrance hall
   makeWindow('win_libR1', W/2, 3.2, 3.5, -Math.PI/2);
   makeWindow('win_libB1', 4.8, 3.3, -D/2, 0);
+
+  // ── house elements ──
+  makeWeb('el_lib_web1',-7.6,4.35,6.4,0,1.05);
+  makeWeb('el_lib_web2',7.5,4.35,-6.5,0,1.05);
+  makeDust('el_lib_dust',4.8,2.7,-6.0);
+  makeSheet('el_lib_sheet',-6.5,5.8,0.7,true);
+  makeDollhouse('el_lib_doll',6.6,5.2,-2.5);
   [-6,-3,0,3,6].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('lib_beam'+bx,{width:0.3,height:0.28,depth:D},scene); b.position.set(bx,H-0.16,0); const bm=mat('lib_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.16,0.08,0.04); b.material=bm; });
 
   // Display cases with skulls

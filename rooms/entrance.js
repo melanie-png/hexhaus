@@ -63,6 +63,17 @@ function buildEntranceHall(){
   makeWindow('win_eL1', -W/2, 3.0, -4.2, Math.PI/2);
   makeWindow('win_eR1',  W/2, 3.0, -4.2, -Math.PI/2);
 
+  // ── house elements ──
+  makeWeb('el_entr_web1',-8.6,4.5,5.55,0,1.0);
+  makeWeb('el_entr_web2',-8.95,3.05,-0.8,Math.PI/2,0.8);
+  makeDust('el_entr_dust',-4.5,2.6,5.1);
+  makeWax('el_entr_wax1',-0.4,4.72); makeWax('el_entr_wax2',0.55,4.6,0.10); makeWax('el_entr_wax3',-0.85,4.55,0.09);
+  makeHat('el_entr_hat',5.6,1.72,5.88,Math.PI);
+  makeLooseBoard('el_entr_board',5.0,-2.8,0);
+  makeGramophone('el_entr_gram',-7.8,4.8,2.2);
+  makeRat('el_entr_rat',[{x:-5.2,z:-5.35},{x:-1.5,z:-5.4},{x:1.6,z:-5.35},{x:-0.6,z:-5.4}],3);
+  makeMoths('el_entr_moths',0.2,1.05,4.9);
+
   // Exposed ceiling beams
   const beamPositions = [-7, -3.5, 0, 3.5, 7];
   beamPositions.forEach((bx, i) => {

@@ -17,6 +17,16 @@ function buildLivingRoom(){
   makeWindow('win_lF1', -4.2, 2.9,  D/2, Math.PI);
   makeWindow('win_lF2',  4.2, 2.9,  D/2, Math.PI);
 
+  // ── house elements ──
+  makeWeb('el_liv_web1',-7.6,4.05,-5.6,0,1.0);
+  makeWeb('el_liv_web2',-0.9,3.15,5.9,Math.PI,0.8);
+  makeDust('el_liv_dust',-4.5,2.4,-5.4);
+  makeWax('el_liv_wax1',-0.5,-5.35); makeWax('el_liv_wax2',0.65,-5.45,0.10);
+  makeRockingChair('el_liv_rock',-6.3,-3.3,2.7);
+  makeSheet('el_liv_sheet',6.3,-3.5,-0.6,true);
+  makeFlowers('el_liv_flowers',4.6,-5.3,0);
+  makeMoths('el_liv_moths',-1.1,1.1,-5.3);
+
   [-5,-2,1,4].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('lr_beam'+bx,{width:0.3,height:0.28,depth:D},scene); b.position.set(bx,H-0.16,0); const bm=mat('lr_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.16,0.08,0.04); b.material=bm; });
 
   // Large arched window (back wall) — moonlight

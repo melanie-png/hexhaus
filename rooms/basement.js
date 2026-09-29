@@ -46,6 +46,13 @@ function buildBasement(){
   [[1,2.5],[2,3],[1.5,2],[0.5,3.5]].forEach(([bx,bz])=>{ const bone=BABYLON.MeshBuilder.CreateCylinder('bs_bone',{diameterTop:0.02,diameterBottom:0.03,height:0.2,tessellation:6},scene); bone.position.set(bx,0.02,bz); bone.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI); const bm=mat('bs_boneM'); bm.diffuseColor=new BABYLON.Color3(0.4,0.35,0.25); bone.material=bm; });
 
   // Crates
+  // ── house elements ──
+  makeWeb('el_bs_web1',-6.7,3.55,-5.6,0,1.05);
+  makeWeb('el_bs_web2',6.7,3.55,5.6,Math.PI,1.05);
+  makeCauldron('el_bs_cauldron',-3.0,0.5);
+  makeSigils('el_bs_sigils',3.2,2.2,1.05);
+  makeDrip('el_bs_bucket',5.5,4.6,6,4.0);
+
   [[-5,-4],[-4.2,-4]].forEach(([cx,cz],ci)=>{ const crate=BABYLON.MeshBuilder.CreateBox('bs_crate'+ci,{width:0.7,height:0.7,depth:0.7},scene); crate.position.set(cx,0.35,cz); const cm=mat('bs_crateM'); cm.diffuseColor=new BABYLON.Color3(0.2,0.14,0.08); crate.material=cm; });
 
   // Stone archway to specimen nook

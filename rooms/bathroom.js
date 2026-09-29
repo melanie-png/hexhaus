@@ -11,6 +11,10 @@ function buildBathroom(){
   doorwayWall('b_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.1,dh:2.3}]);
   makeWindow('win_bB1', 1.3, 2.3, -D/2, 0, 0.7, 1.0);
 
+  // ── house elements ──
+  makeWeb('el_bath_web1',-2.65,3.15,-2.2,0,0.75);
+  makeMirror('el_bath_mirror',-0.9,1.75,-2.42,0);
+
   // Bathtub
   const tubM=mat('b_tubM'); tubM.diffuseColor=new BABYLON.Color3(0.5,0.48,0.42);
   const tub=BABYLON.MeshBuilder.CreateBox('b_tub',{width:1.6,height:0.7,depth:0.8},scene); tub.position.set(0,0.35,-D/2+1.2); tub.material=tubM;

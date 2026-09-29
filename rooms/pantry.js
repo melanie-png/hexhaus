@@ -12,6 +12,12 @@ function buildPantry(){
   doorwayWall('p_wB',W,H,0,-D/2,0,wallM,[{dx:W/2-0.5,dz:-D/2,dw:1.1,dh:2.1}]);
   makeWindow('win_pL1', -W/2, 2.6, 1.5, Math.PI/2, 0.8, 1.1);
 
+  // ── house elements ──
+  makeWeb('el_pan_web1',-4.65,3.4,-3.55,0,0.85);
+  makeDust('el_pan_dust',-4.7,2.3,1.4);
+  makeSaltLine('el_pan_salt',4.5,-3.62,0,1.5);
+  makeRat('el_pan_rat',[{x:2.2,z:-3.2},{x:5.6,z:-3.3},{x:6.8,z:-2.0},{x:4.9,z:-3.15}],2);
+
   // Specimen jar grid
   for(let row=0;row<3;row++){ for(let col=0;col<6;col++){ const jx=-W/2+1+col*1.5; const jy=1.0+row*0.8;
     const jar=BABYLON.MeshBuilder.CreateCylinder('p_jar'+row+col,{diameterTop:0.12,diameterBottom:0.15,height:0.5,tessellation:10},scene); jar.position.set(jx,jy+0.25,-D/2+0.3); const jm=mat('p_jm'+row+col);
@@ -54,6 +60,7 @@ function buildPantry(){
   buildDoor('door_kitchen', 0, D/2, Math.PI, 1.14, 2.18);
   interactables.set('door_kitchen','door_kitchen');
   buildDoor('door_basement', W/2-0.5, -D/2, 0, 0.94, 1.98);
+
   // iron keyhole plate — the crescent-moon lock the iron key answers
   const kp=BABYLON.MeshBuilder.CreateBox('p_keyplate',{width:0.1,height:0.16,depth:0.012},scene); kp.position.set(W/2-0.5,1.15,-D/2+0.11); const kpm=mat('p_kpM'); kpm.diffuseColor=new BABYLON.Color3(0.32,0.26,0.12); kpm.specularColor=new BABYLON.Color3(0.5,0.45,0.25); kpm.specularPower=48; kp.material=kpm;
   const kh=BABYLON.MeshBuilder.CreateCylinder('p_keyhole',{diameter:0.045,height:0.012,tessellation:10},scene); kh.position.set(W/2-0.5,1.15,-D/2+0.115); kh.rotation.x=Math.PI/2; const khm=mat('p_khM'); khm.diffuseColor=new BABYLON.Color3(0.01,0.01,0.01); khm.emissiveColor=new BABYLON.Color3(0.02,0.015,0.0); kh.material=khm;
