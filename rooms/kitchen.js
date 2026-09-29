@@ -24,16 +24,46 @@ function buildKitchen(){
   makeRat('el_kit_rat',[{x:1.0,z:-5.35},{x:4.3,z:-5.45},{x:6.4,z:-5.4},{x:3.0,z:-5.4}],5);
   [-4,-1,2].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('k_beam'+bx,{width:0.28,height:0.26,depth:D},scene); b.position.set(bx,H-0.14,0); const bm=mat('k_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.14,0.07,0.03); b.material=bm; });
 
-  // Stone hearth with cauldron
+  // Open stone fireplace with a green fire
   const hearthM=pbr('k_hearthM',TEX.rock_d,TEX.rock_n,2,2,new BABYLON.Color3(0.28,0.32,0.35));
-  const hearth=BABYLON.MeshBuilder.CreateBox('k_hearth',{width:3.5,height:2.8,depth:0.8},scene); hearth.position.set(0,1.4,-D/2+0.4); hearth.material=hearthM;
-  for(let a=0;a<6;a++){ const ang=(a/5)*Math.PI; const ax=Math.cos(ang)*1.2; const ay=2.5+Math.sin(ang)*0.5; const b=BABYLON.MeshBuilder.CreateBox('k_hArch'+a,{width:0.28,height:0.35,depth:0.4},scene); b.position.set(ax,ay,-D/2+0.4); b.material=hearthM; }
+  const sootM=mat('k_sootM'); sootM.diffuseColor=new BABYLON.Color3(0.02,0.02,0.02);
+  [-1.55,1.55].forEach((px,pi)=>{
+    const pillar=BABYLON.MeshBuilder.CreateBox('k_hpil'+pi,{width:0.7,height:2.6,depth:0.75},scene); pillar.position.set(px,1.3,-D/2+0.45); pillar.material=hearthM;
+  });
+  const lintel=BABYLON.MeshBuilder.CreateBox('k_hlintel',{width:3.8,height:0.5,depth:0.75},scene); lintel.position.set(0,2.85,-D/2+0.45); lintel.material=hearthM;
+  const chimney=BABYLON.MeshBuilder.CreateBox('k_hchin',{width:3.0,height:1.15,depth:0.7},scene); chimney.position.set(0,3.62,-D/2+0.4); chimney.material=hearthM;
+  const fireback=BABYLON.MeshBuilder.CreatePlane('k_hback',{width:2.4,height:2.6},scene); fireback.position.set(0,1.3,-D/2+0.06); fireback.material=sootM;
+  const hearth=BABYLON.MeshBuilder.CreateBox('k_hearth',{width:3.6,height:0.07,depth:1.05},scene); hearth.position.set(0,0.035,-D/2+0.62); hearth.material=hearthM;
+  const flogM=pbr('k_flogM',TEX.wood_d,TEX.wood_n,1,1,new BABYLON.Color3(0.22,0.14,0.07));
+  [[-0.14,0.09,0.15],[0.13,0.09,-0.1],[0.0,0.22,0.03]].forEach(([lx,ly,lz],li)=>{
+    const flog=BABYLON.MeshBuilder.CreateCylinder('k_flog'+li,{diameter:0.12,height:0.8,tessellation:7},scene); flog.rotation.z=Math.PI/2-0.12*li; flog.position.set(lx,ly,-D/2+0.45+lz); flog.material=flogM;
+  });
+  const flameM=mat('k_flameM'); flameM.emissiveColor=new BABYLON.Color3(0.2,0.9,0.25); flameM.diffuseColor=new BABYLON.Color3(0,0,0);
+  const flames=[];
+  [[-0.12,0.34,0.12],[0.1,0.44,-0.06],[0.0,0.28,0.0]].forEach(([fx,fh,fz],fi)=>{
+    const fl=BABYLON.MeshBuilder.CreateCylinder('k_flame'+fi,{diameterTop:0,diameterBottom:0.16,height:fh,tessellation:7},scene);
+    fl.position.set(fx,0.07+fh/2,-D/2+0.45+fz); fl.material=flameM; flames.push(fl);
+  });
+  const chainM=mat('k_chainM'); chainM.diffuseColor=new BABYLON.Color3(0.15,0.14,0.13); chainM.specularColor=new BABYLON.Color3(0.3,0.3,0.3);
+  const cchain=BABYLON.MeshBuilder.CreateCylinder('k_cchain',{diameter:0.02,height:1.72,tessellation:6},scene); cchain.position.set(0,1.74,-D/2+0.5); cchain.material=chainM;
+  const chring=BABYLON.MeshBuilder.CreateTorus('k_chring',{diameter:0.09,thickness:0.02,tessellation:8},scene); chring.position.set(0,0.92,-D/2+0.5); chring.material=chainM;
   const cauldM=mat('k_cauldM'); cauldM.diffuseColor=new BABYLON.Color3(0.08,0.06,0.08);
-  const cauldron=BABYLON.MeshBuilder.CreateSphere('k_cauldron',{diameter:0.8,segments:12},scene); cauldron.position.set(0,0.35,-D/2+0.5); cauldron.scaling.y=0.7; cauldron.material=cauldM;
+  const cauldron=BABYLON.MeshBuilder.CreateSphere('k_cauldron',{diameter:0.8,segments:12},scene); cauldron.position.set(0,0.6,-D/2+0.5); cauldron.scaling.y=0.7; cauldron.material=cauldM;
   const brewM=mat('k_brewM'); brewM.emissiveColor=new BABYLON.Color3(0.05,0.4,0.15); brewM.alpha=0.75;
-  const brew=BABYLON.MeshBuilder.CreateDisc('k_brew',{radius:0.3,tessellation:16},scene); brew.position.set(0,0.55,-D/2+0.5); brew.rotation.x=Math.PI/2; brew.material=brewM;
+  const brew=BABYLON.MeshBuilder.CreateDisc('k_brew',{radius:0.3,tessellation:16},scene); brew.position.set(0,0.84,-D/2+0.5); brew.rotation.x=Math.PI/2; brew.material=brewM;
   const smokeM=mat('k_smokeM'); smokeM.diffuseColor=new BABYLON.Color3(0.08,0.15,0.08); smokeM.emissiveColor=new BABYLON.Color3(0.03,0.08,0.03); smokeM.alpha=0.1;
   const smoke=BABYLON.MeshBuilder.CreateCylinder('k_smoke',{diameterTop:0.5,diameterBottom:0.1,height:1.5,tessellation:8},scene); smoke.position.set(0,1.3,-D/2+0.5); smoke.material=smokeM;
+  // Mantel shelf with candles and jars
+  const mantel=BABYLON.MeshBuilder.CreateBox('k_hmantel',{width:4.2,height:0.1,depth:0.6},scene); mantel.position.set(0,3.15,-D/2+0.5); mantel.material=woodM;
+  const cndM=mat('k_cndM'); cndM.emissiveColor=new BABYLON.Color3(1.0,0.75,0.35); cndM.diffuseColor=new BABYLON.Color3(0,0,0);
+  [-1.3,1.3].forEach((cx,ci)=>{
+    const st=BABYLON.MeshBuilder.CreateCylinder('k_hcand'+ci,{diameter:0.05,height:0.22,tessellation:8},scene); st.position.set(cx,3.31,-D/2+0.5); st.material=chainM;
+    const tip=BABYLON.MeshBuilder.CreateSphere('k_hflame'+ci,{diameter:0.045,segments:6},scene); tip.position.set(cx,3.45,-D/2+0.5); tip.material=cndM;
+  });
+  [-0.5,0.0,0.5].forEach((jx,ji)=>{
+    const jar=BABYLON.MeshBuilder.CreateCylinder('k_hjar'+ji,{diameterTop:0.05,diameterBottom:0.06,height:0.14,tessellation:8},scene); jar.position.set(jx,3.27,-D/2+0.5);
+    const jm=mat('k_hjm'+ji); jm.diffuseColor=new BABYLON.Color3(0.3+Math.random()*0.3,0.12+Math.random()*0.12,0.05+Math.random()*0.1); jar.material=jm;
+  });
 
   // Copper pot rack
   const rackM=mat('k_rackM'); rackM.diffuseColor=new BABYLON.Color3(0.3,0.18,0.08); rackM.specularColor=new BABYLON.Color3(0.3,0.2,0.1);
@@ -85,6 +115,16 @@ function buildKitchen(){
   const sack=BABYLON.MeshBuilder.CreateSphere('k_sack',{diameter:0.3,segments:8},scene); sack.scaling.set(1,1.15,0.75); sack.position.set(-6.45,1.06,0.9); sack.material=sackM;
   const sackTie=BABYLON.MeshBuilder.CreateCylinder('k_sackTie',{diameterTop:0.02,diameterBottom:0.06,height:0.1,tessellation:6},scene); sackTie.position.set(-6.45,1.26,0.9); sackTie.material=sackM;
 
+  // Utensil rail above the workbench
+  const urail=BABYLON.MeshBuilder.CreateCylinder('k_urail',{diameter:0.025,height:3.0,tessellation:8},scene); urail.rotation.x=Math.PI/2; urail.position.set(-6.6,1.75,-0.75); urail.material=rackM;
+  const utenM=mat('k_utenM'); utenM.diffuseColor=new BABYLON.Color3(0.35,0.28,0.16); utenM.specularColor=new BABYLON.Color3(0.4,0.35,0.25);
+  for(let u=0;u<3;u++){
+    const uz=-1.8+u*1.05;
+    const uh=BABYLON.MeshBuilder.CreateCylinder('k_uhook'+u,{diameter:0.01,height:0.16,tessellation:4},scene); uh.position.set(-6.6,1.66,uz); uh.material=rackM;
+    const hd=BABYLON.MeshBuilder.CreateCylinder('k_uhand'+u,{diameter:0.018,height:0.28,tessellation:6},scene); hd.position.set(-6.6,1.45,uz); hd.material=utenM;
+    const bw=BABYLON.MeshBuilder.CreateSphere('k_ubowl'+u,{diameter:0.09,segments:8},scene); bw.scaling.y=0.55; bw.position.set(-6.6,1.3,uz); bw.material=utenM;
+  }
+
   // Stone wash-trough sink, right wall
   const sinkM=pbr('k_sinkM',TEX.rock_d,TEX.rock_n,1,1,new BABYLON.Color3(0.42,0.44,0.45));
   const sink=BABYLON.MeshBuilder.CreateBox('k_sink',{width:0.7,height:0.64,depth:1.3},scene); sink.position.set(6.55,0.32,3.0); sink.material=sinkM;
@@ -123,8 +163,10 @@ function buildKitchen(){
   hearthLight.diffuse=new BABYLON.Color3(0.1,0.6,0.2); hearthLight.intensity=1.5; hearthLight.range=10;
   const winLight=new BABYLON.PointLight('k_wL',new BABYLON.Vector3(-W/2+1,2.5,0),scene);
   winLight.diffuse=new BABYLON.Color3(0.2,0.3,0.5); winLight.intensity=1.0; winLight.range=12;
+  const warmL=new BABYLON.PointLight('k_warmL',new BABYLON.Vector3(0,1.2,-4.6),scene);
+  warmL.diffuse=new BABYLON.Color3(0.35,0.5,0.3); warmL.intensity=0.7; warmL.range=7;
   const ambient=new BABYLON.HemisphericLight('k_amb',new BABYLON.Vector3(0,1,0),scene);
-  ambient.intensity=0.4; ambient.diffuse=new BABYLON.Color3(0.3,0.35,0.4); ambient.groundColor=new BABYLON.Color3(0.1,0.08,0.05);
+  ambient.intensity=0.5; ambient.diffuse=new BABYLON.Color3(0.3,0.35,0.4); ambient.groundColor=new BABYLON.Color3(0.12,0.09,0.05);
 
   let ft=0;
   function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
@@ -133,10 +175,11 @@ function buildKitchen(){
     hearthLight.intensity=flk(1.5,0.3,2.5,0.5);
     if(brew) brew.material.emissiveColor=new BABYLON.Color3(0.03,flk(0.4,0.1,1.8,2),0.12);
     if(smoke) { smoke.rotation.y=ft*0.3; smoke.position.y=1.3+Math.sin(ft*0.5)*0.1; }
+    flames.forEach((fl,i)=>{ fl.scaling.x=0.8+0.25*Math.sin(ft*7+i*2.1); fl.scaling.z=0.8+0.25*Math.cos(ft*6.3+i*1.7); fl.rotation.y=ft*(0.8+i*0.3); });
   });
 
-  interactables.set('k_cauldron','cauldron'); interactables.set('k_brew','cauldron');
-  interactables.set('k_hearth','fireplace');
+  interactables.set('k_cauldron','cauldron'); interactables.set('k_brew','cauldron'); interactables.set('k_cchain','cauldron');
+  interactables.set('k_hearth','fireplace'); interactables.set('k_hmantel','fireplace'); interactables.set('k_hlintel','fireplace');
   interactables.set('k_garlic0','herbs_dried'); interactables.set('k_garlic1','herbs_dried');
   interactables.set('k_benchTop','workbench'); interactables.set('k_bowl','workbench');
   interactables.set('k_sink','stonesink'); interactables.set('k_kettle','kettle');
