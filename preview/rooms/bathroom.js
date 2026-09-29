@@ -47,6 +47,7 @@ function buildBathroom(){
   interactables.set('b_mirror','mirror');
 
   buildDoor('door_entrance', 0, D/2, Math.PI, 0.94, 2.18);
+  makeRoomSwitch('bathroom', 0.85, 1.35, D/2-0.06, Math.PI);
   interactables.set('door_entrance','door_entrance');
 }
 

@@ -51,5 +51,6 @@ function buildAttic(){
   interactables.set('a_broomHandle','broom');
 
   buildDoor('door_library', 0, D/2, Math.PI, 0.94, 1.98);
+  makeRoomSwitch('attic', 0.85, 1.35, D/2-0.06, Math.PI);
   interactables.set('door_library','door_library');
 }

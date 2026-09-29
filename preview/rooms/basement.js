@@ -93,6 +93,7 @@ function buildBasement(){
   interactables.set('bs_bone','bones');
 
   buildDoor('door_pantry', 0, D/2, Math.PI, 1.14, 2.18);
+  makeRoomSwitch('basement', 1.0, 1.4, D/2-0.06, Math.PI);
   interactables.set('door_pantry','door_pantry');
 }
 
