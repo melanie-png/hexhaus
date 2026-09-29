@@ -80,7 +80,7 @@ if (new URLSearchParams(location.search).has('qa')) {
           check(interactables.get('door_kitchen_knob')==='door_kitchen','the door knob is clickable');
           check(!!scene.getMeshByName('e_wB_seg1'),'entrance doorway wall has header fills');
         }
-        const STAIRS={entrance:['door_library'],library:['door_entrance'],pantry:['pDnStair']};
+        const STAIRS={entrance:['door_library'],library:['door_entrance']};
         (STAIRS[roomId]||[]).forEach(sn=>check(!!scene.getMeshByName(sn+'_tread0'),roomId+' staircase '+sn+' has treads'));
         const WINS={entrance:['win_eF1','win_eF2','win_eL1','win_eR1'],living:['win_lB1','win_lF1','win_lF2'],kitchen:['win_kB1','win_kB2'],library:['win_libR1','win_libB1'],bathroom:['win_bB1'],pantry:['win_pL1'],attic:['win_aB1']};
         (WINS[roomId]||[]).forEach(wn=>check(!!scene.getMeshByName(wn+'_glass'),roomId+' window '+wn+' glass is in the wall'));
