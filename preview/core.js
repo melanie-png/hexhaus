@@ -497,7 +497,7 @@ function transitionToRoom(roomId){
           const pm=mat('fx_k_potM'); pm.diffuseColor=new BABYLON.Color3(0.34,0.19,0.10); pm.specularColor=new BABYLON.Color3(0.3,0.2,0.12);
           pot.material=pm;
           SFX.dropAnim(pot,0.085,{size:0.9,spin:1.6,rest:m=>{m.rotation.z=1.35;}});
-        },1200);
+        },250);
       }
       if(roomId==='library' && !state.lBookDropped){   // a book knocked from its case
         state.lBookDropped=true;
@@ -508,7 +508,7 @@ function transitionToRoom(roomId){
           const bm=mat('fx_l_bookM'); bm.diffuseColor=new BABYLON.Color3(0.22,0.10,0.09); bm.specularColor=new BABYLON.Color3(0.05,0.05,0.05);
           bk.material=bm;
           SFX.dropAnim(bk,0.018,{size:0.6,spin:2.4,rest:m=>{m.rotation.z=0.35;}});
-        },1600);
+        },350);
       }
       window._creakTimer=setInterval(()=>{ if(!state.activeModal&&Math.random()<0.6) SFX.creak(0.5+Math.random()*0.8); },15000);
     }
