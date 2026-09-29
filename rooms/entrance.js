@@ -27,8 +27,14 @@ function buildEntranceHall(){
   scene.clearColor = new BABYLON.Color4(0.03, 0.025, 0.02, 1);
 
   // Floor
-  const floor = BABYLON.MeshBuilder.CreateGround('floor',{width:W,height:D,subdivisions:4},scene);
-  floor.material = floorM; floor.receiveShadows = true;
+  // Floor with a stairwell opening cut at the right wall (x 7..9, z 2.05..3.95) —
+  // the flight to the library descends through it.
+  const fA = BABYLON.MeshBuilder.CreateGround('floor',{width:W-2,height:D,subdivisions:4},scene);
+  fA.position.x = -1; fA.material = floorM; fA.receiveShadows = true;
+  const fB = BABYLON.MeshBuilder.CreateGround('floorB',{width:2,height:2.05+D/2,subdivisions:2},scene);   // z -6 .. 2.05
+  fB.position.set(8, 0, (2.05-D/2)/2); fB.material = floorM; fB.receiveShadows = true;
+  const fC = BABYLON.MeshBuilder.CreateGround('floorC',{width:2,height:(D/2)-3.95,subdivisions:2},scene);
+  fC.position.set(8, 0, 3.95+(D/2-3.95)/2); fC.material = floorM; fC.receiveShadows = true;
 
   // Ceiling
   const ceil = BABYLON.MeshBuilder.CreatePlane('ceil',{width:W,height:D},scene);
@@ -49,7 +55,8 @@ function buildEntranceHall(){
     {dx: W/2-2.5, dz:-D/2, dw:1.3, dh:2.5}
   ]);
   doorwayWall('e_wL', D, H, -W/2, 0, Math.PI/2, wallM, [{dx:-W/2, dz:3, dw:1.5, dh:2.5}]);
-  doorwayWall('e_wR', D, H,  W/2, 0, -Math.PI/2, wallM, [{dx: W/2, dz:3, dw:1.5, dh:2.5}]);
+  doorwayWall('e_wR', D, H,  W/2, 0, -Math.PI/2, wallM, [{dx: W/2, dz:3, dw:2.0, dh:2.8}]);
+  makeStairs('door_library', W/2, 3, -Math.PI/2, {mode:'downIn', steps:6, rise:0.17, run:0.30, width:1.9});   // down to the library, through the floor opening
   // Moonlit windows
   makeWindow('win_eF1', -4.5, 3.0, D/2, Math.PI);
   makeWindow('win_eF2',  4.5, 3.0, D/2, Math.PI);
@@ -497,7 +504,8 @@ function buildEntranceHall(){
 
   // Real doors, hinged and latched
   buildDoor('door_living',   -W/2, 3,  Math.PI/2, 1.34, 2.38);
-  buildDoor('door_library',   W/2, 3, -Math.PI/2, 1.34, 2.38);
+  // the library is a floor down — the stairs carry the name
+
   buildDoor('door_kitchen',  W/2-2.5, -D/2, 0, 1.14, 2.38);
   buildDoor('door_bathroom', -W/2+2.5, -D/2, 0, 1.14, 2.38);
 }
