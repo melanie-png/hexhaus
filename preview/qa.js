@@ -2,10 +2,13 @@
 if (new URLSearchParams(location.search).has('qa')) {
   // ?qa&look=x,y,z — frame a specific view for screenshots (no checks run)
   const _lk=new URLSearchParams(location.search).get('look');
+  const _rm=new URLSearchParams(location.search).get('room');
   if(_lk){
     const [lx,ly,lz]=_lk.split(',').map(Number);
+    let _jumped=false;
     setInterval(()=>{
       if(typeof camera!=='undefined'&&typeof state!=='undefined'&&state.currentRoom){
+        if(_rm&&!_jumped&&state.currentRoom!==_rm){ _jumped=true; transitionToRoom(_rm); return; }
         camera.setTarget(new BABYLON.Vector3(lx,ly,lz)); camera.getViewMatrix(true); scene.render();
       }
     },300);
