@@ -5,6 +5,16 @@ function buildKitchen(){
   const ceilM = pbr('k_ceilM', TEX.beam_d, TEX.beam_n, 3, 3, new BABYLON.Color3(0.14,0.09,0.05));
   const woodM = pbr('k_woodM', TEX.darkwood_d, TEX.darkwood_n, 3, 2, new BABYLON.Color3(0.3,0.22,0.12));
 
+  // Warm aged dark wood wainscot paneling materials (~1.05m tall)
+  const panWoodM = pbr('k_panWoodM', TEX.darkwood_d, TEX.darkwood_n, 4, 1.5, new BABYLON.Color3(0.42, 0.28, 0.16));
+  const panTrimM = pbr('k_panTrimM', TEX.wood_d, TEX.wood_n, 3, 1, new BABYLON.Color3(0.38, 0.24, 0.13));
+
+  // Warm stone materials for masonry hearth, pillars, lintel and chimney breast blocks
+  const hearthM = pbr('k_hearthM', TEX.mstone_d, TEX.mstone_n, 2, 2, new BABYLON.Color3(0.48, 0.42, 0.36));
+  const stoneBlockM1 = pbr('k_sBlkM1', TEX.mstone_d, TEX.mstone_n, 1.5, 1.5, new BABYLON.Color3(0.52, 0.46, 0.39));
+  const stoneBlockM2 = pbr('k_sBlkM2', TEX.rock_d, TEX.rock_n, 1.5, 1.5, new BABYLON.Color3(0.46, 0.40, 0.34));
+  const keystoneM = pbr('k_keysM', TEX.mstone_d, TEX.mstone_n, 1, 1, new BABYLON.Color3(0.55, 0.48, 0.40));
+
   const floor=BABYLON.MeshBuilder.CreateGround('k_floor',{width:W,height:D,subdivisions:4},scene); floor.material=floorM; floor.receiveShadows=true;
   const ceil=BABYLON.MeshBuilder.CreatePlane('k_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
   function kWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
@@ -13,6 +23,55 @@ function buildKitchen(){
   doorwayWall('k_wB',W,H,0,-D/2,0,wallM,[{dx:-W/2+3,dz:-D/2,dw:1.3,dh:2.5}]);
   makeWindow('win_kB1',  3.2, 2.6, -D/2, 0);
   makeWindow('win_kB2', -4.0, 2.6, -D/2, 0);
+
+  // ── Lower Wood Wainscot Paneling (~1.05m tall) ──
+  // Left Wall Paneling (x = -W/2 = -7)
+  const panL_back = BABYLON.MeshBuilder.CreateBox('k_panL_back', { width: 0.02, height: 1.05, depth: 12.0 }, scene);
+  panL_back.position.set(-6.99, 0.525, 0); panL_back.material = panWoodM; panL_back.isPickable = false;
+  const panL_base = BABYLON.MeshBuilder.CreateBox('k_panL_base', { width: 0.035, height: 0.12, depth: 12.0 }, scene);
+  panL_base.position.set(-6.9825, 0.06, 0); panL_base.material = panTrimM; panL_base.isPickable = false;
+  const panL_cap = BABYLON.MeshBuilder.CreateBox('k_panL_cap', { width: 0.045, height: 0.05, depth: 12.0 }, scene);
+  panL_cap.position.set(-6.9775, 1.025, 0); panL_cap.material = panTrimM; panL_cap.isPickable = false;
+  for (let i = 0; i < 6; i++) {
+    const frame = BABYLON.MeshBuilder.CreateBox('k_panL_f' + i, { width: 0.015, height: 0.78, depth: 1.4 }, scene);
+    frame.position.set(-6.97, 0.55, -5.0 + i * 2.0); frame.material = panTrimM; frame.isPickable = false;
+  }
+
+  // Right Wall Paneling (x = +W/2 = +7)
+  const panR_back = BABYLON.MeshBuilder.CreateBox('k_panR_back', { width: 0.02, height: 1.05, depth: 12.0 }, scene);
+  panR_back.position.set(6.99, 0.525, 0); panR_back.material = panWoodM; panR_back.isPickable = false;
+  const panR_base = BABYLON.MeshBuilder.CreateBox('k_panR_base', { width: 0.035, height: 0.12, depth: 12.0 }, scene);
+  panR_base.position.set(6.9825, 0.06, 0); panR_base.material = panTrimM; panR_base.isPickable = false;
+  const panR_cap = BABYLON.MeshBuilder.CreateBox('k_panR_cap', { width: 0.045, height: 0.05, depth: 12.0 }, scene);
+  panR_cap.position.set(6.9775, 1.025, 0); panR_cap.material = panTrimM; panR_cap.isPickable = false;
+  for (let i = 0; i < 6; i++) {
+    const frame = BABYLON.MeshBuilder.CreateBox('k_panR_f' + i, { width: 0.015, height: 0.78, depth: 1.4 }, scene);
+    frame.position.set(6.97, 0.55, -5.0 + i * 2.0); frame.material = panTrimM; frame.isPickable = false;
+  }
+
+  // Front-Left Wall Paneling (z = +D/2 = +6, x = -7.0 to -0.78)
+  const panFL_back = BABYLON.MeshBuilder.CreateBox('k_panFL_back', { width: 6.22, height: 1.05, depth: 0.02 }, scene);
+  panFL_back.position.set(-3.89, 0.525, 5.99); panFL_back.material = panWoodM; panFL_back.isPickable = false;
+  const panFL_base = BABYLON.MeshBuilder.CreateBox('k_panFL_base', { width: 6.22, height: 0.12, depth: 0.035 }, scene);
+  panFL_base.position.set(-3.89, 0.06, 5.9825); panFL_base.material = panTrimM; panFL_base.isPickable = false;
+  const panFL_cap = BABYLON.MeshBuilder.CreateBox('k_panFL_cap', { width: 6.22, height: 0.05, depth: 0.045 }, scene);
+  panFL_cap.position.set(-3.89, 1.025, 5.9775); panFL_cap.material = panTrimM; panFL_cap.isPickable = false;
+  [-5.8, -3.89, -1.98].forEach((fx, fi) => {
+    const frame = BABYLON.MeshBuilder.CreateBox('k_panFL_f' + fi, { width: 1.3, height: 0.78, depth: 0.015 }, scene);
+    frame.position.set(fx, 0.55, 5.97); frame.material = panTrimM; frame.isPickable = false;
+  });
+
+  // Front-Right Wall Paneling (z = +D/2 = +6, x = +0.78 to +7.0)
+  const panFR_back = BABYLON.MeshBuilder.CreateBox('k_panFR_back', { width: 6.22, height: 1.05, depth: 0.02 }, scene);
+  panFR_back.position.set(3.89, 0.525, 5.99); panFR_back.material = panWoodM; panFR_back.isPickable = false;
+  const panFR_base = BABYLON.MeshBuilder.CreateBox('k_panFR_base', { width: 6.22, height: 0.12, depth: 0.035 }, scene);
+  panFR_base.position.set(3.89, 0.06, 5.9825); panFR_base.material = panTrimM; panFR_base.isPickable = false;
+  const panFR_cap = BABYLON.MeshBuilder.CreateBox('k_panFR_cap', { width: 6.22, height: 0.05, depth: 0.045 }, scene);
+  panFR_cap.position.set(3.89, 1.025, 5.9775); panFR_cap.material = panTrimM; panFR_cap.isPickable = false;
+  [1.98, 3.89, 5.8].forEach((fx, fi) => {
+    const frame = BABYLON.MeshBuilder.CreateBox('k_panFR_f' + fi, { width: 1.3, height: 0.78, depth: 0.015 }, scene);
+    frame.position.set(fx, 0.55, 5.97); frame.material = panTrimM; frame.isPickable = false;
+  });
 
   // ── house elements ──
   makeWeb('el_kit_web1',-6.75,3.55,-5.6,0,0.95);
@@ -24,16 +83,76 @@ function buildKitchen(){
   makeRat('el_kit_rat',[{x:1.0,z:-5.35},{x:4.3,z:-5.45},{x:6.4,z:-5.4},{x:3.0,z:-5.4}],5);
   [-4,-1,2].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('k_beam'+bx,{width:0.28,height:0.26,depth:D},scene); b.position.set(bx,H-0.14,0); const bm=mat('k_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.14,0.07,0.03); b.material=bm; });
 
-  // Open stone fireplace with a green fire
-  const hearthM=pbr('k_hearthM',TEX.rock_d,TEX.rock_n,2,2,new BABYLON.Color3(0.28,0.32,0.35));
+  // Open stone fireplace with substantial chimney breast and visible stone masonry
   const sootM=mat('k_sootM'); sootM.diffuseColor=new BABYLON.Color3(0.02,0.02,0.02);
   [-1.55,1.55].forEach((px,pi)=>{
     const pillar=BABYLON.MeshBuilder.CreateBox('k_hpil'+pi,{width:0.7,height:2.6,depth:0.75},scene); pillar.position.set(px,1.3,-D/2+0.45); pillar.material=hearthM;
   });
   const lintel=BABYLON.MeshBuilder.CreateBox('k_hlintel',{width:3.8,height:0.5,depth:0.75},scene); lintel.position.set(0,2.85,-D/2+0.45); lintel.material=hearthM;
-  const chimney=BABYLON.MeshBuilder.CreateBox('k_hchin',{width:3.0,height:1.15,depth:0.7},scene); chimney.position.set(0,3.62,-D/2+0.4); chimney.material=hearthM;
+  const chimney=BABYLON.MeshBuilder.CreateBox('k_hchin',{width:3.2,height:1.15,depth:0.8},scene); chimney.position.set(0,3.62,-D/2+0.45); chimney.material=hearthM;
   const fireback=BABYLON.MeshBuilder.CreatePlane('k_hback',{width:2.4,height:2.6},scene); fireback.position.set(0,1.3,-D/2+0.06); fireback.material=sootM;
   const hearth=BABYLON.MeshBuilder.CreateBox('k_hearth',{width:3.6,height:0.07,depth:1.05},scene); hearth.position.set(0,0.035,-D/2+0.62); hearth.material=hearthM;
+
+  // ── Substantial Masonry Details & Chamfer-like Blocks ──
+  // 1. Pillar Masonry Courses (6 vertical courses per pillar)
+  for (let c = 0; c < 6; c++) {
+    const cy = 0.25 + c * 0.42;
+    const sm = (c % 2 === 0) ? stoneBlockM1 : stoneBlockM2;
+
+    // Left pillar front block
+    const lpBlk = BABYLON.MeshBuilder.CreateBox('k_lpBlk_' + c, { width: 0.72, height: 0.38, depth: 0.04 }, scene);
+    lpBlk.position.set(-1.55, cy, -D/2 + 0.84); lpBlk.material = sm; lpBlk.isPickable = false;
+    // Left pillar outer quoin
+    const lpQ = BABYLON.MeshBuilder.CreateBox('k_lpQ_' + c, { width: 0.04, height: 0.38, depth: 0.76 }, scene);
+    lpQ.position.set(-1.92, cy, -D/2 + 0.45); lpQ.material = sm; lpQ.isPickable = false;
+
+    // Right pillar front block
+    const rpBlk = BABYLON.MeshBuilder.CreateBox('k_rpBlk_' + c, { width: 0.72, height: 0.38, depth: 0.04 }, scene);
+    rpBlk.position.set(1.55, cy, -D/2 + 0.84); rpBlk.material = sm; rpBlk.isPickable = false;
+    // Right pillar outer quoin
+    const rpQ = BABYLON.MeshBuilder.CreateBox('k_rpQ_' + c, { width: 0.04, height: 0.38, depth: 0.76 }, scene);
+    rpQ.position.set(1.92, cy, -D/2 + 0.45); rpQ.material = sm; rpQ.isPickable = false;
+  }
+
+  // 2. Lintel Voussoir Stones & Central Keystone across width = 3.8
+  const keystone = BABYLON.MeshBuilder.CreateBox('k_keystone', { width: 0.52, height: 0.56, depth: 0.08 }, scene);
+  keystone.position.set(0, 2.85, -D/2 + 0.85); keystone.material = keystoneM; keystone.isPickable = false;
+
+  [-1.6, -1.1, -0.6, 0.6, 1.1, 1.6].forEach((vx, vi) => {
+    const voussoir = BABYLON.MeshBuilder.CreateBox('k_voussoir_' + vi, { width: 0.46, height: 0.50, depth: 0.05 }, scene);
+    voussoir.position.set(vx, 2.85, -D/2 + 0.84); voussoir.material = (vi % 2 === 0) ? stoneBlockM1 : stoneBlockM2; voussoir.isPickable = false;
+  });
+
+  // 3. Stone Corbels under Mantel Shelf
+  [-1.6, 1.6].forEach((cx, ci) => {
+    const corbel = BABYLON.MeshBuilder.CreateBox('k_corbel_' + ci, { width: 0.3, height: 0.35, depth: 0.25 }, scene);
+    corbel.position.set(cx, 2.95, -D/2 + 0.72); corbel.material = keystoneM; corbel.isPickable = false;
+  });
+
+  // 4. Substantial Chimney Breast Quoins and Rustic Ashlar Masonry
+  [3.3, 3.5, 3.7, 3.9].forEach((qy, qi) => {
+    const lQuoin = BABYLON.MeshBuilder.CreateBox('k_cql_' + qi, { width: 0.35, height: 0.18, depth: 0.82 }, scene);
+    lQuoin.position.set(-1.52, qy, -D/2 + 0.45); lQuoin.material = stoneBlockM1; lQuoin.isPickable = false;
+
+    const rQuoin = BABYLON.MeshBuilder.CreateBox('k_cqr_' + qi, { width: 0.35, height: 0.18, depth: 0.82 }, scene);
+    rQuoin.position.set(1.52, qy, -D/2 + 0.45); rQuoin.material = stoneBlockM1; rQuoin.isPickable = false;
+  });
+
+  // Front face ashlar stone blocks on upper chimney breast
+  [
+    { y: 3.35, xs: [-0.9, 0, 0.9], w: 0.8 },
+    { y: 3.55, xs: [-0.45, 0.45], w: 0.85 },
+    { y: 3.75, xs: [-0.9, 0, 0.9], w: 0.8 },
+    { y: 3.92, xs: [-0.45, 0.45], w: 0.85 }
+  ].forEach((row, ri) => {
+    row.xs.forEach((bx, bi) => {
+      const blk = BABYLON.MeshBuilder.CreateBox(`k_cash_${ri}_${bi}`, { width: row.w, height: 0.16, depth: 0.04 }, scene);
+      blk.position.set(bx, row.y, -D/2 + 0.86);
+      blk.material = ((ri + bi) % 2 === 0) ? stoneBlockM1 : stoneBlockM2;
+      blk.isPickable = false;
+    });
+  });
+
   const flogM=pbr('k_flogM',TEX.wood_d,TEX.wood_n,1,1,new BABYLON.Color3(0.22,0.14,0.07));
   [[-0.14,0.09,0.15],[0.13,0.09,-0.1],[0.0,0.22,0.03]].forEach(([lx,ly,lz],li)=>{
     const flog=BABYLON.MeshBuilder.CreateCylinder('k_flog'+li,{diameter:0.12,height:0.8,tessellation:7},scene); flog.rotation.z=Math.PI/2-0.12*li; flog.position.set(lx,ly,-D/2+0.45+lz); flog.material=flogM;
@@ -158,6 +277,10 @@ function buildKitchen(){
     const bar=BABYLON.MeshBuilder.CreateCylinder('k_barrel'+bi,{diameterTop:0.44,diameterBottom:0.4,height:0.62,tessellation:12},scene); bar.position.set(bx,0.31,bz); bar.material=barrelM;
   });
 
+  // Warm workbench light reveals the paneling without changing the room controls.
+  const benchGlow=new BABYLON.PointLight('k_benchGlow',new BABYLON.Vector3(-5.4,2.4,0),scene);
+  benchGlow.diffuse=new BABYLON.Color3(0.92,0.65,0.36); benchGlow.intensity=0.8; benchGlow.range=7;
+
   // Lights
   const hearthLight=new BABYLON.PointLight('k_hL',new BABYLON.Vector3(0,0.8,-D/2+0.5),scene);
   hearthLight.diffuse=new BABYLON.Color3(0.1,0.6,0.2); hearthLight.intensity=1.5; hearthLight.range=10;
@@ -166,7 +289,7 @@ function buildKitchen(){
   const warmL=new BABYLON.PointLight('k_warmL',new BABYLON.Vector3(0,1.2,-4.6),scene);
   warmL.diffuse=new BABYLON.Color3(0.35,0.5,0.3); warmL.intensity=0.7; warmL.range=7;
   const ambient=new BABYLON.HemisphericLight('k_amb',new BABYLON.Vector3(0,1,0),scene);
-  ambient.intensity=0.5; ambient.diffuse=new BABYLON.Color3(0.3,0.35,0.4); ambient.groundColor=new BABYLON.Color3(0.12,0.09,0.05);
+  ambient.intensity=0.68; ambient.diffuse=new BABYLON.Color3(0.68,0.59,0.46); ambient.groundColor=new BABYLON.Color3(0.16,0.11,0.07);
 
   let ft=0;
   function flk(base,amp,sp,off){ return base+amp*(Math.sin(ft*sp+off)*0.5+Math.sin(ft*sp*2.3+off*1.7)*0.3+Math.sin(ft*sp*0.41+off*0.9)*0.2); }
@@ -189,5 +312,3 @@ function buildKitchen(){
   buildDoor('door_pantry', -W/2+3, -D/2, 0, 1.14, 2.38);
   interactables.set('door_pantry','door_pantry');
 }
-
-// ─── LIBRARY ──────────────────────────────────────────────────────────────────
