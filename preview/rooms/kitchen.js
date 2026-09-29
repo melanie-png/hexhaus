@@ -57,7 +57,7 @@ function buildKitchen(){
   const mantel=BABYLON.MeshBuilder.CreateBox('k_hmantel',{width:4.2,height:0.1,depth:0.6},scene); mantel.position.set(0,3.15,-D/2+0.5); mantel.material=woodM;
   const cndM=mat('k_cndM'); cndM.emissiveColor=new BABYLON.Color3(1.0,0.75,0.35); cndM.diffuseColor=new BABYLON.Color3(0,0,0);
   [-1.3,1.3].forEach((cx,ci)=>{
-    const st=BABYLON.MeshBuilder.CreateCylinder('k_hcand'+ci,{diameter:0.05,height:0.22,tessellation:8},scene); st.position.set(cx,3.31,-D/2+0.5); st.material=rackM;
+    const st=BABYLON.MeshBuilder.CreateCylinder('k_hcand'+ci,{diameter:0.05,height:0.22,tessellation:8},scene); st.position.set(cx,3.31,-D/2+0.5); st.material=chainM;
     const tip=BABYLON.MeshBuilder.CreateSphere('k_hflame'+ci,{diameter:0.045,segments:6},scene); tip.position.set(cx,3.45,-D/2+0.5); tip.material=cndM;
   });
   [-0.5,0.0,0.5].forEach((jx,ji)=>{
