@@ -40,7 +40,7 @@ const ITEMS = {
   secretshelf:{ name:'The Whispering Shelf', icon:'📖', collectible:false, desc:'Every book here is named, not titled. The shelf hums, very faintly, like paper about to speak.' },
 };
 
-const state = { inventory:[], activeModal:null, currentRoom:'entrance', passageOpen:false, basementUnlocked:false, helgaSeen:false, kJarDropped:false, lBookDropped:false };
+const state = { inventory:[], activeModal:null, currentRoom:'entrance', passageOpen:false, basementUnlocked:false, helgaSeen:false, kJarDropped:false, lBookDropped:false, lightsOn:{} };
 const $ = id => document.getElementById(id);
 
 // ─── LOADING ──────────────────────────────────────────────────────────────────
@@ -568,6 +568,15 @@ function handleInteract(key){
   if(key==='passage_hole'){
     state.basementUnlocked=true;
     transitionToRoom('basement');
+    return;
+  }
+  // A light switch: click it and the dark room comes to life.
+  if(key.startsWith('lightswitch_')){
+    const rm = key.slice(12);
+    state.lightsOn[rm] = !state.lightsOn[rm];
+    if(typeof applyRoomLight === 'function') applyRoomLight(rm, state.lightsOn[rm]);
+    if(window.SFX) SFX.click();
+    showToast(state.lightsOn[rm] ? '💡 The light hums on.' : 'The bulb clicks off.');
     return;
   }
   if(key.startsWith('door_')){

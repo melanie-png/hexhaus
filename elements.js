@@ -471,3 +471,50 @@ function makeDollhouse(name,x,z,rotY){
   interactables.set(name+'_g1','dollhouse'); interactables.set(name+'_g2','dollhouse');
   return node;
 }
+
+// ── LIGHT SWITCHES ─────────────────────────────────────────────────────────────
+// The dark rooms each get a switch by the door: click it and the room comes to life.
+const LIT = {
+  bathroom:{ amb:'b_amb',  off:0.25, on:0.62, offD:[0.20,0.25,0.30], onD:[0.52,0.48,0.40], lamp:[0,3.0,0],  li:1.0,  lr:7  },
+  pantry:  { amb:'p_amb',  off:0.30, on:0.68, offD:[0.25,0.30,0.35], onD:[0.58,0.52,0.42], lamp:[0,3.3,0],  li:1.25, lr:11 },
+  basement:{ amb:'bs_amb', off:0.20, on:0.60, offD:[0.10,0.15,0.12], onD:[0.48,0.44,0.38], lamp:[0,3.5,0],  li:1.5,  lr:16 },
+  attic:   { amb:'a_amb',  off:0.15, on:0.55, offD:[0.15,0.12,0.10], onD:[0.56,0.50,0.42], lamp:[0,2.55,0], li:1.3,  lr:11 }
+};
+function applyRoomLight(room, on){
+  const cfg = LIT[room]; if(!cfg || !scene) return;
+  const amb = scene.getLightByName(cfg.amb);
+  if(amb){
+    amb.intensity = on ? cfg.on : cfg.off;
+    const d = on ? cfg.onD : cfg.offD;
+    amb.diffuse = new BABYLON.Color3(d[0], d[1], d[2]);
+  }
+  let lamp = scene.getLightByName('sw_lamp_' + room);
+  if(on){
+    if(!lamp){
+      lamp = new BABYLON.PointLight('sw_lamp_' + room, new BABYLON.Vector3(cfg.lamp[0], cfg.lamp[1], cfg.lamp[2]), scene);
+      lamp.diffuse = new BABYLON.Color3(0.95, 0.8, 0.55);
+    }
+    lamp.intensity = cfg.li; lamp.range = cfg.lr;
+  } else if(lamp){ lamp.intensity = 0; }
+  const lever = scene.getMeshByName('sw_lever_' + room);
+  if(lever){
+    const target = on ? 0.022 : -0.022;
+    elAnim(lever, () => { lever.position.y += (target - lever.position.y) * 0.35; });
+  }
+  const bulb = scene.getMeshByName('a_bulb');   // the attic bulb glows warm when its switch is on
+  if(room === 'attic' && bulb && bulb.material){
+    bulb.material.emissiveColor = on ? new BABYLON.Color3(1.0, 0.88, 0.55) : new BABYLON.Color3(0.6, 0.5, 0.3);
+  }
+}
+function makeRoomSwitch(room, x, y, z, ry){
+  const plate = BABYLON.MeshBuilder.CreateBox('sw_plate_' + room, {width:0.16, height:0.22, depth:0.03}, scene);
+  plate.position.set(x, y, z); plate.rotation.y = ry;
+  const pm = mat('sw_pm_' + room); pm.diffuseColor = new BABYLON.Color3(0.32, 0.24, 0.13); pm.specularColor = new BABYLON.Color3(0.35, 0.30, 0.20); plate.material = pm;
+  const lever = BABYLON.MeshBuilder.CreateBox('sw_lever_' + room, {width:0.045, height:0.10, depth:0.025}, scene);
+  lever.parent = plate; lever.position.set(0, (state.lightsOn && state.lightsOn[room]) ? 0.022 : -0.022, 0.026);
+  const lm = mat('sw_lm_' + room); lm.diffuseColor = new BABYLON.Color3(0.50, 0.42, 0.25); lm.specularColor = new BABYLON.Color3(0.50, 0.45, 0.30); lever.material = lm;
+  interactables.set('sw_plate_' + room, 'lightswitch_' + room);
+  interactables.set('sw_lever_' + room, 'lightswitch_' + room);
+  // a revisit keeps the light you switched on
+  if(state.lightsOn && state.lightsOn[room]) applyRoomLight(room, true);
+}

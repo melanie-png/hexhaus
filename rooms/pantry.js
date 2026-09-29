@@ -58,6 +58,7 @@ function buildPantry(){
   interactables.set('p_glow','crystalball');
 
   buildDoor('door_kitchen', 0, D/2, Math.PI, 1.14, 2.18);
+  makeRoomSwitch('pantry', 1.0, 1.4, D/2-0.06, Math.PI);
   interactables.set('door_kitchen','door_kitchen');
   buildDoor('door_basement', W/2-0.5, -D/2, 0, 0.94, 1.98);
 
