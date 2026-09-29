@@ -248,7 +248,7 @@ if (new URLSearchParams(location.search).has('qa')) {
                   }
                 },700);
                 setTimeout(()=>{
-                  check(SFX_LOG.includes('thud'),'item drop thud fired (pot lands in the final dwell)');
+                  check(SFX_LOG.includes('thud'),'item drop thud fired (pot lands in the final dwell) LOG='+SFX_LOG.slice(-12).join(',')+' kJar='+state.kJarDropped+' room='+state.currentRoom+' pot='+!!(scene&&scene.getMeshByName('fx_k_pot')));
                   document.title='QA '+(checks-failures)+'/'+checks+(failLines.length?' | '+failLines.join(' ; ').slice(0,700):'');
                   log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
                 },2400);
