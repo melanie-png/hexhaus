@@ -20,7 +20,7 @@ const ITEMS = {
   raven:     { name:'The Raven',         icon:'🦅', collectible:false, desc:'It watches you. It has watched everyone who has entered this room. It does not blink.' },
   helga_portrait:{ name:'Portrait of the Lady', icon:'🖼️', collectible:false, desc:'She is young here. Younger than the house. The white in her hair was already there when this was painted. The cat on her shoulders looks at you. Nothing else in the frame does.' },
   helga_apparition:{ name:'Helga', icon:'🕯️', collectible:false, desc:'She is mid-scream and no sound comes out. Her hands are black to the knuckle, the hands of someone who has worked this house for two hundred years. The candle has not burned down. She is closer than she was.' },
-  helga_cat:{ name:'The Cat', icon:'🐈‍⬛', collectible:false, desc:'Green eyes, older than the cat wearing them. It looks at you the way she does. By the time you blink it is already somewhere else in the house.' },
+  helga_cat:{ name:'Hans', icon:'\u{1F409}\u{2B1B}', collectible:false, desc:'Green eyes, older than the cat wearing them. Hans looks at you the way she does. By the time you blink, he is already somewhere else in the house.' },
   portrait:  { name:'Family Portrait',    icon:'🖼️', collectible:false, desc:'Four figures. Three look outward. One — the smallest — faces the wall. The paint is old. The posture is not.' },
   mirror:    { name:'Standing Mirror',    icon:'🪞', collectible:false, desc:"Your reflection is a half-second slow. It catches up when you stop moving. When you look away, it doesn't." },
   clock:     { name:'Grandfather Clock',  icon:'🕰️', collectible:false, desc:'Stopped at 3:17. The pendulum is still. But you heard it tick when you entered the room.' },
