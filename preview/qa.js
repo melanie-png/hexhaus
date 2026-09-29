@@ -13,8 +13,9 @@ if (new URLSearchParams(location.search).has('qa')) {
   const report=document.createElement('pre');report.id='qa-report';report.style.cssText='position:fixed;top:5%;left:3%;width:94%;height:85%;overflow:auto;background:#0a0a0aee;color:#fff;padding:14px;z-index:999999;font:13px/1.5 monospace;white-space:pre-wrap';document.body.appendChild(report);
   const log=s=>{report.textContent+=s+'\n';console.log('[qa]',s)};
   let failures=0,checks=0;
-  const check=(v,msg)=>{checks++;if(!v)failures++;log((v?'PASS':'FAIL')+' '+msg)};
+  const failLines=[];const check=(v,msg)=>{checks++;if(!v){failures++;failLines.push(msg.slice(0,46))}log((v?'PASS':'FAIL')+' '+msg)};
   addEventListener('error',e=>log('ERROR '+e.message));
+  addEventListener('error',e=>{document.title='QAERR '+e.message.slice(0,200)});
   addEventListener('unhandledrejection',e=>log('REJECTION '+e.reason));
   const run=()=>{
     try{
@@ -223,6 +224,7 @@ if (new URLSearchParams(location.search).has('qa')) {
             }
             window.HEXQA_SPAWN=null;
             log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
+            document.title='QA '+(checks-failures)+'/'+checks+(failLines.length?' | '+failLines.join(' ; ').slice(0,700):'');
             // final dwell: the kitchen, camera parked on the cat — for visual QA
             setTimeout(()=>{
               try{
