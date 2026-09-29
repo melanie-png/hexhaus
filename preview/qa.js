@@ -100,7 +100,7 @@ if (new URLSearchParams(location.search).has('qa')) {
           living:[['el_liv_web1',null],['el_liv_dust',null],['el_liv_rock','rockingchair',0],['el_liv_sheet','sheeted',0],['el_liv_flowers','deadflowers',0],['el_liv_moths',null],['el_liv_wax1',null]],
           kitchen:[['el_kit_web1',null],['el_kit_dust',null],['el_kit_potions','potions',1],['el_kit_salt','saltline',0],['el_kit_herbs0',null],['el_kit_herbs1',null],['el_kit_herbs2',null],['el_kit_rat','rat',0],['el_kit_wax1',null]],
           library:[['el_lib_web1',null],['el_lib_web2',null],['el_lib_dust',null],['el_lib_sheet','sheeted',0],['el_lib_doll','dollhouse',0]],
-          bathroom:[['el_bath_web1',null],['el_bath_mirror','crackedmirror',1]],
+          bathroom:[['el_bath_web1',null],['el_bath_mirror','crackedmirror',1],['b_tub','bathtub',1],['b_wc_bowl','hightank',1],['b_sinkbasin','washbasin',1],['b_wainscotB',null]],
           pantry:[['el_pan_web1',null],['el_pan_dust',null],['el_pan_salt','saltline',0],['el_pan_rat','rat',0]],
           basement:[['el_bs_web1',null],['el_bs_web2',null],['el_bs_cauldron','cauldron',1],['el_bs_sigils','sigils',[4.544,0.012,2.415]],['el_bs_bucket','dripbucket',0]],
           attic:[['el_at_web1',null],['el_at_web2',null],['el_at_dust',null],['el_at_sheet1','sheeted',0],['el_at_sheet2',null],['el_at_spider','spider',0],['el_at_raven','raven',1]],
