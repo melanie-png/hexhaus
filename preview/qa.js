@@ -1,5 +1,15 @@
 // Preview-only exhaustive room/navigation diagnostics.
 if (new URLSearchParams(location.search).has('qa')) {
+  // ?qa&look=x,y,z — frame a specific view for screenshots (no checks run)
+  const _lk=new URLSearchParams(location.search).get('look');
+  if(_lk){
+    const [lx,ly,lz]=_lk.split(',').map(Number);
+    setInterval(()=>{
+      if(typeof camera!=='undefined'&&typeof state!=='undefined'&&state.currentRoom){
+        camera.setTarget(new BABYLON.Vector3(lx,ly,lz)); camera.getViewMatrix(true); scene.render();
+      }
+    },300);
+  } else {
   const report=document.createElement('pre');report.id='qa-report';report.style.cssText='position:fixed;top:5%;left:3%;width:94%;height:85%;overflow:auto;background:#0a0a0aee;color:#fff;padding:14px;z-index:999999;font:13px/1.5 monospace;white-space:pre-wrap';document.body.appendChild(report);
   const log=s=>{report.textContent+=s+'\n';console.log('[qa]',s)};
   let failures=0,checks=0;
@@ -215,4 +225,5 @@ if (new URLSearchParams(location.search).has('qa')) {
     if(state.currentRoom==='entrance'&&scene&&scene.meshes.length>100){clearInterval(timer);setTimeout(run,2500)}
     else if(++ticks>80){clearInterval(timer);log('TIMEOUT waiting for entrance')}
   },250);
+}
 }
