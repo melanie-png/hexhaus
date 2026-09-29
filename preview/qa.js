@@ -207,7 +207,6 @@ if (new URLSearchParams(location.search).has('qa')) {
             check(typeof SFX==='object'&&typeof SFX.doorCreak==='function'&&typeof SFX.slam==='function'&&typeof SFX.dropAnim==='function','SFX engine present (creak/doorCreak/thud/slam/skitter/dropAnim)');
             check(SFX_LOG.includes('doorCreak'),'door creak fired on a door swing');
             check(SFX_LOG.includes('creak'),'floorboard creak fired on room entry');
-            check(SFX_LOG.includes('thud'),'item drop thud fired');
             window.HEXQA_SPAWN=null;
             check(state.helgaSeen===true,'the first sighting happened when the living room was entered');
             spawnApparitions('living');
@@ -237,6 +236,7 @@ if (new URLSearchParams(location.search).has('qa')) {
             setTimeout(()=>{
               try{
                 window.HEXQA_SPAWN='cat';
+                state.kJarDropped=false;   // re-arm: the pot drops during the dwell — thud checked late
                 transitionToRoom('kitchen');
                 setTimeout(()=>{
                   const cb2=scene.getMeshByName('app_cat_body');
@@ -247,6 +247,11 @@ if (new URLSearchParams(location.search).has('qa')) {
                     scene.render();
                   }
                 },700);
+                setTimeout(()=>{
+                  check(SFX_LOG.includes('thud'),'item drop thud fired (pot lands in the final dwell)');
+                  document.title='QA '+(checks-failures)+'/'+checks+(failLines.length?' | '+failLines.join(' ; ').slice(0,700):'');
+                  log('DONE '+(checks-failures)+'/'+checks+' checks; '+failures+' failures');
+                },2400);
               }catch(e){log('FATAL catDwell '+e.stack)}
             },3600);
           },2500);
