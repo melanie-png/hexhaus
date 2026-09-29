@@ -572,7 +572,7 @@ function handleInteract(key){
   }
   // A light switch: click it and the dark room comes to life.
   if(key.startsWith('lightswitch_')){
-    const rm = key.slice(11);
+    const rm = key.slice(12);
     state.lightsOn[rm] = !state.lightsOn[rm];
     if(typeof applyRoomLight === 'function') applyRoomLight(rm, state.lightsOn[rm]);
     if(window.SFX) SFX.click();
