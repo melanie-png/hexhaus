@@ -40,7 +40,7 @@ const ITEMS = {
   secretshelf:{ name:'The Whispering Shelf', icon:'📖', collectible:false, desc:'Every book here is named, not titled. The shelf hums, very faintly, like paper about to speak.' },
 };
 
-const state = { inventory:[], activeModal:null, currentRoom:'entrance', passageOpen:false, basementUnlocked:false, helgaSeen:false };
+const state = { inventory:[], activeModal:null, currentRoom:'entrance', passageOpen:false, basementUnlocked:false, helgaSeen:false, kJarDropped:false, lBookDropped:false };
 const $ = id => document.getElementById(id);
 
 // ─── LOADING ──────────────────────────────────────────────────────────────────
@@ -60,6 +60,7 @@ function advanceLoad(){
 setTimeout(advanceLoad,300);
 
 $('btn-enter').addEventListener('click',()=>{
+  if(window.SFX) SFX.unlock();   // audio needs a user gesture
   $('title-screen').classList.add('hidden');
   $('game-canvas').classList.remove('hidden');
   $('hud').classList.remove('hidden');
@@ -205,6 +206,7 @@ function buildDoor(name, wx, wz, rotY, dw, dh, y0=0){
 
 // The swing: opens away from you, and you walk through as it passes halfway.
 function swingDoor(d, target){
+  if(window.SFX) SFX.doorCreak();   // the creak rides the swing
   if(new URLSearchParams(location.search).has('qa')){ if(target) transitionToRoom(target); return; }   // QA asserts instantly
   const t0=performance.now(), T=650; let walked=false;
   const obs=scene.onBeforeRenderObservable.add(()=>{
@@ -449,6 +451,7 @@ function transitionToRoom(roomId){
   if(isTransitioning) return;
   if(!ROOMS[roomId]) { console.warn('Unknown room:', roomId); return; }
   if(recentreAnim){ clearInterval(recentreAnim); recentreAnim=null; }
+  if(window._creakTimer){ clearInterval(window._creakTimer); window._creakTimer=null; }
   document.getElementById('dbgLoad')?.remove();
   isTransitioning = true;
   const canvas = $('game-canvas');
@@ -482,6 +485,33 @@ function transitionToRoom(roomId){
       }
     });
     state.currentRoom = roomId;
+    // ── sound & animation pass: your step, the house's noises, one-shot drops ──
+    if(window.SFX){
+      SFX.creak(0.7);                                   // your first step onto the boards
+      if(roomId==='kitchen' && !state.kJarDropped){     // the pot that will not stay on its shelf
+        state.kJarDropped=true;
+        setTimeout(()=>{
+          if(state.currentRoom!=='kitchen'||!scene) return;
+          const pot=BABYLON.MeshBuilder.CreateCylinder('fx_k_pot',{diameter:0.12,height:0.17,tessellation:12},scene);
+          pot.position.set(5.1,1.55,-5.6); pot.rotation.z=0.12;
+          const pm=mat('fx_k_potM'); pm.diffuseColor=new BABYLON.Color3(0.34,0.19,0.10); pm.specularColor=new BABYLON.Color3(0.3,0.2,0.12);
+          pot.material=pm;
+          SFX.dropAnim(pot,0.085,{size:0.9,spin:1.6,rest:m=>{m.rotation.z=1.35;}});
+        },1200);
+      }
+      if(roomId==='library' && !state.lBookDropped){   // a book knocked from its case
+        state.lBookDropped=true;
+        setTimeout(()=>{
+          if(state.currentRoom!=='library'||!scene) return;
+          const bk=BABYLON.MeshBuilder.CreateBox('fx_l_book',{width:0.22,height:0.035,depth:0.15},scene);
+          bk.position.set(3.0,1.5,-5.4);
+          const bm=mat('fx_l_bookM'); bm.diffuseColor=new BABYLON.Color3(0.22,0.10,0.09); bm.specularColor=new BABYLON.Color3(0.05,0.05,0.05);
+          bk.material=bm;
+          SFX.dropAnim(bk,0.018,{size:0.6,spin:2.4,rest:m=>{m.rotation.z=0.35;}});
+        },1600);
+      }
+      window._creakTimer=setInterval(()=>{ if(!state.activeModal&&Math.random()<0.6) SFX.creak(0.5+Math.random()*0.8); },15000);
+    }
     // The house's residents drift where they please.
     if (typeof spawnApparitions === 'function') spawnApparitions(roomId);
     $('room-name').textContent = r.name;
