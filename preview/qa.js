@@ -13,7 +13,7 @@ if (new URLSearchParams(location.search).has('qa')) {
   const report=document.createElement('pre');report.id='qa-report';report.style.cssText='position:fixed;top:5%;left:3%;width:94%;height:85%;overflow:auto;background:#0a0a0aee;color:#fff;padding:14px;z-index:999999;font:13px/1.5 monospace;white-space:pre-wrap';document.body.appendChild(report);
   const log=s=>{report.textContent+=s+'\n';console.log('[qa]',s)};
   let failures=0,checks=0;
-  const failLines=[];const check=(v,msg)=>{checks++;if(!v){failures++;failLines.push(msg.slice(0,46))}log((v?'PASS':'FAIL')+' '+msg)};
+  const failLines=[];const check=(v,msg)=>{checks++;if(!v){failures++;failLines.push(msg.slice(0,64))}log((v?'PASS':'FAIL')+' '+msg)};
   addEventListener('error',e=>log('ERROR '+e.message));
   addEventListener('error',e=>{document.title='QAERR '+e.message.slice(0,200)});
   addEventListener('unhandledrejection',e=>log('REJECTION '+e.reason));
@@ -117,7 +117,7 @@ if (new URLSearchParams(location.search).has('qa')) {
             camera.setTarget(aim); scene.render();
             const pick=scene.pick(scene.getEngine().getRenderWidth()/2, scene.getEngine().getRenderHeight()/2);
             const ok=pick.hit&&(pick.pickedMesh&&(pick.pickedMesh.name===mn||pick.pickedMesh.name.startsWith(mn+'_')||interactables.get(pick.pickedMesh.name)===key));
-            check(ok, roomId+' element '+mn+' ray-selects');
+            check(ok, roomId+' element '+mn+' ray hit '+(pick.hit&&pick.pickedMesh?pick.pickedMesh.name.slice(0,28):'NOTHING'));
           }
         });
         const WINS={entrance:['win_eF1','win_eF2','win_eL1','win_eR1'],living:['win_lB1','win_lF1','win_lF2'],kitchen:['win_kB1','win_kB2'],library:['win_libR1','win_libB1'],bathroom:['win_bB1'],pantry:['win_pL1'],attic:['win_aB1']};
