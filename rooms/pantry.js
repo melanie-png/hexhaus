@@ -7,8 +7,10 @@ function buildPantry(){
   const floor=BABYLON.MeshBuilder.CreateGround('p_floor',{width:W,height:D,subdivisions:3},scene); floor.material=floorM; floor.receiveShadows=true;
   const ceilM=mat('p_ceilM'); ceilM.diffuseColor=new BABYLON.Color3(0.1,0.08,0.06); const ceil=BABYLON.MeshBuilder.CreatePlane('p_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
   function pWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
-  pWall('p_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); pWall('p_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
   pWall('p_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); pWall('p_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  doorwayWall('p_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.3,dh:2.3}]);
+  doorwayWall('p_wB',W,H,0,-D/2,0,wallM,[{dx:W/2-0.5,dz:-D/2,dw:1.1,dh:2.1}]);
+  makeWindow('win_pL1', -W/2, 2.6, 1.5, Math.PI/2, 0.8, 1.1);
 
   // Specimen jar grid
   for(let row=0;row<3;row++){ for(let col=0;col<6;col++){ const jx=-W/2+1+col*1.5; const jy=1.0+row*0.8;
@@ -49,9 +51,9 @@ function buildPantry(){
   interactables.set('p_jar00','jars'); interactables.set('p_jar11','jars');
   interactables.set('p_glow','crystalball');
 
-  const doorK=BABYLON.MeshBuilder.CreateBox('door_kitchen',{width:1.2,height:2.2,depth:0.1},scene); doorK.position.set(0,1.1,D/2-0.05); const dkM=mat('p_dkM'); dkM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorK.material=dkM;
+  buildDoor('door_kitchen', 0, D/2, Math.PI, 1.14, 2.18);
   interactables.set('door_kitchen','door_kitchen');
-  const doorBs=BABYLON.MeshBuilder.CreateBox('door_basement',{width:1.0,height:2.0,depth:0.1},scene); doorBs.position.set(W/2-0.5,1.0,-D/2+0.05); const dbM=mat('p_dbM'); dbM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorBs.material=dbM;
+  buildDoor('door_basement', W/2-0.5, -D/2, 0, 0.94, 1.98);
   // iron keyhole plate — the crescent-moon lock the iron key answers
   const kp=BABYLON.MeshBuilder.CreateBox('p_keyplate',{width:0.1,height:0.16,depth:0.012},scene); kp.position.set(W/2-0.5,1.15,-D/2+0.11); const kpm=mat('p_kpM'); kpm.diffuseColor=new BABYLON.Color3(0.32,0.26,0.12); kpm.specularColor=new BABYLON.Color3(0.5,0.45,0.25); kpm.specularPower=48; kp.material=kpm;
   const kh=BABYLON.MeshBuilder.CreateCylinder('p_keyhole',{diameter:0.045,height:0.012,tessellation:10},scene); kh.position.set(W/2-0.5,1.15,-D/2+0.115); kh.rotation.x=Math.PI/2; const khm=mat('p_khM'); khm.diffuseColor=new BABYLON.Color3(0.01,0.01,0.01); khm.emissiveColor=new BABYLON.Color3(0.02,0.015,0.0); kh.material=khm;

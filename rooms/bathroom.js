@@ -7,8 +7,9 @@ function buildBathroom(){
   const floor=BABYLON.MeshBuilder.CreateGround('b_floor',{width:W,height:D,subdivisions:2},scene); floor.material=floorM; floor.receiveShadows=true;
   const ceil=BABYLON.MeshBuilder.CreatePlane('b_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
   function bWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
-  bWall('b_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); bWall('b_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
-  bWall('b_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); bWall('b_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  bWall('b_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); bWall('b_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); bWall('b_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  doorwayWall('b_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.1,dh:2.3}]);
+  makeWindow('win_bB1', 1.3, 2.3, -D/2, 0, 0.7, 1.0);
 
   // Bathtub
   const tubM=mat('b_tubM'); tubM.diffuseColor=new BABYLON.Color3(0.5,0.48,0.42);
@@ -41,7 +42,7 @@ function buildBathroom(){
   interactables.set('b_spider','spider'); interactables.set('b_leg0','spider');
   interactables.set('b_mirror','mirror');
 
-  const doorE=BABYLON.MeshBuilder.CreateBox('door_entrance',{width:1.0,height:2.2,depth:0.1},scene); doorE.position.set(0,1.1,D/2-0.05); const deM=mat('b_deM'); deM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorE.material=deM;
+  buildDoor('door_entrance', 0, D/2, Math.PI, 0.94, 2.18);
   interactables.set('door_entrance','door_entrance');
 }
 

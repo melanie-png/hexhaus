@@ -10,8 +10,12 @@ function buildLivingRoom(){
   const ceil=BABYLON.MeshBuilder.CreatePlane('lr_ceil',{width:W,height:D},scene);
   ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
   function lrWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
-  lrWall('lr_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); lrWall('lr_wF',W,H,new BABYLON.Vector3(0,H/2,D/2),Math.PI);
-  lrWall('lr_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); lrWall('lr_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
+  lrWall('lr_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); lrWall('lr_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2);
+  doorwayWall('lr_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.5,dh:2.5}]);
+  doorwayWall('lr_wR',D,H,W/2,0,-Math.PI/2,wallM,[{dx:W/2,dz:-3,dw:1.5,dh:2.5}]);
+  makeWindow('win_lB1', -4.5, 2.9, -D/2, 0);
+  makeWindow('win_lF1', -4.2, 2.9,  D/2, Math.PI);
+  makeWindow('win_lF2',  4.2, 2.9,  D/2, Math.PI);
 
   [-5,-2,1,4].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('lr_beam'+bx,{width:0.3,height:0.28,depth:D},scene); b.position.set(bx,H-0.16,0); const bm=mat('lr_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.16,0.08,0.04); b.material=bm; });
 
@@ -99,10 +103,8 @@ function buildLivingRoom(){
   interactables.set('lr_bsBack','bookshelf');
   interactables.set('lr_embers','fireplace'); interactables.set('lr_firebox','fireplace'); interactables.set('lr_mantel','fireplace');
 
-  const doorE=BABYLON.MeshBuilder.CreateBox('door_entrance',{width:1.4,height:2.4,depth:0.1},scene); doorE.position.set(0,1.2,D/2-0.05); const deM=mat('lr_deM'); deM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorE.material=deM;
-  interactables.set('door_entrance','door_entrance');
-  const doorK=BABYLON.MeshBuilder.CreateBox('door_kitchen',{width:0.1,height:2.4,depth:1.4},scene); doorK.position.set(W/2-0.05,1.2,-3); const dkM=mat('lr_dkM'); dkM.diffuseColor=new BABYLON.Color3(0.18,0.12,0.07); doorK.material=dkM;
-  interactables.set('door_kitchen','door_kitchen');
+  buildDoor('door_entrance', 0, D/2, Math.PI, 1.34, 2.38);
+  buildDoor('door_kitchen', W/2, -3, -Math.PI/2, 1.34, 2.38);
 }
 
 // ─── KITCHEN ──────────────────────────────────────────────────────────────────
