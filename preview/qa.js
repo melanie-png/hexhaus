@@ -204,6 +204,20 @@ if (new URLSearchParams(location.search).has('qa')) {
               check(ec.g>0.5&&ec.g>ec.r,'the cat has green eyes');
             }
             // ── sound + animation pass ──
+            // light switch pass: every dark room gets a working switch
+            ['bathroom','pantry','basement','attic'].forEach(rm=>{
+              transitionToRoom(rm);
+              const sw = scene.getMeshByName('sw_plate_'+rm), lv = scene.getMeshByName('sw_lever_'+rm);
+              check(!!(sw&&lv), rm+' light switch built');
+              const ambName = {bathroom:'b_amb',pantry:'p_amb',basement:'bs_amb',attic:'a_amb'}[rm];
+              const amb = scene.getLightByName(ambName); const before = amb ? amb.intensity : -1;
+              handleInteract('lightswitch_'+rm);
+              const amb2 = scene.getLightByName(ambName);
+              check(state.lightsOn[rm]===true && amb2 && amb2.intensity > before + 0.2, rm+' light switch raises the light');
+              const lamp = scene.getLightByName('sw_lamp_'+rm);
+              check(!!lamp && lamp.intensity > 0, rm+' lamp is lit');
+            });
+            check(SFX_LOG.includes('click'), 'light switch click sound fired');
             check(typeof SFX==='object'&&typeof SFX.doorCreak==='function'&&typeof SFX.slam==='function'&&typeof SFX.dropAnim==='function','SFX engine present (creak/doorCreak/thud/slam/skitter/dropAnim)');
             check(SFX_LOG.includes('doorCreak'),'door creak fired on a door swing');
             check(SFX_LOG.includes('creak'),'floorboard creak fired on room entry');

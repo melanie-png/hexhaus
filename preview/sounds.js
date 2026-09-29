@@ -141,6 +141,18 @@ const SFX = (() => {
     });
   }
 
-  return { unlock, creak, doorCreak, thud, slam, skitter, dropAnim };
+  // A light switch - a dry mechanical snap.
+  function click(){
+    note('click');
+    if(!ready()) return;
+    const t0 = ctx.currentTime;
+    const src = ctx.createBufferSource(); src.buffer = noiseBuf(0.05);
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2300; bp.Q.value = 7;
+    const g = ctx.createGain(); env(g, t0, 0.002, 0.05, 0.5);
+    src.connect(bp); bp.connect(g); g.connect(master);
+    src.start(t0); src.stop(t0 + 0.09);
+  }
+
+  return { unlock, creak, doorCreak, thud, slam, skitter, dropAnim, click };
 })();
 window.SFX = SFX;
