@@ -103,16 +103,17 @@ if (new URLSearchParams(location.search).has('qa')) {
         };
         (STAIRS[roomId]||[]).forEach(sn=>check(!!scene.getMeshByName(sn+'_tread0'),roomId+' staircase '+sn+' has treads'));
         (ELEMENTS[roomId]||[]).forEach(([mn,key,ray])=>{
-          const em=scene.getMeshByName(mn);
+          // elements may be a mesh, a TransformNode with children, or a ParticleSystem
+          const em=scene.getMeshByName(mn)||scene.getTransformNodeByName(mn)||scene.particleSystems.find(ps=>ps.name===mn);
           check(!!em, roomId+' element '+mn+' exists');
           if(!em) return;
-          const bb=em.getHierarchyBoundingVectors?em.getHierarchyBoundingVectors():null;
           if(key){
             check(interactables.get(mn)===key||[...interactables.values()].includes(key), roomId+' element '+mn+' is examineable');
             check(ITEMS[key]&&ITEMS[key].desc.length>10, roomId+' element '+mn+' has inspect text');
           }
           if(ray){
-            camera.setTarget(em.getBoundingInfo().boundingSphere.centerWorld); scene.render();
+            const bb=em.getHierarchyBoundingVectors();
+            camera.setTarget(bb.center); scene.render();
             const pick=scene.pick(scene.getEngine().getRenderWidth()/2, scene.getEngine().getRenderHeight()/2);
             const ok=pick.hit&&(pick.pickedMesh&&(pick.pickedMesh.name===mn||interactables.get(pick.pickedMesh.name)===key));
             check(ok, roomId+' element '+mn+' ray-selects');
