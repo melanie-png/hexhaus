@@ -38,6 +38,7 @@ function buildKitchen(){
   // Copper pot rack
   const rackM=mat('k_rackM'); rackM.diffuseColor=new BABYLON.Color3(0.3,0.18,0.08); rackM.specularColor=new BABYLON.Color3(0.3,0.2,0.1);
   const rackBar=BABYLON.MeshBuilder.CreateBox('k_rack',{width:3.5,height:0.06,depth:0.06},scene); rackBar.position.set(0,H-0.6,0); rackBar.material=rackM;
+  [-1.6,1.6].forEach((cx,ci)=>{ const ch=BABYLON.MeshBuilder.CreateCylinder('k_rackchain'+ci,{diameter:0.012,height:0.6,tessellation:6},scene); ch.position.set(cx,H-0.3,0); ch.material=rackM; });
   for(let p=0;p<5;p++){ const px=-1.5+p*0.75;
     const pan=BABYLON.MeshBuilder.CreateCylinder('k_pan'+p,{diameterTop:0.3,diameterBottom:0.25,height:0.12,tessellation:12},scene); pan.position.set(px,H-0.9,0); pan.material=rackM;
     const hook=BABYLON.MeshBuilder.CreateCylinder('k_hook'+p,{diameter:0.01,height:0.3,tessellation:4},scene); hook.position.set(px,H-0.75,0); hook.material=rackM;
@@ -65,7 +66,56 @@ function buildKitchen(){
   const rug=BABYLON.MeshBuilder.CreateGround('k_rug',{width:3.0,height:4.0,subdivisions:2},scene); rug.position.set(0,0.01,2); rug.material=rugM;
 
   // Hanging garlic
-  [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(([gx,gz],gi)=>{ const g=BABYLON.MeshBuilder.CreateCylinder('k_garlic'+gi,{diameterTop:0.04,diameterBottom:0.15,height:0.4,tessellation:8},scene); g.position.set(gx,H-0.4,gz); const gm=mat('k_gm'+gi); gm.diffuseColor=new BABYLON.Color3(0.28,0.24,0.16); g.material=gm; });
+  [[-4,-3],[-4,3],[2,-3],[2,3]].forEach(([gx,gz],gi)=>{
+    const str=BABYLON.MeshBuilder.CreateCylinder('k_gstr'+gi,{diameter:0.008,height:0.35,tessellation:4},scene); str.position.set(gx,H-0.45,gz); str.material=rackM;
+    const g=BABYLON.MeshBuilder.CreateCylinder('k_garlic'+gi,{diameterTop:0.04,diameterBottom:0.15,height:0.4,tessellation:8},scene); g.position.set(gx,H-0.62,gz); const gm=mat('k_gm'+gi); gm.diffuseColor=new BABYLON.Color3(0.28,0.24,0.16); g.material=gm;
+  });
+
+  // Flour workbench along the left wall
+  const benchTop=BABYLON.MeshBuilder.CreateBox('k_benchTop',{width:1.0,height:0.07,depth:4.6},scene); benchTop.position.set(-6.3,0.92,-0.75); benchTop.material=woodM;
+  [[-6.72,-2.95],[-5.88,-2.95],[-6.72,1.45],[-5.88,1.45]].forEach(([lx,lz],li)=>{
+    const leg=BABYLON.MeshBuilder.CreateCylinder('k_bleg'+li,{diameter:0.08,height:0.9,tessellation:8},scene); leg.position.set(lx,0.45,lz); leg.material=woodM;
+  });
+  const bshelf=BABYLON.MeshBuilder.CreateBox('k_bshelf',{width:0.9,height:0.05,depth:4.3},scene); bshelf.position.set(-6.3,0.35,-0.75); bshelf.material=woodM;
+  const rpin=BABYLON.MeshBuilder.CreateCylinder('k_rpin',{diameter:0.06,height:0.38,tessellation:10},scene); rpin.rotation.x=Math.PI/2; rpin.position.set(-6.3,0.985,-2.2); rpin.material=woodM;
+  const bowlM=mat('k_bowlM'); bowlM.diffuseColor=new BABYLON.Color3(0.55,0.5,0.42);
+  const bowl=BABYLON.MeshBuilder.CreateCylinder('k_bowl',{diameterTop:0.24,diameterBottom:0.14,height:0.11,tessellation:12},scene); bowl.position.set(-6.3,0.99,-0.2); bowl.material=bowlM;
+  const dough=BABYLON.MeshBuilder.CreateSphere('k_dough',{diameter:0.2,segments:8},scene); dough.scaling.y=0.5; dough.position.set(-6.3,1.0,-0.2); dough.material=bowlM;
+  const sackM=mat('k_sackM'); sackM.diffuseColor=new BABYLON.Color3(0.45,0.38,0.28);
+  const sack=BABYLON.MeshBuilder.CreateSphere('k_sack',{diameter:0.3,segments:8},scene); sack.scaling.set(1,1.15,0.75); sack.position.set(-6.45,1.06,0.9); sack.material=sackM;
+  const sackTie=BABYLON.MeshBuilder.CreateCylinder('k_sackTie',{diameterTop:0.02,diameterBottom:0.06,height:0.1,tessellation:6},scene); sackTie.position.set(-6.45,1.26,0.9); sackTie.material=sackM;
+
+  // Stone wash-trough sink, right wall
+  const sinkM=pbr('k_sinkM',TEX.rock_d,TEX.rock_n,1,1,new BABYLON.Color3(0.42,0.44,0.45));
+  const sink=BABYLON.MeshBuilder.CreateBox('k_sink',{width:0.7,height:0.64,depth:1.3},scene); sink.position.set(6.55,0.32,3.0); sink.material=sinkM;
+  const basinM=mat('k_basinM'); basinM.diffuseColor=new BABYLON.Color3(0.1,0.12,0.13);
+  const basinIn=BABYLON.MeshBuilder.CreateBox('k_basinIn',{width:0.5,height:0.04,depth:1.05},scene); basinIn.position.set(6.55,0.58,3.0); basinIn.material=basinM;
+  const jug=BABYLON.MeshBuilder.CreateCylinder('k_jug',{diameterTop:0.09,diameterBottom:0.16,height:0.34,tessellation:10},scene); jug.position.set(6.55,0.76,3.85); jug.material=bowlM;
+
+  // Firewood and bellows beside the hearth
+  const logM=pbr('k_logM',TEX.wood_d,TEX.wood_n,1,1,new BABYLON.Color3(0.3,0.2,0.1));
+  [[-5.55,0.07],[-5.32,0.07],[-5.44,0.2],[-5.55,0.33],[-5.32,0.33]].forEach(([lz,ly],li)=>{
+    const log=BABYLON.MeshBuilder.CreateCylinder('k_woodlog'+li,{diameter:0.13,height:0.55,tessellation:8},scene); log.rotation.z=Math.PI/2; log.position.set(2.0,ly,lz-0.1); log.material=logM;
+  });
+  const belA=BABYLON.MeshBuilder.CreateBox('k_belA',{width:0.5,height:0.03,depth:0.18},scene); belA.position.set(1.1,0.04,-5.5); belA.rotation.y=0.3; belA.material=woodM;
+  const belB=BABYLON.MeshBuilder.CreateBox('k_belB',{width:0.5,height:0.03,depth:0.18},scene); belB.position.set(1.1,0.1,-5.5); belB.rotation.x=0.22; belB.rotation.y=0.3; belB.material=woodM;
+
+  // Copper kettle hung at the hearth arch
+  const ketM=mat('k_ketM'); ketM.diffuseColor=new BABYLON.Color3(0.45,0.26,0.1); ketM.specularColor=new BABYLON.Color3(0.6,0.4,0.2);
+  const khook=BABYLON.MeshBuilder.CreateCylinder('k_khook',{diameter:0.012,height:0.3,tessellation:4},scene); khook.position.set(0.9,2.0,-5.4); khook.material=rackM;
+  const kettle=BABYLON.MeshBuilder.CreateSphere('k_kettle',{diameter:0.28,segments:10},scene); kettle.scaling.y=0.8; kettle.position.set(0.9,1.8,-5.4); kettle.material=ketM;
+  const kspout=BABYLON.MeshBuilder.CreateCylinder('k_kspout',{diameter:0.03,height:0.14,tessellation:6},scene); kspout.rotation.z=Math.PI/3; kspout.position.set(1.03,1.82,-5.4); kspout.material=ketM;
+  const khandle=BABYLON.MeshBuilder.CreateTorus('k_khandle',{diameter:0.14,thickness:0.014,tessellation:10},scene); khandle.rotation.x=Math.PI/2; khandle.position.set(0.9,1.9,-5.4); khandle.material=ketM;
+
+  // Cast-iron skillet on the butcher's block
+  const skillet=BABYLON.MeshBuilder.CreateCylinder('k_skillet',{diameter:0.26,height:0.035,tessellation:14},scene); skillet.position.set(5.0,0.94,0.75); skillet.material=cauldM;
+  const skh=BABYLON.MeshBuilder.CreateBox('k_skhandle',{width:0.2,height:0.02,depth:0.04},scene); skh.position.set(5.2,0.94,0.75); skh.material=cauldM;
+
+  // Storage barrels by the pantry door
+  const barrelM=pbr('k_barrelM',TEX.wood_d,TEX.wood_n,1,1,new BABYLON.Color3(0.35,0.26,0.15));
+  [[-5.2,-5.25],[-2.8,-5.5]].forEach(([bx,bz],bi)=>{
+    const bar=BABYLON.MeshBuilder.CreateCylinder('k_barrel'+bi,{diameterTop:0.44,diameterBottom:0.4,height:0.62,tessellation:12},scene); bar.position.set(bx,0.31,bz); bar.material=barrelM;
+  });
 
   // Lights
   const hearthLight=new BABYLON.PointLight('k_hL',new BABYLON.Vector3(0,0.8,-D/2+0.5),scene);
@@ -87,6 +137,8 @@ function buildKitchen(){
   interactables.set('k_cauldron','cauldron'); interactables.set('k_brew','cauldron');
   interactables.set('k_hearth','fireplace');
   interactables.set('k_garlic0','herbs_dried'); interactables.set('k_garlic1','herbs_dried');
+  interactables.set('k_benchTop','workbench'); interactables.set('k_bowl','workbench');
+  interactables.set('k_sink','stonesink'); interactables.set('k_kettle','kettle');
 
   buildDoor('door_entrance', 0, D/2, Math.PI, 1.34, 2.38);
   interactables.set('door_entrance','door_entrance');
