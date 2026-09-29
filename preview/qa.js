@@ -5,10 +5,10 @@ if (new URLSearchParams(location.search).has('qa')) {
   const _rm=new URLSearchParams(location.search).get('room');
   if(_lk){
     const [lx,ly,lz]=_lk.split(',').map(Number);
-    let _jumped=false;
+    let _ticks=0,_jumped=false;
     setInterval(()=>{
       if(typeof camera!=='undefined'&&typeof state!=='undefined'&&state.currentRoom){
-        if(_rm&&!_jumped&&state.currentRoom!==_rm){ _jumped=true; transitionToRoom(_rm); return; }
+        if(_rm&&!_jumped&&state.currentRoom!==_rm){ if(_ticks<12){_ticks++;return;} _jumped=true; transitionToRoom(_rm); return; }
         camera.setTarget(new BABYLON.Vector3(lx,ly,lz)); camera.getViewMatrix(true); scene.render();
       }
     },300);
