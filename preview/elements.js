@@ -301,9 +301,9 @@ function makeSigils(name,x,z,r=1.1){
   const node=new BABYLON.TransformNode(name,scene); node.position.set(x,0.012,z); node.rotation.y=0.4;
   const chM=_m(name+'_m',0.82,0.80,0.74,[0.05,0.05,0.045]); chM.alpha=0.65;
   const ring=BABYLON.MeshBuilder.CreateTorus(name+'_ring',{diameter:r*2,tessellation:28,thickness:0.018},scene);
-  ring.parent=node; ring.scaling.x=1.6; ring.rotation.x=Math.PI/2; ring.material=chM;
+  ring.parent=node; ring.scaling.x=1.6; ring.material=chM;   // torus lies flat by default
   const ring2=BABYLON.MeshBuilder.CreateTorus(name+'_ring2',{diameter:r*1.16,tessellation:24,thickness:0.014},scene);
-  ring2.parent=node; ring2.scaling.x=1.6; ring2.rotation.x=Math.PI/2; ring2.material=chM;
+  ring2.parent=node; ring2.scaling.x=1.6; ring2.material=chM;
   for(let s=0;s<5;s++){ const a=s/5*Math.PI*2;
     const ray=BABYLON.MeshBuilder.CreateBox(name+'_ray'+s,{width:r*0.9,height:0.004,depth:0.016},scene);
     ray.parent=node; ray.position.set(Math.cos(a)*r*0.62,0,Math.sin(a)*r*0.62);
