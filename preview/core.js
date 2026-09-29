@@ -244,6 +244,66 @@ function makeWindow(name, x, y, z, rotY, ww=1.1, wh=1.7){
   return node;
 }
 
+
+// ─── STAIRCASES ──────────────────────────────────────────────────────────────
+// Stairs between floors. The landing (or threshold) carries the historic
+// interactable name, so clicking the stairs routes through the door handler.
+// mode 'down': treads descend THROUGH a wall opening, into the floor below.
+// mode 'up':   treads rise INSIDE the room toward the opening in the wall.
+function makeStairs(name, wx, wz, rotY, opts={}){
+  const mode=opts.mode||'down', steps=opts.steps??5, rise=opts.rise??0.18, run=opts.run??0.32, width=opts.width??1.9, clickKey=opts.clickKey||name;
+  const node=new BABYLON.TransformNode(name+'_stwn',scene);
+  node.position.set(wx,0,wz); node.rotation.y=rotY;
+  const stM=mat(name+'_stM'); stM.diffuseColor=new BABYLON.Color3(0.19,0.13,0.075); stM.specularColor=new BABYLON.Color3(0.03,0.03,0.03);
+  const railM=mat(name+'_railM'); railM.diffuseColor=new BABYLON.Color3(0.14,0.095,0.055); railM.specularColor=new BABYLON.Color3(0.02,0.02,0.02);
+  if(mode==='down'){
+    for(let i=0;i<steps;i++){
+      const t=BABYLON.MeshBuilder.CreateBox(name+'_tread'+i,{width:width,height:0.06,depth:run},scene);
+      t.parent=node; t.position.set(0,-rise*(i+1),-(run*(i+0.5))-0.06); t.material=stM;
+      interactables.set(t.name,clickKey);
+      const r=BABYLON.MeshBuilder.CreateBox(name+'_riser'+i,{width:width,height:rise,depth:0.03},scene);
+      r.parent=node; r.position.set(0,-rise*(i+1)-rise/2,-(run*(i+1))-0.045); r.material=stM;
+    }
+    const L=BABYLON.MeshBuilder.CreateBox(name,{width:width,height:0.06,depth:0.32},scene);
+    L.parent=node; L.position.set(0,0.03,-0.16); L.material=stM;
+    interactables.set(name,clickKey);
+    // newel post, balusters and a sloped handrail on the right side
+    const post=BABYLON.MeshBuilder.CreateBox(name+'_newel',{width:0.09,height:1.05,depth:0.09},scene);
+    post.parent=node; post.position.set(width/2-0.05,0.525,-0.05); post.material=railM;
+    for(let i=0;i<steps;i+=2){
+      const b=BABYLON.MeshBuilder.CreateBox(name+'_bal'+i,{width:0.05,height:0.9,depth:0.05},scene);
+      b.parent=node; b.position.set(width/2-0.05,-rise*(i+1)+0.45,-(run*(i+0.5))-0.06); b.material=railM;
+    }
+    const railLen=Math.hypot(steps*run,steps*rise)+0.4;
+    const rail=BABYLON.MeshBuilder.CreateBox(name+'_rail',{width:0.07,height:0.06,depth:railLen},scene);
+    rail.parent=node; rail.rotation.x=-Math.atan(rise/run);
+    rail.position.set(width/2-0.05,-steps*rise/2+0.92,-(steps*run)/2-0.25); rail.material=railM;
+    const glow=new BABYLON.PointLight(name+'_L',new BABYLON.Vector3(0,0.9,-1.1),scene);
+    glow.parent=node; glow.diffuse=new BABYLON.Color3(0.8,0.6,0.4); glow.intensity=0.32; glow.range=3.5;
+  } else {
+    for(let i=0;i<steps;i++){
+      const t=BABYLON.MeshBuilder.CreateBox(name+'_tread'+i,{width:width,height:0.06,depth:run},scene);
+      t.parent=node; t.position.set(0,rise*(i+1),run*(steps-i-0.5)+0.35); t.material=stM;
+      interactables.set(t.name,clickKey);
+      const r=BABYLON.MeshBuilder.CreateBox(name+'_riser'+i,{width:width,height:rise,depth:0.03},scene);
+      r.parent=node; r.position.set(0,rise*(i+1)-rise/2,run*(steps-i-1)+0.35); r.material=stM;
+    }
+    const L=BABYLON.MeshBuilder.CreateBox(name,{width:width,height:0.07,depth:0.4},scene);
+    L.parent=node; L.position.set(0,rise*steps+0.035,0.15); L.material=stM;
+    interactables.set(name,clickKey);
+    // side rails so you don't step off the landing into the room below
+    for(const sd of [-1,1]){
+      const b=BABYLON.MeshBuilder.CreateBox(name+'_post'+(sd<0?'L':'R'),{width:0.07,height:0.95,depth:0.07},scene);
+      b.parent=node; b.position.set(sd*(width/2-0.04),rise*steps+0.5,0.38); b.material=railM;
+      const rl=BABYLON.MeshBuilder.CreateBox(name+'_rail'+(sd<0?'L':'R'),{width:0.05,height:0.05,depth:0.5},scene);
+      rl.parent=node; rl.position.set(sd*(width/2-0.04),rise*steps+0.62,0.18); rl.material=railM;
+    }
+    const glow=new BABYLON.PointLight(name+'_L',new BABYLON.Vector3(0,rise*steps+1.2,0.6),scene);
+    glow.parent=node; glow.diffuse=new BABYLON.Color3(0.8,0.6,0.4); glow.intensity=0.3; glow.range=3.5;
+  }
+  return node;
+}
+
 // ─── MODEL LOADER ───────────────────────────────────────────────────────────
 const MODEL_BASE = location.pathname.includes('/preview/') ? '../models/' : 'models/';
 let modelInstance = 0;

@@ -54,6 +54,7 @@ function buildPantry(){
   buildDoor('door_kitchen', 0, D/2, Math.PI, 1.14, 2.18);
   interactables.set('door_kitchen','door_kitchen');
   buildDoor('door_basement', W/2-0.5, -D/2, 0, 0.94, 1.98);
+  makeStairs('pDnStair', W/2-0.5, -D/2, 0, {mode:'down', steps:5, rise:0.16, run:0.28, width:1.4, clickKey:'door_basement'});   // the descent, behind the lock
   // iron keyhole plate — the crescent-moon lock the iron key answers
   const kp=BABYLON.MeshBuilder.CreateBox('p_keyplate',{width:0.1,height:0.16,depth:0.012},scene); kp.position.set(W/2-0.5,1.15,-D/2+0.11); const kpm=mat('p_kpM'); kpm.diffuseColor=new BABYLON.Color3(0.32,0.26,0.12); kpm.specularColor=new BABYLON.Color3(0.5,0.45,0.25); kpm.specularPower=48; kp.material=kpm;
   const kh=BABYLON.MeshBuilder.CreateCylinder('p_keyhole',{diameter:0.045,height:0.012,tessellation:10},scene); kh.position.set(W/2-0.5,1.15,-D/2+0.115); kh.rotation.x=Math.PI/2; const khm=mat('p_khM'); khm.diffuseColor=new BABYLON.Color3(0.01,0.01,0.01); khm.emissiveColor=new BABYLON.Color3(0.02,0.015,0.0); kh.material=khm;

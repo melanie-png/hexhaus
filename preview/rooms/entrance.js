@@ -49,7 +49,8 @@ function buildEntranceHall(){
     {dx: W/2-2.5, dz:-D/2, dw:1.3, dh:2.5}
   ]);
   doorwayWall('e_wL', D, H, -W/2, 0, Math.PI/2, wallM, [{dx:-W/2, dz:3, dw:1.5, dh:2.5}]);
-  doorwayWall('e_wR', D, H,  W/2, 0, -Math.PI/2, wallM, [{dx: W/2, dz:3, dw:1.5, dh:2.5}]);
+  doorwayWall('e_wR', D, H,  W/2, 0, -Math.PI/2, wallM, [{dx: W/2, dz:3, dw:2.0, dh:2.8}]);
+  makeStairs('door_library', W/2, 3, -Math.PI/2, {mode:'down', steps:6, rise:0.17, run:0.30, width:1.9});   // down to the library
   // Moonlit windows
   makeWindow('win_eF1', -4.5, 3.0, D/2, Math.PI);
   makeWindow('win_eF2',  4.5, 3.0, D/2, Math.PI);
@@ -497,7 +498,8 @@ function buildEntranceHall(){
 
   // Real doors, hinged and latched
   buildDoor('door_living',   -W/2, 3,  Math.PI/2, 1.34, 2.38);
-  buildDoor('door_library',   W/2, 3, -Math.PI/2, 1.34, 2.38);
+  // the library is a floor down — the stairs carry the name
+
   buildDoor('door_kitchen',  W/2-2.5, -D/2, 0, 1.14, 2.38);
   buildDoor('door_bathroom', -W/2+2.5, -D/2, 0, 1.14, 2.38);
 }

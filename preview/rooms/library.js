@@ -9,7 +9,8 @@ function buildLibrary(){
   const ceil=BABYLON.MeshBuilder.CreatePlane('lib_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
   function libWall(n,w,h,pos,ry){ const m=BABYLON.MeshBuilder.CreatePlane(n,{width:w,height:h},scene); m.position.copyFrom(pos); m.rotation.y=ry; const wm=wallM.clone(n+'_m'); wm.backFaceCulling=false; m.material=wm; }
   libWall('lib_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); libWall('lib_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2); libWall('lib_wR',D,H,new BABYLON.Vector3(W/2,H/2,0),-Math.PI/2);
-  doorwayWall('lib_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.5,dh:2.5}]);
+  doorwayWall('lib_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:2.0,dh:2.9}]);
+  makeStairs('door_entrance', 0, D/2, Math.PI, {mode:'up', steps:5, rise:0.18, run:0.32, width:1.9});   // back up to the entrance hall
   makeWindow('win_libR1', W/2, 3.2, 3.5, -Math.PI/2);
   makeWindow('win_libB1', 4.8, 3.3, -D/2, 0);
   [-6,-3,0,3,6].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('lib_beam'+bx,{width:0.3,height:0.28,depth:D},scene); b.position.set(bx,H-0.16,0); const bm=mat('lib_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.16,0.08,0.04); b.material=bm; });
@@ -99,7 +100,8 @@ function buildLibrary(){
   interactables.set('lib_cage','clock');
   interactables.set('lib_broomHandle','broom'); interactables.set('lib_broomStraw','broom');
 
-  buildDoor('door_entrance', 0, D/2, Math.PI, 1.34, 2.38);
+  // the entrance hall is a floor up — the stairs carry the name
+
   buildDoor('door_attic', soX+STS*0.2, soZ-STS*SZ+0.2, 0, 1.1, 2.36, STS*SY/2);   // freestanding at the stair top
   // ── SECRET PASSAGE — the whispering shelf ──────────────────────────────────
   // A bookshelf against the west wall hides a stairwell down to the basement.
