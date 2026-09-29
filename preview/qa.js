@@ -95,11 +95,11 @@ if (new URLSearchParams(location.search).has('qa')) {
         const ELEMENTS={
           entrance:[['el_entr_web1',null],['el_entr_web2',null],['el_entr_dust',null],['el_entr_wax1',null],['el_entr_hat','witchhat',1],['el_entr_board','looseboard',1],['el_entr_gram','gramophone',0],['el_entr_rat','rat',0],['el_entr_moths',null]],
           living:[['el_liv_web1',null],['el_liv_dust',null],['el_liv_rock','rockingchair',0],['el_liv_sheet','sheeted',0],['el_liv_flowers','deadflowers',0],['el_liv_moths',null],['el_liv_wax1',null]],
-          kitchen:[['el_kit_web1',null],['el_kit_dust',null],['el_kit_potions','potions',1],['el_kit_salt','saltline',0],['el_kit_herbs',null],['el_kit_rat','rat',0],['el_kit_wax1',null]],
+          kitchen:[['el_kit_web1',null],['el_kit_dust',null],['el_kit_potions','potions',1],['el_kit_salt','saltline',0],['el_kit_herbs0',null],['el_kit_herbs1',null],['el_kit_herbs2',null],['el_kit_rat','rat',0],['el_kit_wax1',null]],
           library:[['el_lib_web1',null],['el_lib_web2',null],['el_lib_dust',null],['el_lib_sheet','sheeted',0],['el_lib_doll','dollhouse',0]],
           bathroom:[['el_bath_web1',null],['el_bath_mirror','crackedmirror',1]],
           pantry:[['el_pan_web1',null],['el_pan_dust',null],['el_pan_salt','saltline',0],['el_pan_rat','rat',0]],
-          basement:[['el_bs_web1',null],['el_bs_web2',null],['el_bs_cauldron','cauldron',1],['el_bs_sigils','sigils',1],['el_bs_bucket','dripbucket',0]],
+          basement:[['el_bs_web1',null],['el_bs_web2',null],['el_bs_cauldron','cauldron',1],['el_bs_sigils','sigils',1,[4.39,0.012,2.95]],['el_bs_bucket','dripbucket',0]],
           attic:[['el_at_web1',null],['el_at_web2',null],['el_at_dust',null],['el_at_sheet1','sheeted',0],['el_at_sheet2',null],['el_at_spider','spider',0],['el_at_raven','raven',1]],
         };
         (STAIRS[roomId]||[]).forEach(sn=>check(!!scene.getMeshByName(sn+'_tread0'),roomId+' staircase '+sn+' has treads'));
@@ -113,10 +113,10 @@ if (new URLSearchParams(location.search).has('qa')) {
             check(ITEMS[key]&&ITEMS[key].desc.length>10, roomId+' element '+mn+' has inspect text');
           }
           if(ray){
-            const hb=em.getHierarchyBoundingVectors();
-            camera.setTarget(hb.min.add(hb.max).scale(0.5)); scene.render();
+            const aim=Array.isArray(ray)?new BABYLON.Vector3(ray[0],ray[1],ray[2]):em.getHierarchyBoundingVectors().min.add(em.getHierarchyBoundingVectors().max).scale(0.5);
+            camera.setTarget(aim); scene.render();
             const pick=scene.pick(scene.getEngine().getRenderWidth()/2, scene.getEngine().getRenderHeight()/2);
-            const ok=pick.hit&&(pick.pickedMesh&&(pick.pickedMesh.name===mn||interactables.get(pick.pickedMesh.name)===key));
+            const ok=pick.hit&&(pick.pickedMesh&&(pick.pickedMesh.name===mn||pick.pickedMesh.name.startsWith(mn+'_')||interactables.get(pick.pickedMesh.name)===key));
             check(ok, roomId+' element '+mn+' ray-selects');
           }
         });
