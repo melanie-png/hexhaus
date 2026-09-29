@@ -112,8 +112,8 @@ if (new URLSearchParams(location.search).has('qa')) {
             check(ITEMS[key]&&ITEMS[key].desc.length>10, roomId+' element '+mn+' has inspect text');
           }
           if(ray){
-            const bb=em.getHierarchyBoundingVectors();
-            camera.setTarget(bb.center); scene.render();
+            const hb=em.getHierarchyBoundingVectors();
+            camera.setTarget(hb.min.add(hb.max).scale(0.5)); scene.render();
             const pick=scene.pick(scene.getEngine().getRenderWidth()/2, scene.getEngine().getRenderHeight()/2);
             const ok=pick.hit&&(pick.pickedMesh&&(pick.pickedMesh.name===mn||interactables.get(pick.pickedMesh.name)===key));
             check(ok, roomId+' element '+mn+' ray-selects');
