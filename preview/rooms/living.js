@@ -48,6 +48,8 @@ function buildLivingRoom(){
   lrWall('lr_wB',W,H,new BABYLON.Vector3(0,H/2,-D/2),0); lrWall('lr_wL',D,H,new BABYLON.Vector3(-W/2,H/2,0),Math.PI/2);
   doorwayWall('lr_wF',W,H,0,D/2,Math.PI,wallM,[{dx:0,dz:D/2,dw:1.5,dh:2.5}]);
   doorwayWall('lr_wR',D,H,W/2,0,-Math.PI/2,wallM,[{dx:W/2,dz:-3,dw:1.5,dh:2.5}]);
+  // DynamicTexture.clone() makes a blank canvas; all wall segments share the painted wallpaper.
+  scene.meshes.filter(m=>/^lr_w[BLFR](?:_|$)/.test(m.name)).forEach(m=>{if(m.material)m.material.diffuseTexture=paperTex;});
   makeWindow('win_lB1', -4.5, 2.9, -D/2, 0);
   makeWindow('win_lF1', -4.2, 2.9,  D/2, Math.PI);
   makeWindow('win_lF2',  4.2, 2.9,  D/2, Math.PI);
