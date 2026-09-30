@@ -4,6 +4,8 @@ function buildLibrary(){
   const floorM = pbr('lib_floorM', TEX.wood_d, TEX.wood_n, 4, 4, new BABYLON.Color3(0.3,0.22,0.14));
   const ceilM = pbr('lib_ceilM', TEX.beam_d, TEX.beam_n, 4, 3, new BABYLON.Color3(0.14,0.09,0.05));
   const woodM = pbr('lib_woodM', TEX.darkwood_d, TEX.darkwood_n, 3, 2, new BABYLON.Color3(0.28,0.2,0.1));
+  const walnutM = pbr('lib_walnutM', TEX.darkwood_d, TEX.darkwood_n, 2, 2, new BABYLON.Color3(0.22,0.14,0.08));
+  const oakM = pbr('lib_oakM', TEX.wood_d, TEX.wood_n, 2, 2, new BABYLON.Color3(0.35,0.24,0.14));
 
   const floor=BABYLON.MeshBuilder.CreateGround('lib_floor',{width:W,height:D,subdivisions:4},scene); floor.material=floorM; floor.receiveShadows=true;
   const ceil=BABYLON.MeshBuilder.CreatePlane('lib_ceil',{width:W,height:D},scene); ceil.position.y=H; ceil.rotation.x=Math.PI/2; ceilM.backFaceCulling=false; ceil.material=ceilM;
@@ -22,14 +24,107 @@ function buildLibrary(){
   makeDollhouse('el_lib_doll',6.6,5.2,-2.5);
   [-6,-3,0,3,6].forEach(bx=>{ const b=BABYLON.MeshBuilder.CreateBox('lib_beam'+bx,{width:0.3,height:0.28,depth:D},scene); b.position.set(bx,H-0.16,0); const bm=mat('lib_bm'+bx); bm.diffuseColor=new BABYLON.Color3(0.16,0.08,0.04); b.material=bm; });
 
-  // Display cases with skulls
-  for(let dc=0;dc<5;dc++){ const dx=-5+dc*2.5;
-    const caseBox=BABYLON.MeshBuilder.CreateBox('lib_dc'+dc,{width:1.0,height:2.0,depth:0.5},scene); caseBox.position.set(dx,1.0,-D/2+0.3); caseBox.material=woodM;
-    const glassM=mat('lib_glassM'); glassM.diffuseColor=new BABYLON.Color3(0.05,0.08,0.1); glassM.alpha=0.3;
-    const glass=BABYLON.MeshBuilder.CreatePlane('lib_dg'+dc,{width:0.9,height:1.9},scene); glass.position.set(dx,1.0,-D/2+0.55); glass.material=glassM;
-    const skullM=mat('lib_skullM'); skullM.diffuseColor=new BABYLON.Color3(0.6,0.55,0.45);
-    const skull=BABYLON.MeshBuilder.CreateSphere('lib_skull'+dc,{diameter:0.2,segments:8},scene); skull.position.set(dx,1.0,-D/2+0.3); skull.scaling.y=1.2; skull.material=skullM;
+  // ── Renovated Display Cases with Skulls (believable framed open glass cases) ──
+  // Original mesh names retained: lib_dc0..4, lib_dg0..4, lib_skull0..4
+  const glassM=mat('lib_glassM'); glassM.diffuseColor=new BABYLON.Color3(0.08,0.12,0.15); glassM.alpha=0.25; glassM.specularColor=new BABYLON.Color3(0.8,0.8,0.8);
+  const skullM=mat('lib_skullM'); skullM.diffuseColor=new BABYLON.Color3(0.65,0.60,0.50); skullM.specularColor=new BABYLON.Color3(0.05,0.05,0.05);
+  const brassM=mat('lib_brassM'); brassM.diffuseColor=new BABYLON.Color3(0.65,0.50,0.20); brassM.specularColor=new BABYLON.Color3(0.8,0.7,0.3);
+  const dcXs=[-6.5, -1.5, 0, 1.5, 6.5];
+  glassM.backFaceCulling=false;
+
+  for(let dc=0;dc<5;dc++){ const dx=dcXs[dc];
+    // Open framed cabinet structure
+    const caseBox=BABYLON.MeshBuilder.CreateBox('lib_dc'+dc,{width:0.95,height:1.9,depth:0.035},scene);
+    caseBox.position.set(dx,0.95,-D/2+0.07); caseBox.material=walnutM;
+    for(const side of [-1,1]){
+      const edge=BABYLON.MeshBuilder.CreateBox('lib_caseSide'+dc+'_'+side,{width:0.05,height:1.9,depth:0.44},scene);
+      edge.position.set(dx+side*0.45,0.95,-D/2+0.28);edge.material=walnutM;edge.isPickable=false;
+    }
+    for(const yy of [0.045,1.94]){
+      const edge=BABYLON.MeshBuilder.CreateBox('lib_caseCap'+dc+'_'+yy,{width:1.0,height:0.08,depth:0.46},scene);
+      edge.position.set(dx,yy,-D/2+0.28);edge.material=walnutM;edge.isPickable=false;
+    }
+    
+    // Internal shelf
+    const intShelf=BABYLON.MeshBuilder.CreateBox('lib_dcshelf'+dc,{width:0.87,height:0.04,depth:0.36},scene);
+    intShelf.position.set(dx,0.90,-D/2+0.25); intShelf.material=walnutM; intShelf.isPickable=false;
+
+    // Front clear glass panel
+    const glass=BABYLON.MeshBuilder.CreatePlane('lib_dg'+dc,{width:0.85,height:1.8},scene);
+    glass.position.set(dx,0.95,-D/2+0.46); glass.material=glassM;
+
+    // Brass corner trim
+    for(const sx of [-0.44, 0.44]){
+      const trim=BABYLON.MeshBuilder.CreateBox('lib_dctrim'+dc+'_'+(sx<0?'L':'R'),{width:0.04,height:1.88,depth:0.04},scene);
+      trim.position.set(dx+sx,0.95,-D/2+0.46); trim.material=brassM; trim.isPickable=false;
+    }
+
+    // Skull resting visibly inside on shelf
+    const skull=BABYLON.MeshBuilder.CreateSphere('lib_skull'+dc,{diameter:0.22,segments:8},scene);
+    skull.position.set(dx,1.05,-D/2+0.32); skull.scaling.set(0.9,1.15,1.05); skull.material=skullM;
+    const socketM=mat('lib_socketM'+dc);socketM.diffuseColor=new BABYLON.Color3(0.035,0.025,0.018);
+    for(const side of [-1,1]){const eye=BABYLON.MeshBuilder.CreateSphere('lib_skullEye'+dc+'_'+side,{diameter:0.047,segments:8},scene);eye.position.set(dx+side*0.042,1.07,-D/2+0.426);eye.scaling.z=0.28;eye.material=socketM;eye.isPickable=false;}
+    const jaw=BABYLON.MeshBuilder.CreateSphere('lib_skullJaw'+dc,{diameter:0.12,segments:8},scene);jaw.position.set(dx,0.96,-D/2+0.35);jaw.scaling.set(1,0.5,0.8);jaw.material=skullM;jaw.isPickable=false;
+
   }
+
+  // ── Tall Walnut Bookcases (Back wall flanking central portrait & West wall north end) ──
+  const shelfPalette=[[0.28,0.08,0.06],[0.10,0.12,0.22],[0.08,0.18,0.10],[0.32,0.22,0.08],[0.20,0.10,0.18],[0.12,0.15,0.14],[0.22,0.14,0.08]];
+  
+  // Seven shared leather textures, with rubbed gilding and spine labels, not flat bright blocks.
+  const bookHex=['#6a3e34','#374350','#3f503a','#75604a','#594354','#36504b','#67503a'];
+  const shelfBookM=bookHex.map((colour,i)=>{
+    const tex=new BABYLON.DynamicTexture('lib_bookLeatherTex'+i,{width:128,height:256},scene,false),c=tex.getContext();
+    c.fillStyle=colour;c.fillRect(0,0,128,256);
+    c.strokeStyle='#ad9160';c.lineWidth=3;c.strokeRect(8,9,112,238);
+    for(const y of [33,39,207,213]){c.beginPath();c.moveTo(0,y);c.lineTo(128,y);c.stroke();}
+    c.fillStyle='#b09c71';c.fillRect(27,67,74,45);c.fillStyle='#493a2b';
+    for(let row=0;row<3;row++)c.fillRect(34,77+row*9,53-row*7,2);
+    c.fillStyle='rgba(206,188,144,0.09)';for(let k=0;k<140;k++)c.fillRect((k*37+i*11)%128,(k*79+i*19)%256,2,3);
+    tex.update();const m=mat('lib_bookLeather'+i);m.diffuseTexture=tex;m.diffuseColor=new BABYLON.Color3(0.88,0.80,0.69);m.specularColor=new BABYLON.Color3(0.04,0.035,0.025);return m;
+  });
+
+  function buildBookcase(prefix, x, y, z, width, height, depth, rotY, isWest=false){
+    const node=new BABYLON.TransformNode(prefix+'_node',scene);
+    node.position.set(x,y,z); node.rotation.y=rotY;
+    
+    // Carcass frame
+    const back=BABYLON.MeshBuilder.CreateBox(prefix+'_back',{width:width,height:height,depth:0.05},scene);
+    back.parent=node; back.position.set(0,height/2,0); back.material=walnutM; back.isPickable=false;
+    const sideL=BABYLON.MeshBuilder.CreateBox(prefix+'_sideL',{width:0.06,height:height,depth:depth},scene);
+    sideL.parent=node; sideL.position.set(-width/2+0.03,height/2,depth/2); sideL.material=walnutM; sideL.isPickable=false;
+    const sideR=BABYLON.MeshBuilder.CreateBox(prefix+'_sideR',{width:0.06,height:height,depth:depth},scene);
+    sideR.parent=node; sideR.position.set(width/2-0.03,height/2,depth/2); sideR.material=walnutM; sideR.isPickable=false;
+    const topCap=BABYLON.MeshBuilder.CreateBox(prefix+'_topCap',{width:width+0.1,height:0.1,depth:depth+0.08},scene);
+    topCap.parent=node; topCap.position.set(0,height+0.05,depth/2); topCap.material=walnutM; topCap.isPickable=false;
+
+    const numShelves=5;
+    for(let r=0;r<numShelves;r++){
+      const sy=0.2+r*(height-0.3)/numShelves;
+      const sh=BABYLON.MeshBuilder.CreateBox(prefix+'_sh'+r,{width:width-0.08,height:0.04,depth:depth-0.04},scene);
+      sh.parent=node; sh.position.set(0,sy,depth/2); sh.material=walnutM; sh.isPickable=false;
+
+      // Fill shelf with books
+      let bx=-width/2+0.12;
+      while(bx<width/2-0.12){
+        const bw=Math.min(0.12+(Math.abs(r*5+Math.round(bx*20))%4)*0.018,width/2-0.12-bx);if(bw<0.055)break;
+        const bh=0.44+(Math.abs(r*3+Math.round(bx*17))%5)*0.04;
+        const bd=depth*0.65;
+        const book=BABYLON.MeshBuilder.CreateBox(prefix+'_book_'+r+'_'+Math.round((bx+5)*100),{width:bw,height:bh,depth:bd},scene);
+        book.parent=node; book.position.set(bx+bw/2, sy+bh/2+0.02, depth/2);
+        book.material=shelfBookM[(r+Math.round((bx+5)*10))%shelfPalette.length];
+        interactables.set(book.name,'bookshelf');
+        bx+=bw+0.012;
+      }
+    }
+  }
+
+  // Back wall left bookcase (flanking portrait on west side)
+  buildBookcase('lib_bcL', -4.0, 0, -D/2+0.25, 2.2, 4.2, 0.45, 0);
+  // Back wall right bookcase (flanking portrait on east side, before window at x=4.8)
+  buildBookcase('lib_bcR', 2.8, 0, -D/2+0.25, 2.0, 4.2, 0.45, 0);
+  // West wall north end bookcase (away from secret shelf at x=-7.74, z=-4.6)
+  buildBookcase('lib_bcW', -W/2+0.25, 0, -1.2, 2.2, 4.2, 0.45, Math.PI/2, true);
 
   // Diagonal staircase
   const STS=10, SY=H*0.5/STS, SZ=0.35, SX=2.5;
@@ -37,14 +132,117 @@ function buildLibrary(){
   for(let s=0;s<STS;s++){ const tread=BABYLON.MeshBuilder.CreateBox('lib_tread'+s,{width:SX,height:0.05,depth:SZ},scene); tread.position.set(soX+s*0.4,s*SY+0.05,soZ-s*SZ); tread.material=woodM;
     const riser=BABYLON.MeshBuilder.CreateBox('lib_riser'+s,{width:SX,height:SY,depth:0.03},scene); riser.position.set(soX+s*0.4,s*SY+SY/2,soZ-s*SZ+SZ/2); riser.material=woodM; }
 
-  // Leather wingback chair
-  const chairM=mat('lib_chairM'); chairM.diffuseColor=new BABYLON.Color3(0.15,0.08,0.06); chairM.specularPower=8;
-  const chairBase=BABYLON.MeshBuilder.CreateBox('lib_chair',{width:0.8,height:0.45,depth:0.8},scene); chairBase.position.set(W/2-2,0.45,-2); chairBase.material=chairM;
-  const chairBack=BABYLON.MeshBuilder.CreateBox('lib_chairBack',{width:0.8,height:1.0,depth:0.15},scene); chairBack.position.set(W/2-2,1.0,-2-0.35); chairBack.material=chairM;
+  // ── Renovated Oak Study Desk & Accessories ──
+  // Positioned at x=2.7, z=-2.0 while keeping center x=0, z=0 unobstructed
+  const deskX=2.7, deskZ=-2.0, deskH=0.76;
+  const deskTop=BABYLON.MeshBuilder.CreateBox('lib_deskTop',{width:2.1,height:0.06,depth:1.1},scene);
+  deskTop.position.set(deskX,deskH,deskZ); deskTop.material=oakM; deskTop.isPickable=false;
+  
+  // Leather writing inlay
+  const leatherM=mat('lib_deskLeatherM'); leatherM.diffuseColor=new BABYLON.Color3(0.12,0.08,0.06); leatherM.specularPower=12;
+  const deskInlay=BABYLON.MeshBuilder.CreateBox('lib_deskInlay',{width:1.2,height:0.005,depth:0.7},scene);
+  deskInlay.position.set(deskX,deskH+0.031,deskZ); deskInlay.material=leatherM; deskInlay.isPickable=false;
 
-  // Red rug
-  const rugM=mat('lib_rugM'); rugM.diffuseColor=new BABYLON.Color3(0.32,0.06,0.04);
-  const rug=BABYLON.MeshBuilder.CreateGround('lib_rug',{width:3.5,height:4.5,subdivisions:2},scene); rug.position.set(W/2-2,0.01,-1.5); rug.material=rugM;
+  // Desk pedestals & drawers
+  [-0.75, 0.75].forEach((ox, pIdx)=>{
+    const ped=BABYLON.MeshBuilder.CreateBox('lib_deskPed'+pIdx,{width:0.52,height:deskH-0.03,depth:0.95},scene);
+    ped.position.set(deskX+ox,(deskH-0.03)/2,deskZ); ped.material=oakM; ped.isPickable=false;
+    // Drawer pulls
+    for(let dr=0;dr<3;dr++){
+      const pull=BABYLON.MeshBuilder.CreateSphere('lib_deskPull'+pIdx+'_'+dr,{diameter:0.04,segments:6},scene);
+      pull.position.set(deskX+ox, 0.18+dr*0.2, deskZ+0.49); pull.material=brassM; pull.isPickable=false;
+    }
+  });
+
+  // Desk Accessories: Lamp/Candle, Inkwell, Quill, Open Book, Papers
+  // Brass desk lamp with warm glow
+  const lampBase=BABYLON.MeshBuilder.CreateCylinder('lib_lampBase',{diameter:0.16,height:0.03,tessellation:12},scene);
+  lampBase.position.set(deskX-0.75,deskH+0.045,deskZ-0.25); lampBase.material=brassM; lampBase.isPickable=false;
+  const lampStem=BABYLON.MeshBuilder.CreateCylinder('lib_lampStem',{diameter:0.025,height:0.35,tessellation:8},scene);
+  lampStem.position.set(deskX-0.75,deskH+0.22,deskZ-0.25); lampStem.material=brassM; lampStem.isPickable=false;
+  const lampShade=BABYLON.MeshBuilder.CreateCylinder('lib_lampShade',{diameterTop:0.1,diameterBottom:0.22,height:0.14,tessellation:12},scene);
+  lampShade.position.set(deskX-0.75,deskH+0.38,deskZ-0.25);
+  const shadeM=mat('lib_shadeM'); shadeM.diffuseColor=new BABYLON.Color3(0.12,0.28,0.18); shadeM.emissiveColor=new BABYLON.Color3(0.08,0.18,0.10);
+  lampShade.material=shadeM; lampShade.isPickable=false;
+
+  // Warm Desk Light (point light on desk)
+  const deskLight=new BABYLON.PointLight('lib_deskL',new BABYLON.Vector3(deskX-0.75,deskH+0.32,deskZ-0.25),scene);
+  deskLight.diffuse=new BABYLON.Color3(0.9,0.65,0.35); deskLight.intensity=0.85; deskLight.range=5.5;
+
+  // Inkwell & Quill
+  const inkM=mat('lib_inkM'); inkM.diffuseColor=new BABYLON.Color3(0.05,0.05,0.06); inkM.specularPower=32;
+  const inkwell=BABYLON.MeshBuilder.CreateCylinder('lib_inkwell',{diameter:0.08,height:0.08,tessellation:10},scene);
+  inkwell.position.set(deskX+0.65,deskH+0.07,deskZ-0.2); inkwell.material=inkM; inkwell.isPickable=false;
+  const quillM=mat('lib_quillM'); quillM.diffuseColor=new BABYLON.Color3(0.9,0.88,0.80);
+  const quill=BABYLON.MeshBuilder.CreateCylinder('lib_quill',{diameterTop:0.002,diameterBottom:0.02,height:0.32,tessellation:6},scene);
+  quill.position.set(deskX+0.63,deskH+0.18,deskZ-0.18); quill.rotation.z=-0.35; quill.material=quillM; quill.isPickable=false;
+
+  const feather=BABYLON.MeshBuilder.CreateSphere('lib_quillFeather',{diameter:0.11,segments:10},scene);feather.scaling.set(0.48,1.8,0.18);feather.position.set(deskX+0.59,deskH+0.30,deskZ-0.18);feather.rotation.z=-0.35;feather.material=quillM;feather.isPickable=false;
+  // Open Book & Papers on desk
+  const paperM=mat('lib_paperM'); paperM.diffuseColor=new BABYLON.Color3(0.82,0.76,0.65);paperM.backFaceCulling=false;
+  const paper1=BABYLON.MeshBuilder.CreatePlane('lib_paper1',{width:0.22,height:0.30},scene);
+  paper1.position.set(deskX+0.25,deskH+0.035,deskZ+0.08); paper1.rotation.x=Math.PI/2; paper1.rotation.y=0.15; paper1.material=paperM; paper1.isPickable=false;
+  const paper2=BABYLON.MeshBuilder.CreatePlane('lib_paper2',{width:0.22,height:0.30},scene);
+  paper2.position.set(deskX+0.32,deskH+0.036,deskZ+0.05); paper2.rotation.x=Math.PI/2; paper2.rotation.y=-0.22; paper2.material=paperM; paper2.isPickable=false;
+
+  const openBookL=BABYLON.MeshBuilder.CreateBox('lib_openBookL',{width:0.18,height:0.015,depth:0.26},scene);
+  openBookL.position.set(deskX-0.09,deskH+0.04,deskZ); openBookL.rotation.z=0.08; openBookL.material=paperM; openBookL.isPickable=false;
+  const openBookR=BABYLON.MeshBuilder.CreateBox('lib_openBookR',{width:0.18,height:0.015,depth:0.26},scene);
+  openBookR.position.set(deskX+0.09,deskH+0.04,deskZ); openBookR.rotation.z=-0.08; openBookR.material=paperM; openBookR.isPickable=false;
+
+  // ── Renovated Burgundy Leather Wingback Chair ──
+  // Preserving core mesh names lib_chair and lib_chairBack
+  const burgundyM=mat('lib_burgundyM'); burgundyM.diffuseColor=new BABYLON.Color3(0.28,0.05,0.08); burgundyM.specularPower=12;
+  const chairX=W/2-2, chairZ=-2.0; // x=6.0, z=-2.0
+
+  const chairBase=BABYLON.MeshBuilder.CreateBox('lib_chair',{width:0.85,height:0.38,depth:0.85},scene);
+  chairBase.position.set(chairX,0.38,chairZ); chairBase.material=burgundyM;
+  const chairCushion=BABYLON.MeshBuilder.CreateBox('lib_chairCushion',{width:0.80,height:0.12,depth:0.80},scene);
+  chairCushion.position.set(chairX,0.52,chairZ); chairCushion.material=burgundyM; chairCushion.isPickable=false;
+
+  const chairBack=BABYLON.MeshBuilder.CreateBox('lib_chairBack',{width:0.85,height:1.1,depth:0.16},scene);
+  chairBack.position.set(chairX,1.10,chairZ-0.36); chairBack.rotation.x=-0.08; chairBack.material=burgundyM;
+
+  for(let r=0;r<3;r++)for(let c=0;c<3;c++){const stud=BABYLON.MeshBuilder.CreateSphere('lib_chairButton'+r+'_'+c,{diameter:0.035,segments:6},scene);stud.position.set(chairX-0.24+c*0.24,0.87+r*0.24,chairZ-0.25);stud.material=burgundyM;stud.isPickable=false;}
+  // Wings & Armrests
+  for(const sd of [-1,1]){
+    const wing=BABYLON.MeshBuilder.CreateBox('lib_chairWing'+(sd<0?'L':'R'),{width:0.12,height:0.65,depth:0.32},scene);
+    wing.position.set(chairX+sd*0.40,1.30,chairZ-0.24); wing.rotation.y=sd*0.25; wing.material=burgundyM; wing.isPickable=false;
+    const arm=BABYLON.MeshBuilder.CreateBox('lib_chairArm'+(sd<0?'L':'R'),{width:0.14,height:0.25,depth:0.75},scene);
+    arm.position.set(chairX+sd*0.42,0.68,chairZ-0.02); arm.material=burgundyM; arm.isPickable=false;
+  }
+  // Turned wooden legs
+  [[-0.35,-0.35],[0.35,-0.35],[-0.35,0.35],[0.35,0.35]].forEach(([lx,lz],i)=>{
+    const leg=BABYLON.MeshBuilder.CreateCylinder('lib_chairLeg'+i,{diameterTop:0.06,diameterBottom:0.03,height:0.20,tessellation:8},scene);
+    leg.position.set(chairX+lx,0.10,chairZ+lz); leg.material=woodM; leg.isPickable=false;
+  });
+
+  // ── Renovated Patterned Victorian Reading Rug ──
+  // Retaining mesh name lib_rug and material lib_rugM
+  let rugTex=null;
+  if(typeof BABYLON.DynamicTexture !== 'undefined'){
+    const dt=new BABYLON.DynamicTexture('lib_rugTex',{width:256,height:256},scene,false);
+    const ctx=dt.getContext();
+    // Rich burgundy base
+    ctx.fillStyle='#3a080c'; ctx.fillRect(0,0,256,256);
+    // Outer gold border frame
+    ctx.strokeStyle='#c89632'; ctx.lineWidth=10; ctx.strokeRect(12,12,232,232);
+    ctx.strokeStyle='#5a1218'; ctx.lineWidth=4; ctx.strokeRect(22,22,212,212);
+    // Inner filigree pattern & diamond medallion
+    ctx.strokeStyle='#d4a242'; ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.moveTo(128,40); ctx.lineTo(216,128); ctx.lineTo(128,216); ctx.lineTo(40,128); ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(128,128,35,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='#5a1218'; ctx.fill();
+    dt.update(); rugTex=dt;
+  }
+  const rugM=mat('lib_rugM');
+  if(rugTex) rugM.diffuseTexture=rugTex;
+  else rugM.diffuseColor=new BABYLON.Color3(0.32,0.06,0.04);
+
+  const rug=BABYLON.MeshBuilder.CreateGround('lib_rug',{width:3.6,height:4.8,subdivisions:2},scene);
+  rug.position.set(W/2-2,0.01,-1.5); rug.material=rugM;
 
   // Owl with glowing eyes
   const owlM=mat('lib_owlM'); owlM.diffuseColor=new BABYLON.Color3(0.3,0.25,0.15);
