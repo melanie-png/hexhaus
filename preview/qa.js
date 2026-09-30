@@ -78,6 +78,7 @@ if (new URLSearchParams(location.search).has('qa')) {
             const hit=scene.pick(engine.getRenderWidth()/2,engine.getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled());
             check(interactables.get(hit?.pickedMesh?.name)===key,'parlour '+n+' ray-selects ('+(hit?.pickedMesh?.name||'none')+')');
           }
+          check(scene.getMeshByName('lr_wL').material.diffuseTexture.name==='lr_damaskTex','damask wallpaper is shared rather than blank-cloned');
           const orb=scene.getMeshByName('lr_crystalBall');check(orb.position.y>1,'crystal ball raised onto its pedestal');
         }
 

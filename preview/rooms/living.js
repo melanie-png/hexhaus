@@ -9,7 +9,7 @@ function buildLivingRoom(){
   const paperTex=new BABYLON.DynamicTexture('lr_damaskTex',{width:256,height:256},scene,false);
   const pc=paperTex.getContext();
   pc.fillStyle='#583c40'; pc.fillRect(0,0,256,256);
-  pc.strokeStyle='#96725d'; pc.lineWidth=1.5;
+  pc.strokeStyle='#b38b70'; pc.lineWidth=2.2;
   for(let row=-1;row<5;row++) for(let col=-1;col<5;col++){
     const x=col*64+(row%2)*32, y=row*64;
     pc.beginPath(); pc.moveTo(x,y-25);
@@ -18,7 +18,7 @@ function buildLivingRoom(){
     pc.beginPath(); pc.moveTo(x,y-15); pc.quadraticCurveTo(x+12,y,x,y+15); pc.quadraticCurveTo(x-12,y,x,y-15); pc.stroke();
     pc.fillStyle='#a58566'; pc.fillRect(x-1,y-2,2,4);
   }
-  paperTex.update(); paperTex.uScale=12; paperTex.vScale=3;
+  paperTex.update(); paperTex.uScale=3; paperTex.vScale=2;
   wallM.diffuseTexture=paperTex; wallM.bumpTexture=null; wallM.diffuseColor=new BABYLON.Color3(0.88,0.77,0.73);
   const joinM=pbr('lr_joinM',TEX.darkwood_d,TEX.darkwood_n,1,1,new BABYLON.Color3(0.68,0.43,0.23));
   const panelM=pbr('lr_panelM',TEX.wood_d,TEX.wood_n,1,1,new BABYLON.Color3(0.40,0.25,0.14));
