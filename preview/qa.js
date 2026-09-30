@@ -75,7 +75,8 @@ if (new URLSearchParams(location.search).has('qa')) {
           for(let f=0;f<5;f++)check(!!scene.getMeshByName('lr_fireFlame'+f),'living fire flame '+f+' built');
           for(const [n,key] of [['lr_crystalBall','crystalball'],['lr_table','tea'],['lr_firebox','fireplace'],['lr_mantel','fireplace'],['door_entrance','door_entrance'],['door_kitchen','door_kitchen']]){
             const m=scene.getMeshByName(n);m.computeWorldMatrix(true);camera.setTarget(m.getBoundingInfo().boundingSphere.centerWorld);camera.getViewMatrix(true);scene.render();
-            const hit=scene.pick(engine.getRenderWidth()/2,engine.getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled());
+            // The one-shot apparition may cross this sightline during the test; inspect permanent fixtures.
+            const hit=scene.pick(engine.getRenderWidth()/2,engine.getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled()&&!m.name.startsWith('app_'));
             check(interactables.get(hit?.pickedMesh?.name)===key,'parlour '+n+' ray-selects ('+(hit?.pickedMesh?.name||'none')+')');
           }
           check(scene.getMeshByName('lr_wL').material.diffuseTexture.name==='lr_damaskTex','damask wallpaper is shared rather than blank-cloned');
