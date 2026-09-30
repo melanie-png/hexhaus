@@ -70,6 +70,21 @@ if (new URLSearchParams(location.search).has('qa')) {
         if(state.currentRoom!==roomId)transitionToRoom(roomId);
         check(state.currentRoom===roomId,roomId+' builds');
         check(camera.position.x===0&&camera.position.z===0,roomId+' centered camera');
+        if(roomId==='library'){
+          check(scene.meshes.filter(m=>/book/i.test(m.name)).length>=100,'library has substantial visible book stock');
+          check(scene.meshes.some(m=>/desk/i.test(m.name)),'library writing desk built');
+          check(scene.meshes.some(m=>/quill/i.test(m.name)),'library desk quill built');
+          check(scene.meshes.some(m=>/ink/i.test(m.name)),'library desk inkwell built');
+          check(scene.meshes.some(m=>/wing/i.test(m.name)),'library chair wings built');
+          check(!!scene.getMeshByName('lib_rug').material.diffuseTexture,'library reading rug has a pattern');
+          check(scene.getMeshByName('lib_helgaP').material.backFaceCulling===false,'library portrait stays visible from the room');
+          for(const [n,key] of [['door_entrance','door_entrance'],['door_attic','door_attic'],['lib_helgaP','helga_portrait'],['lib_ssBack','secretshelf']]){
+            const m=scene.getMeshByName(n);m.computeWorldMatrix(true);camera.setTarget(m.getBoundingInfo().boundingSphere.centerWorld);camera.getViewMatrix(true);scene.render();
+            const hit=scene.pick(engine.getRenderWidth()/2,engine.getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled()&&!m.name.startsWith('app_'));
+            check(interactables.get(hit?.pickedMesh?.name)===key,'library preserved '+n+' ray-selects ('+(hit?.pickedMesh?.name||'none')+')');
+          }
+        }
+
         if(roomId==='living'){
           for(const n of ['lr_couch','lr_couchBack','lr_parlourRug','lr_backDrapes_pole','lr_windowSill','lr_chimneyBreast','lr_fpKeyStone','lr_orbPedestal','lr_mantelMirrorFrame'])check(!!scene.getMeshByName(n),'parlour feature '+n+' built');
           for(let f=0;f<5;f++)check(!!scene.getMeshByName('lr_fireFlame'+f),'living fire flame '+f+' built');
