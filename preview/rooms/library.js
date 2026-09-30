@@ -62,12 +62,28 @@ function buildLibrary(){
     // Skull resting visibly inside on shelf
     const skull=BABYLON.MeshBuilder.CreateSphere('lib_skull'+dc,{diameter:0.22,segments:8},scene);
     skull.position.set(dx,1.05,-D/2+0.32); skull.scaling.set(0.9,1.15,1.05); skull.material=skullM;
+    const socketM=mat('lib_socketM'+dc);socketM.diffuseColor=new BABYLON.Color3(0.035,0.025,0.018);
+    for(const side of [-1,1]){const eye=BABYLON.MeshBuilder.CreateSphere('lib_skullEye'+dc+'_'+side,{diameter:0.047,segments:8},scene);eye.position.set(dx+side*0.042,1.07,-D/2+0.426);eye.scaling.z=0.28;eye.material=socketM;eye.isPickable=false;}
+    const jaw=BABYLON.MeshBuilder.CreateSphere('lib_skullJaw'+dc,{diameter:0.12,segments:8},scene);jaw.position.set(dx,0.96,-D/2+0.35);jaw.scaling.set(1,0.5,0.8);jaw.material=skullM;jaw.isPickable=false;
+
   }
 
   // ── Tall Walnut Bookcases (Back wall flanking central portrait & West wall north end) ──
   const shelfPalette=[[0.28,0.08,0.06],[0.10,0.12,0.22],[0.08,0.18,0.10],[0.32,0.22,0.08],[0.20,0.10,0.18],[0.12,0.15,0.14],[0.22,0.14,0.08]];
   
-  const shelfBookM=shelfPalette.map((col,i)=>{const m=mat('lib_bookLeather'+i);m.diffuseColor=new BABYLON.Color3(...col).scale(1.6);m.emissiveColor=new BABYLON.Color3(...col).scale(0.08);return m;});
+  // Seven shared leather textures, with rubbed gilding and spine labels, not flat bright blocks.
+  const bookHex=['#6a3e34','#374350','#3f503a','#75604a','#594354','#36504b','#67503a'];
+  const shelfBookM=bookHex.map((colour,i)=>{
+    const tex=new BABYLON.DynamicTexture('lib_bookLeatherTex'+i,{width:128,height:256},scene,false),c=tex.getContext();
+    c.fillStyle=colour;c.fillRect(0,0,128,256);
+    c.strokeStyle='#ad9160';c.lineWidth=3;c.strokeRect(8,9,112,238);
+    for(const y of [33,39,207,213]){c.beginPath();c.moveTo(0,y);c.lineTo(128,y);c.stroke();}
+    c.fillStyle='#b09c71';c.fillRect(27,67,74,45);c.fillStyle='#493a2b';
+    for(let row=0;row<3;row++)c.fillRect(34,77+row*9,53-row*7,2);
+    c.fillStyle='rgba(206,188,144,0.09)';for(let k=0;k<140;k++)c.fillRect((k*37+i*11)%128,(k*79+i*19)%256,2,3);
+    tex.update();const m=mat('lib_bookLeather'+i);m.diffuseTexture=tex;m.diffuseColor=new BABYLON.Color3(0.88,0.80,0.69);m.specularColor=new BABYLON.Color3(0.04,0.035,0.025);return m;
+  });
+
   function buildBookcase(prefix, x, y, z, width, height, depth, rotY, isWest=false){
     const node=new BABYLON.TransformNode(prefix+'_node',scene);
     node.position.set(x,y,z); node.rotation.y=rotY;
