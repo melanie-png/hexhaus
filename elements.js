@@ -173,27 +173,37 @@ function makeRat(name,path,seed){
   for(const s of [-1,1]){ const eye=BABYLON.MeshBuilder.CreateBox(name+'_ey'+(s<0?'L':'R'),{width:0.012,height:0.012,depth:0.012},scene);
     eye.parent=node; eye.position.set(0.205,0.09,s*0.025); eye.material=eyeM; }
   interactables.set(name+'_body','rat');
-  // motion state
+  // The rat model's nose points along local +X, not Babylon's usual +Z.
   let seg=0, prog=0, pause=(seed*0.7)%2.5, dir=1, look=0;
+  const face=(dx,dz)=>{ node.rotation.y=Math.atan2(-dz,dx); };
+  node.position.set(path[0].x,0,path[0].z);
+  face(path[1].x-path[0].x,path[1].z-path[0].z);
   elAnim(node,(dt,t)=>{
     const speed=0.9;
     if(pause>0){
-      pause-=dt;
-      if(look>0){ look-=dt; node.rotation.y=Math.atan2(camera.position.x-node.position.x, camera.position.z-node.position.z); }
+      pause=Math.max(0,pause-dt);
+      if(look>0){
+        look=Math.max(0,look-dt);
+        face(camera.position.x-node.position.x,camera.position.z-node.position.z);
+      }
       return;
     }
-    const a=path[seg], b=path[(seg+dir+path.length)%path.length];
+    look=0;
+    const a=path[seg], next=(seg+dir+path.length)%path.length, b=path[next];
     const dx=b.x-a.x, dz=b.z-a.z, len=Math.hypot(dx,dz);
-    prog+=speed*dt/len;
+    if(len<0.0001){ seg=next; prog=0; return; }
+    prog=Math.min(1,prog+speed*dt/len);
+    node.position.set(a.x+dx*prog,Math.abs(Math.sin(t*22))*0.012,a.z+dz*prog);
+    // dx/dz already include the chosen direction; multiplying by dir reverses it twice.
+    face(dx,dz);
     if(prog>=1){
-      prog=0; seg=(seg+dir+path.length)%path.length;
+      node.position.set(b.x,0,b.z);
+      prog=0; seg=next;
       if(((seg*13+seed*7)|0)%3===0){ dir=-dir; }
-      pause=0.4+(((seg*29+seed*11)%10)/10)*1.8; if(window.SFX&&Math.random()<0.5)SFX.skitter();   // claws on the boards as it bolts
+      pause=0.4+(((seg*29+seed*11)%10)/10)*1.8;
+      if(window.SFX&&Math.random()<0.5)SFX.skitter();
       if(pause>1.2&&((seg*7)%4===0)) look=pause*0.6;
     }
-    const nx=a.x+dx*Math.min(prog,1), nz=a.z+dz*Math.min(prog,1);
-    node.position.set(nx,Math.abs(Math.sin(t*22))*0.012,nz);
-    if(look<=0) node.rotation.y=Math.atan2(dx*dir,dz*dir);
   });
   return node;
 }
