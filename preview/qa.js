@@ -70,6 +70,17 @@ if (new URLSearchParams(location.search).has('qa')) {
         if(state.currentRoom!==roomId)transitionToRoom(roomId);
         check(state.currentRoom===roomId,roomId+' builds');
         check(camera.position.x===0&&camera.position.z===0,roomId+' centered camera');
+        if(roomId==='attic'){
+          for(const name of ['a_trunk_lid','a_trunk_latch','a_travelTrunk','a_dresserTop','a_dresserDrawer2','a_brokenChairCrest','a_brokenChairFallenLeg','a_pictureTall_canvas','a_pictureSmall_canvas','a_rolledRug','a_hatbox'])check(!!scene.getMeshByName(name),'attic furnishing '+name+' built');
+          check(scene.meshes.filter(m=>m.name==='a_box').length===1,'attic storage has unique selectable crate names');
+          for(const name of ['el_at_sheet1_sh','el_at_sheet2_sh'])check(scene.getMeshByName(name)?.getTotalVertices()>100,'attic '+name+' is draped cloth, not a solid box');
+          for(const [name,key] of [['door_library','door_library'],['sw_plate_attic','lightswitch_attic'],['a_trunk','attic_box'],['el_at_raven','raven']]){
+            const m=scene.getMeshByName(name)||scene.getTransformNodeByName(name);m.computeWorldMatrix(true);const aim=m instanceof BABYLON.Mesh?m.getBoundingInfo().boundingSphere.centerWorld:m.getHierarchyBoundingVectors().min.add(m.getHierarchyBoundingVectors().max).scale(0.5);
+            camera.setTarget(aim);camera.getViewMatrix(true);scene.render();const hit=scene.pick(engine.getRenderWidth()/2,engine.getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled()&&!m.name.startsWith('app_'));
+            check(interactables.get(hit?.pickedMesh?.name)===key,'attic preserved '+name+' ray-selects ('+(hit?.pickedMesh?.name||'none')+')');
+          }
+        }
+
         if(roomId==='library'){
           check(scene.meshes.filter(m=>/book/i.test(m.name)).length>=100,'library has substantial visible book stock');
           check(scene.meshes.some(m=>/desk/i.test(m.name)),'library writing desk built');

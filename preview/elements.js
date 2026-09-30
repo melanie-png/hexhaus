@@ -494,7 +494,7 @@ const LIT = {
   bathroom:{ amb:'b_amb',  off:0.25, on:0.62, offD:[0.20,0.25,0.30], onD:[0.52,0.48,0.40], lamp:[0,3.0,0],  li:1.0,  lr:7  },
   pantry:  { amb:'p_amb',  off:0.30, on:0.68, offD:[0.25,0.30,0.35], onD:[0.58,0.52,0.42], lamp:[0,3.3,0],  li:1.25, lr:11 },
   basement:{ amb:'bs_amb', off:0.20, on:0.60, offD:[0.10,0.15,0.12], onD:[0.48,0.44,0.38], lamp:[0,3.5,0],  li:1.5,  lr:16 },
-  attic:   { amb:'a_amb',  off:0.15, on:0.55, offD:[0.15,0.12,0.10], onD:[0.56,0.50,0.42], lamp:[0,2.55,0], li:1.3,  lr:11 }
+  attic:   { amb:'a_amb',  off:0.40, on:0.78, offD:[0.32,0.30,0.28], onD:[0.56,0.50,0.42], lamp:[0,2.55,0], li:1.3,  lr:11 }
 };
 function applyRoomLight(room, on){
   const cfg = LIT[room]; if(!cfg || !scene) return;
