@@ -1,6 +1,6 @@
 function buildAttic(){
   const W=10, D=8, H=3.0;
-  const wallM = pbr('a_wallM', TEX.beam_d, TEX.beam_n, 2, 2, new BABYLON.Color3(0.30,0.23,0.16));
+  const wallM = pbr('a_wallM', TEX.beam_d, TEX.beam_n, 2, 2, new BABYLON.Color3(0.52,0.40,0.28));
   const floorM = pbr('a_floorM', TEX.wood_d, TEX.wood_n, 3, 2, new BABYLON.Color3(0.40,0.31,0.21));
   const ceilM = pbr('a_ceilM', TEX.beam_d, TEX.beam_n, 2, 2, new BABYLON.Color3(0.22,0.16,0.10));
 
@@ -97,6 +97,16 @@ function buildAttic(){
     prop('a_dresserDrawer'+row,{width:1.22,height:0.235,depth:0.028},dx,0.27+row*0.255,dz+0.346,timber);
     for(const side of [-1,1]){const pull=BABYLON.MeshBuilder.CreateSphere('a_dresserPull'+row+'_'+side,{diameter:0.047,segments:8},scene);pull.position.set(dx+side*0.30,0.27+row*0.255,dz+0.386);pull.material=brass;pull.isPickable=false;}
   }
+
+  // A small old oil lantern gives the stored furniture a readable warm pool of light.
+  const lanternX=4.05,lanternZ=0.30;
+  const lanternBase=BABYLON.MeshBuilder.CreateCylinder('a_lanternBase',{diameter:0.17,height:0.035,tessellation:12},scene);lanternBase.position.set(lanternX,1.0675,lanternZ);lanternBase.material=iron;lanternBase.isPickable=false;
+  const lampGlassM=mat('a_lanternGlassM');lampGlassM.diffuseColor=new BABYLON.Color3(0.46,0.32,0.13);lampGlassM.emissiveColor=new BABYLON.Color3(0.4,0.21,0.055);lampGlassM.alpha=0.65;
+  const glass=BABYLON.MeshBuilder.CreateCylinder('a_lanternGlass',{diameter:0.105,height:0.18,tessellation:12},scene);glass.position.set(lanternX,1.175,lanternZ);glass.material=lampGlassM;glass.isPickable=false;
+  for(let k=0;k<4;k++){const angle=k*Math.PI/2;const bar=BABYLON.MeshBuilder.CreateCylinder('a_lanternBar'+k,{diameter:0.012,height:0.22,tessellation:6},scene);bar.position.set(lanternX+Math.cos(angle)*0.062,1.195,lanternZ+Math.sin(angle)*0.062);bar.material=iron;bar.isPickable=false;}
+  const cap=BABYLON.MeshBuilder.CreateCylinder('a_lanternCap',{diameterBottom:0.17,diameterTop:0.055,height:0.07,tessellation:12},scene);cap.position.set(lanternX,1.30,lanternZ);cap.material=iron;cap.isPickable=false;
+  const lantern=new BABYLON.PointLight('a_lanternL',new BABYLON.Vector3(lanternX,1.27,lanternZ),scene);lantern.diffuse=new BABYLON.Color3(1.0,0.72,0.40);lantern.intensity=1.2;lantern.range=8;
+  let lanternTime=0;scene.registerBeforeRender(()=>{lanternTime+=engine.getDeltaTime()*0.001;lantern.intensity=1.2+Math.sin(lanternTime*2.1+1.7)*0.065+Math.sin(lanternTime*5.3+0.4)*0.025;});
 
   // Broken chair, three legs still attached and the fourth lying alongside it.
   const cx=-4.08,cz=-0.18;
