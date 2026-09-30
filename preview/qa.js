@@ -70,6 +70,17 @@ if (new URLSearchParams(location.search).has('qa')) {
         if(state.currentRoom!==roomId)transitionToRoom(roomId);
         check(state.currentRoom===roomId,roomId+' builds');
         check(camera.position.x===0&&camera.position.z===0,roomId+' centered camera');
+        if(roomId==='living'){
+          for(const n of ['lr_couch','lr_couchBack','lr_parlourRug','lr_backDrapes_pole','lr_windowSill','lr_chimneyBreast','lr_fpKeyStone','lr_orbPedestal','lr_mantelMirrorFrame'])check(!!scene.getMeshByName(n),'parlour feature '+n+' built');
+          for(let f=0;f<5;f++)check(!!scene.getMeshByName('lr_fireFlame'+f),'living fire flame '+f+' built');
+          for(const [n,key] of [['lr_crystalBall','crystalball'],['lr_table','tea'],['lr_firebox','fireplace'],['lr_mantel','fireplace'],['door_entrance','door_entrance'],['door_kitchen','door_kitchen']]){
+            const m=scene.getMeshByName(n);m.computeWorldMatrix(true);camera.setTarget(m.getBoundingInfo().boundingSphere.centerWorld);camera.getViewMatrix(true);scene.render();
+            const hit=scene.pick(engine.getRenderWidth()/2,engine.getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled());
+            check(interactables.get(hit?.pickedMesh?.name)===key,'parlour '+n+' ray-selects ('+(hit?.pickedMesh?.name||'none')+')');
+          }
+          const orb=scene.getMeshByName('lr_crystalBall');check(orb.position.y>1,'crystal ball raised onto its pedestal');
+        }
+
         const doors=[...interactables.entries()].filter(([mesh,key])=>key.startsWith('door_'));
         check(doors.length>0,roomId+' has exits ('+doors.length+')');
         let rayCount=0;
