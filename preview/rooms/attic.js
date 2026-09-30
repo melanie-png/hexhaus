@@ -29,7 +29,7 @@ function buildAttic(){
     original.dispose(false,false);
     const sheet=BABYLON.MeshBuilder.CreateGround(name+'_sh',{width:1.35,height:1.35,subdivisions:24,updatable:true},scene);
     const positions=sheet.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-    for(let k=0;k<positions.length;k+=3){const x=positions[k],z=positions[k+2],drop=Math.max(0,Math.abs(x)-0.40,Math.abs(z)-0.40);positions[k+1]=0.745-drop*2.25+Math.sin(x*35+z*17)*0.008;}
+    for(let k=0;k<positions.length;k+=3){const x=positions[k],z=positions[k+2],drop=Math.max(0,Math.abs(x)-0.435,Math.abs(z)-0.435);positions[k+1]=0.745-drop*2.65+Math.sin(x*35+z*17)*0.008;}
     sheet.updateVerticesData(BABYLON.VertexBuffer.PositionKind,positions,true);
     const normals=[];BABYLON.VertexData.ComputeNormals(positions,sheet.getIndices(),normals);sheet.updateVerticesData(BABYLON.VertexBuffer.NormalKind,normals);
     sheet.parent=parent;sheet.material=material;material.diffuseTexture=linenTex;material.diffuseColor=new BABYLON.Color3(0.85,0.82,0.75);material.backFaceCulling=false;
@@ -97,6 +97,8 @@ function buildAttic(){
     prop('a_dresserDrawer'+row,{width:1.22,height:0.235,depth:0.028},dx,0.27+row*0.255,dz+0.346,timber);
     for(const side of [-1,1]){const pull=BABYLON.MeshBuilder.CreateSphere('a_dresserPull'+row+'_'+side,{diameter:0.047,segments:8},scene);pull.position.set(dx+side*0.30,0.27+row*0.255,dz+0.386);pull.material=brass;pull.isPickable=false;}
   }
+
+  const dresserPivot=new BABYLON.TransformNode('a_dresserPivot',scene);dresserPivot.position.set(dx,0,dz);scene.meshes.filter(m=>m.name.startsWith('a_dresser')).forEach(m=>m.setParent(dresserPivot));dresserPivot.rotation.y=-Math.PI/2;
 
   // A small old oil lantern gives the stored furniture a readable warm pool of light.
   const lanternX=4.05,lanternZ=0.30;
