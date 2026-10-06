@@ -5,7 +5,7 @@
 // The cat lives in the kitchen. Sometimes you catch her sitting there.
 
 const APP_TEX = 'textures/helga_apparition.png?v=20260928a6';
-const HANS_TEX = 'textures/hans_apparition.png?v=20261006a1';
+const HANS_TEX = 'textures/hans_apparition.png?v=20261006a2';
 
 // Spots are inset from the walls, near furniture lines, facing the room centre.
 const HELGA_SPOTS = {   // where the sighting can stand in each room
