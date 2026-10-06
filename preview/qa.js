@@ -70,6 +70,16 @@ if (new URLSearchParams(location.search).has('qa')) {
         if(state.currentRoom!==roomId)transitionToRoom(roomId);
         check(state.currentRoom===roomId,roomId+' builds');
         check(camera.position.x===0&&camera.position.z===0,roomId+' centered camera');
+        if(roomId==='pantry'){
+          for(const name of ['p_jarFill00','p_label02','p_wax00','p_corbel0_40','p_hangRail1','p_herbStr3','p_sack_neck','p_sack2_neck','p_produceCrate0','p_potato3','p_onion1','p_squash','p_basketFill0_1','p_chestBand8','p_chestSeam','p_shelfLip2'])check(!!scene.getMeshByName(name),'pantry furnishing '+name+' built');
+          check(scene.meshes.filter(m=>m.name.startsWith('p_jar')&&/^p_jar\d\d$/.test(m.name)).length===18,'pantry keeps its 18 named jars');
+          for(const [name,key] of [['door_kitchen','door_kitchen'],['door_basement','door_basement'],['sw_plate_pantry','lightswitch_pantry'],['p_jar00','jars'],['p_jar11','jars'],['p_glow','crystalball']]){
+            const m=scene.getMeshByName(name);m.computeWorldMatrix(true);const aim=m.getBoundingInfo().boundingSphere.centerWorld;
+            camera.setTarget(aim);camera.getViewMatrix(true);scene.render();const hit=scene.pick(engine.getRenderWidth()/2,engine.getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled()&&!m.name.startsWith('app_'));
+            check(interactables.get(hit?.pickedMesh?.name)===key,'pantry preserved '+name+' ray-selects ('+(hit?.pickedMesh?.name||'none')+')');
+          }
+        }
+
         if(roomId==='attic'){
           for(const name of ['a_trunk_lid','a_trunk_latch','a_travelTrunk','a_dresserTop','a_dresserDrawer2','a_brokenChairCrest','a_brokenChairFallenLeg','a_pictureTall_canvas','a_pictureSmall_canvas','a_rolledRug','a_hatbox'])check(!!scene.getMeshByName(name),'attic furnishing '+name+' built');
           check(scene.meshes.filter(m=>m.name==='a_box').length===1,'attic storage has unique selectable crate names');
