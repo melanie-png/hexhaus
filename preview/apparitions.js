@@ -176,7 +176,8 @@ function spawnCat(roomId){
   m.backFaceCulling = false;
   m.alpha = 1;
   plane.material = m;
-  plane.rotation.y = Math.atan2(-sx,-sz) + Math.PI;       // face the room centre
+  // an apparition faces whoever is looking at it — never seen edge-on
+  plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Y;
 
   // the eyes carry a faint green cast onto the floor in front of him
   const glow = new BABYLON.PointLight('app_catL', new BABYLON.Vector3(sx,0.42,sz+0.35), sc);
@@ -192,10 +193,11 @@ function spawnCat(roomId){
   interactables.set('app_cat_body','helga_cat');
 
   // Examined or ignored too long: one dash, and it is not there at all.
+  const spawnYaw = Math.atan2(-sx,-sz) + Math.PI;          // where he was facing when he appeared
   let dashed = false;
   const dash = ()=>{
     if (dashed) return; dashed = true;
-    const dir = plane.rotation.y + Math.PI/2;
+    const dir = spawnYaw + Math.PI/2;
     const dx = Math.sin(dir), dz = Math.cos(dir);
     const start = {x:sx, z:sz}; const d0 = performance.now();
     const o2 = sc.onBeforeRenderObservable.add(()=>{
