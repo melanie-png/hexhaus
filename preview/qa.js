@@ -145,7 +145,7 @@ if (new URLSearchParams(location.search).has('qa')) {
         }
         const STAIRS={entrance:['door_library'],library:['door_entrance']};
         const ELEMENTS={
-          entrance:[['el_entr_web1',null],['el_entr_web2',null],['el_entr_dust',null],['el_entr_wax1',null],['el_entr_hat','witchhat',1],['el_entr_board','looseboard',1],['el_entr_gram','gramophone',0],['el_entr_rat','rat',0],['el_entr_moths',null]],
+          entrance:[['el_entr_web1',null],['el_entr_web2',null],['el_entr_dust',null],['el_entr_wax1',null],['el_entr_hat','witchhat',1],['el_entr_board','looseboard',1],['el_entr_gram','gramophone',0],['el_entr_rat','rat',0],['el_entr_moths',null],['clockFace','clock',[8.4,1.85,-3]],['portCanvas','portrait',[-8.4,2.8,-2]],['mirGlass','mirror',[-8.68,1.1,5.0]]],
           living:[['el_liv_web1',null],['el_liv_dust',null],['el_liv_rock','rockingchair',0],['el_liv_sheet','sheeted',0],['el_liv_flowers','deadflowers',0],['el_liv_moths',null],['el_liv_wax1',null]],
           kitchen:[['el_kit_web1',null],['el_kit_dust',null],['el_kit_potions','potions',1],['el_kit_salt','saltline',0],['el_kit_herbs0',null],['el_kit_herbs1',null],['el_kit_herbs2',null],['el_kit_rat','rat',0],['el_kit_wax1',null],['k_benchTop','workbench',1],['k_sink','stonesink',1],['k_kettle','kettle',1],['k_woodlog0',null],['k_hearth','fireplace',1],['k_cauldron','cauldron',1]],
           library:[['el_lib_web1',null],['el_lib_web2',null],['el_lib_dust',null],['el_lib_sheet','sheeted',0],['el_lib_doll','dollhouse',0]],

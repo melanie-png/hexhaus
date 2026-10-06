@@ -146,26 +146,99 @@ function buildEntranceHall(){
   candleFlame.scaling.y = 2.0;
   candleFlame.material = emitM('candleFlameM', 1.0, 0.65, 0.15, 1.0);
 
+  // ── Hearth depth: lintel, chimney breast, hearth slab, logs ──────────────
+  const fpLintel = BABYLON.MeshBuilder.CreateBox('fpLintel', {width:3.3, height:0.32, depth:0.72}, scene);
+  fpLintel.position.set(fpX, 2.72, fpZ+0.12); fpLintel.material = stoneM;
+  const fpBreast = BABYLON.MeshBuilder.CreateBox('fpBreast', {width:2.6, height:H-2.88, depth:0.62}, scene);
+  fpBreast.position.set(fpX, 2.88+(H-2.88)/2, -D/2+0.31); fpBreast.material = stoneM;
+  fpBreast.isPickable = false;
+  const fpSlab = BABYLON.MeshBuilder.CreateBox('fpSlab', {width:3.4, height:0.07, depth:0.9}, scene);
+  fpSlab.position.set(fpX, 0.035, fpZ+0.85); fpSlab.material = stoneM; fpSlab.isPickable = false;
+  // Soot blackening around the opening
+  const sootM = mat('fpSootM');
+  sootM.diffuseColor=new BABYLON.Color3(0.05,0.04,0.035); sootM.emissiveColor=new BABYLON.Color3(0.01,0.008,0.006);
+  [[-0.95],[0.95]].forEach(([sx])=>{
+    const sm=BABYLON.MeshBuilder.CreatePlane('fpSoot'+(sx<0?'L':'R'),{width:0.5,height:1.8},scene);
+    sm.position.set(fpX+sx,0.95,fpZ+0.403); sm.material=sootM; sm.isPickable=false;
+  });
+  const sootTop=BABYLON.MeshBuilder.CreatePlane('fpSootT',{width:2.2,height:0.8},scene);
+  sootTop.position.set(fpX,1.9,fpZ+0.403); sootTop.material=sootM; sootTop.isPickable=false;
+  // Andirons + log pile (the wood that isn't burning)
+  const fpIronM = mat('fpIronM'); fpIronM.diffuseColor=new BABYLON.Color3(0.12,0.11,0.10); fpIronM.specularColor=new BABYLON.Color3(0.2,0.18,0.16); fpIronM.specularPower=32;
+  [[-0.38],[0.38]].forEach(([ax])=>{
+    const bar=BABYLON.MeshBuilder.CreateCylinder('fpAndiron'+(ax<0?'L':'R'),{diameter:0.028,height:0.72,tessellation:6},scene);
+    bar.rotation.x=Math.PI/2; bar.position.set(fpX+ax,0.09,fpZ+0.62); bar.material=fpIronM; bar.isPickable=false;
+  });
+  const fpLogM = pbr('fpLogM', TEX.wood_d, TEX.wood_n, 1, 1, new BABYLON.Color3(0.30, 0.20, 0.12));
+  [[0.0,0.17,-5.3],[-0.15,0.17,-5.12],[0.14,0.29,-5.22],[-0.05,0.41,-5.18]].forEach(([lx,ly,lz],li)=>{
+    const lg=BABYLON.MeshBuilder.CreateCylinder('fpLog'+li,{diameterTop:0.11,diameterBottom:0.13,height:0.75,tessellation:8},scene);
+    lg.rotation.x=Math.PI/2; lg.rotation.y=li*0.7; lg.position.set(fpX+lx,ly,lz); lg.material=fpLogM; lg.isPickable=false;
+  });
+  const fpAshM = mat('fpAshM'); fpAshM.diffuseColor=new BABYLON.Color3(0.22,0.20,0.18);
+  const fpAsh = BABYLON.MeshBuilder.CreateSphere('fpAsh',{diameter:0.55,segments:8},scene);
+  fpAsh.scaling.y=0.22; fpAsh.position.set(fpX+0.32,0.03,fpZ+0.52); fpAsh.material=fpAshM; fpAsh.isPickable=false;
+
   // ── GRANDFATHER CLOCK (right wall, stopped at 3:17) ─────────────────────────
-  const clockX = W/2 - 0.3;
-  const clockBody = BABYLON.MeshBuilder.CreateBox('clockBody', {width:0.8, height:2.4, depth:0.35}, scene);
-  clockBody.position.set(clockX, 1.2, -3); clockBody.material = woodM;
-  const clockFace = BABYLON.MeshBuilder.CreateCylinder('clockFace', {diameter:0.4, height:0.03, tessellation:16}, scene);
-  clockFace.position.set(clockX - 0.18, 1.8, -3);
-  clockFace.rotation.z = Math.PI/2;
-  clockFace.material = mat('clockFaceM'); clockFace.material.diffuseColor = new BABYLON.Color3(0.3, 0.28, 0.22);
-  // Clock hands (fixed at 3:17)
-  const hourHand = BABYLON.MeshBuilder.CreateBox('hourHand', {width:0.02, height:0.08, depth:0.01}, scene);
-  hourHand.position.set(clockX - 0.18, 1.82, -3); hourHand.rotation.z = -Math.PI/6; // ~3 o'clock
-  hourHand.material = mat('hourHandM'); hourHand.material.diffuseColor = new BABYLON.Color3(0.1, 0.08, 0.06);
-  const minHand = BABYLON.MeshBuilder.CreateBox('minHand', {width:0.02, height:0.13, depth:0.01}, scene);
-  minHand.position.set(clockX - 0.18, 1.82, -3); minHand.rotation.z = -Math.PI/3 * 0.57; // ~17 min
-  minHand.material = mat('minHandM'); minHand.material.diffuseColor = new BABYLON.Color3(0.1, 0.08, 0.06);
-  // Pendulum (still)
-  const pendRod = BABYLON.MeshBuilder.CreateCylinder('pendRod', {diameter:0.01, height:0.6, tessellation:4}, scene);
-  pendRod.position.set(clockX - 0.18, 1.2, -3); pendRod.material = mat('pendRodM'); pendRod.material.diffuseColor = new BABYLON.Color3(0.15, 0.12, 0.08);
-  const pendBob = BABYLON.MeshBuilder.CreateSphere('pendBob', {diameter:0.12, segments:8}, scene);
-  pendBob.position.set(clockX - 0.18, 0.85, -3); pendBob.material = mat('pendBobM'); pendBob.material.diffuseColor = new BABYLON.Color3(0.2, 0.15, 0.08);
+  const clockX = W/2 - 0.22;
+  const clockM = pbr('clockM', TEX.darkwood_d, TEX.darkwood_n, 1, 2, new BABYLON.Color3(0.32, 0.21, 0.11));
+  const clockBody = BABYLON.MeshBuilder.CreateBox('clockBody', {width:0.34, height:2.4, depth:0.82}, scene);
+  clockBody.position.set(clockX, 1.2, -3); clockBody.material = clockM;
+  const clockCaseL = BABYLON.MeshBuilder.CreateBox('clockCaseL', {width:0.36, height:2.4, depth:0.06}, scene);
+  clockCaseL.position.set(clockX, 1.2, -3.44); clockCaseL.material = clockM;
+  const clockCaseR = clockCaseL.clone('clockCaseR'); clockCaseR.position.z = -2.56;
+  const clockBack = BABYLON.MeshBuilder.CreateBox('clockBack', {width:0.02, height:2.4, depth:0.94}, scene);
+  clockBack.position.set(clockX+0.16, 1.2, -3); clockBack.material = clockM;
+  const clockHood = BABYLON.MeshBuilder.CreateBox('clockHood', {width:0.42, height:0.5, depth:0.94}, scene);
+  clockHood.position.set(clockX, 2.64, -3); clockHood.material = clockM;
+  const clockCrown = BABYLON.MeshBuilder.CreateBox('clockCrown', {width:0.5, height:0.09, depth:1.02}, scene);
+  clockCrown.position.set(clockX, 2.935, -3); clockCrown.material = clockM;
+  const entrBrassM = mat('entrBrassM'); entrBrassM.diffuseColor=new BABYLON.Color3(0.36,0.29,0.15); entrBrassM.specularColor=new BABYLON.Color3(0.55,0.45,0.25); entrBrassM.specularPower=48;
+  const clockFinial = BABYLON.MeshBuilder.CreateSphere('clockFinial', {diameter:0.1, segments:8}, scene);
+  clockFinial.position.set(clockX, 3.03, -3); clockFinial.material = entrBrassM;
+  const clockPlinth = BABYLON.MeshBuilder.CreateBox('clockPlinth', {width:0.42, height:0.18, depth:0.94}, scene);
+  clockPlinth.position.set(clockX, 0.09, -3); clockPlinth.material = clockM;
+  // Painted dial — Roman numerals, hands stopped at 3:17
+  const dialTex = new BABYLON.DynamicTexture('entr_dialTex', {width:256, height:256}, scene, false);
+  const dc = dialTex.getContext();
+  dc.fillStyle='#ddd0b0'; dc.fillRect(0,0,256,256);
+  dc.strokeStyle='#3a2410'; dc.lineWidth=6; dc.beginPath(); dc.arc(128,128,120,0,Math.PI*2); dc.stroke();
+  dc.strokeStyle='#7a5a30'; dc.lineWidth=3; dc.beginPath(); dc.arc(128,128,110,0,Math.PI*2); dc.stroke();
+  for(let b=0;b<26;b++){ dc.fillStyle='rgba(120,90,50,'+(0.04+Math.random()*0.05)+')'; dc.beginPath(); dc.arc(20+Math.random()*216,20+Math.random()*216,8+Math.random()*20,0,Math.PI*2); dc.fill(); }
+  dc.fillStyle='#2a1a08'; dc.textAlign='center'; dc.textBaseline='middle'; dc.font='bold 24px Georgia, serif';
+  ['XII','I','II','III','IIII','V','VI','VII','VIII','IX','X','XI'].forEach((n,i)=>{
+    const a=i/12*Math.PI*2-Math.PI/2; dc.fillText(n,128+Math.cos(a)*92,128+Math.sin(a)*92);
+  });
+  dc.strokeStyle='#2a1a08';
+  for(let t=0;t<60;t++){ const a=t/60*Math.PI*2-Math.PI/2; const r2=(t%5===0)?96:101;
+    dc.lineWidth=(t%5===0)?2.5:1.2; dc.beginPath(); dc.moveTo(128+Math.cos(a)*104,128+Math.sin(a)*104); dc.lineTo(128+Math.cos(a)*r2,128+Math.sin(a)*r2); dc.stroke();
+  }
+  const hA=(3+17/60)/12*Math.PI*2-Math.PI/2, mA=(17/60)*Math.PI*2-Math.PI/2;
+  dc.strokeStyle='#1a0e04'; dc.lineCap='round';
+  dc.lineWidth=7; dc.beginPath(); dc.moveTo(128,128); dc.lineTo(128+Math.cos(hA)*58,128+Math.sin(hA)*58); dc.stroke();
+  dc.lineWidth=4; dc.beginPath(); dc.moveTo(128,128); dc.lineTo(128+Math.cos(mA)*88,128+Math.sin(mA)*88); dc.stroke();
+  dc.fillStyle='#1a0e04'; dc.beginPath(); dc.arc(128,128,7,0,Math.PI*2); dc.fill();
+  dialTex.update();
+  const clockFace = BABYLON.MeshBuilder.CreateDisc('clockFace', {radius:0.23, tessellation:32}, scene);
+  clockFace.rotation.y = -Math.PI/2;
+  clockFace.position.set(clockX - 0.19, 1.85, -3);
+  const dialM = mat('entrDialM'); dialM.diffuseTexture = dialTex; dialM.emissiveTexture = dialTex;
+  dialM.emissiveColor = new BABYLON.Color3(0.32, 0.28, 0.2); clockFace.material = dialM;
+  const clockGlass = BABYLON.MeshBuilder.CreatePlane('clockGlass', {width:0.62, height:1.05}, scene);
+  clockGlass.rotation.y = -Math.PI/2;
+  clockGlass.position.set(clockX - 0.19, 1.28, -3);
+  const cgM = mat('entrClockGlassM'); cgM.diffuseColor=new BABYLON.Color3(0.05,0.05,0.06);
+  cgM.emissiveColor=new BABYLON.Color3(0.015,0.015,0.02); cgM.specularColor=new BABYLON.Color3(0.25,0.25,0.3); cgM.specularPower=96; cgM.alpha=0.16;
+  clockGlass.material = cgM;
+  const pendRod = BABYLON.MeshBuilder.CreateCylinder('pendRod', {diameter:0.012, height:0.72, tessellation:6}, scene);
+  pendRod.position.set(clockX - 0.05, 1.15, -3); pendRod.material = entrBrassM;
+  const pendBob = BABYLON.MeshBuilder.CreateSphere('pendBob', {diameter:0.13, segments:10}, scene);
+  pendBob.position.set(clockX - 0.05, 0.74, -3); pendBob.material = entrBrassM;
+  [[-2.86],[-3.14]].forEach(([wz],wi)=>{
+    const chain=BABYLON.MeshBuilder.CreateCylinder('clockChain'+wi,{diameter:0.008,height:0.7,tessellation:4},scene);
+    chain.position.set(clockX-0.02,1.9,wz); chain.material=entrBrassM;
+    const weight=BABYLON.MeshBuilder.CreateCylinder('clockWeight'+wi,{diameter:0.055,height:0.16,tessellation:8},scene);
+    weight.position.set(clockX-0.02,1.47,wz); weight.material=entrBrassM;
+  });
 
   // ── FAMILY PORTRAIT (left wall) ─────────────────────────────────────────────
   const portFrame = BABYLON.MeshBuilder.CreateBox('portFrame', {width:1.0, height:1.3, depth:0.06}, scene);
@@ -175,9 +248,42 @@ function buildEntranceHall(){
   const portCanvas = BABYLON.MeshBuilder.CreatePlane('portCanvas', {width:0.85, height:1.15}, scene);
   portCanvas.position.set(-W/2 + 0.09, 2.8, -2);
   portCanvas.rotation.y = Math.PI/2;
-  portCanvas.material = mat('portCanvasM');
-  portCanvas.material.diffuseColor = new BABYLON.Color3(0.12, 0.10, 0.08);
-  portCanvas.material.emissiveColor = new BABYLON.Color3(0.02, 0.015, 0.01);
+  // Painted family group — three face outward, the smallest faces the wall
+  const famTex = new BABYLON.DynamicTexture('entr_familyTex', {width:256, height:344}, scene, false);
+  const fc = famTex.getContext();
+  fc.fillStyle='#1c130a'; fc.fillRect(0,0,256,344);
+  fc.fillStyle='#241a10'; fc.fillRect(0,60,256,220);
+  fc.fillStyle='#0e0906'; fc.fillRect(0,280,256,64);
+  for(let b=0;b<40;b++){ fc.fillStyle='rgba(90,60,30,'+(0.03+Math.random()*0.06)+')'; fc.beginPath(); fc.arc(Math.random()*256,Math.random()*344,10+Math.random()*26,0,Math.PI*2); fc.fill(); }
+  function fig(fx, fy, fh, facing){
+    fc.fillStyle='#0a0705';
+    fc.beginPath(); fc.moveTo(fx-fh*0.22,fy); fc.quadraticCurveTo(fx,fy+fh*0.08,fx+fh*0.22,fy); fc.lineTo(fx+fh*0.30,fy+fh*0.85); fc.lineTo(fx-fh*0.30,fy+fh*0.85); fc.closePath(); fc.fill();
+    fc.beginPath(); fc.arc(fx,fy-fh*0.30,fh*0.16,0,Math.PI*2); fc.fill();
+    if(facing){
+      fc.fillStyle='#9a8568'; fc.beginPath(); fc.arc(fx,fy-fh*0.28,fh*0.11,0,Math.PI*2); fc.fill();
+      fc.fillStyle='#3d2e1a'; fc.beginPath(); fc.arc(fx,fy-fh*0.40,fh*0.12,Math.PI,0); fc.fill();
+    }
+  }
+  fig(64,140,110,true); fig(128,140,120,true); fig(192,140,110,true); fig(160,150,70,false);
+  fc.strokeStyle='rgba(20,14,8,0.5)'; fc.lineWidth=0.6;
+  for(let c=0;c<46;c++){ fc.beginPath(); let cx=Math.random()*256, cy=Math.random()*344; fc.moveTo(cx,cy);
+    for(let sgm=0;sgm<4;sgm++){ cx+=(Math.random()-0.5)*30; cy+=(Math.random()-0.5)*30; fc.lineTo(cx,cy);} fc.stroke(); }
+  const vg = fc.createRadialGradient(128,172,80,128,172,230); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(8,5,2,0.55)');
+  fc.fillStyle=vg; fc.fillRect(0,0,256,344);
+  famTex.update();
+  const portM = mat('portCanvasM'); portM.diffuseTexture = famTex; portM.emissiveTexture = famTex;
+  portM.emissiveColor = new BABYLON.Color3(0.55, 0.48, 0.38); portM.backFaceCulling = false;
+  portCanvas.material = portM;
+  // Gilt inner frame + corner rosettes
+  const entrGiltM = mat('entrGiltM'); entrGiltM.diffuseColor=new BABYLON.Color3(0.32,0.25,0.12); entrGiltM.specularColor=new BABYLON.Color3(0.5,0.4,0.2); entrGiltM.specularPower=40;
+  [[0.0,0.575,0.9,0.045],[0.0,-0.575,0.9,0.045],[-0.435,0.0,0.045,1.2],[0.435,0.0,0.045,1.2]].forEach(([oz,oy,bw,bh],bi)=>{
+    const bar=BABYLON.MeshBuilder.CreateBox('portGilt'+bi,{width:0.018,height:bh,depth:bw},scene);
+    bar.position.set(-W/2+0.088, 2.8+oy, -2+oz); bar.material=entrGiltM; bar.isPickable=false;
+  });
+  [[-0.62,-0.47],[0.62,-0.47],[-0.62,0.47],[0.62,0.47]].forEach(([oy,oz],ri)=>{
+    const ros=BABYLON.MeshBuilder.CreateSphere('portRos'+ri,{diameter:0.09,segments:8},scene);
+    ros.position.set(-W/2+0.05, 2.8+oy, -2+oz); ros.material=entrGiltM; ros.isPickable=false;
+  });
 
   // ── STANDING MIRROR (left-front corner) ─────────────────────────────────────
   const mirFrame = BABYLON.MeshBuilder.CreateBox('mirFrame', {width:0.8, height:2.0, depth:0.08}, scene);
@@ -221,9 +327,15 @@ function buildEntranceHall(){
   clasp.material.specularColor = new BABYLON.Color3(0.5, 0.5, 0.55); clasp.material.specularPower = 48;
 
   // ── CONSOLE TABLE WITH SEALED LETTER (front wall) ───────────────────────────
-  const console = BABYLON.MeshBuilder.CreateBox('console', {width:1.2, height:0.85, depth:0.4}, scene);
-  console.position.set(-2.5, 0.43, D/2 - 0.25);
+  const console = BABYLON.MeshBuilder.CreateBox('console', {width:1.2, height:0.07, depth:0.42}, scene);
+  console.position.set(-2.5, 0.83, D/2 - 0.25);
   console.material = woodM;
+  [[-0.52,-0.14],[0.52,-0.14],[-0.52,0.14],[0.52,0.14]].forEach(([lx,lz],li)=>{
+    const leg=BABYLON.MeshBuilder.CreateCylinder('consoleLeg'+li,{diameterTop:0.05,diameterBottom:0.07,height:0.8,tessellation:8},scene);
+    leg.position.set(-2.5+lx,0.4,D/2-0.25+lz); leg.material=woodM;
+  });
+  const consoleApron=BABYLON.MeshBuilder.CreateBox('consoleApron',{width:1.05,height:0.09,depth:0.04},scene);
+  consoleApron.position.set(-2.5,0.76,D/2-0.39); consoleApron.material=woodM;
   // Drawer detail
   const drawer = BABYLON.MeshBuilder.CreateBox('drawer', {width:1.0, height:0.25, depth:0.02}, scene);
   drawer.position.set(-2.5, 0.55, D/2 - 0.06); drawer.material = woodM;
@@ -295,8 +407,26 @@ function buildEntranceHall(){
   });
 
   // ── RED PERSIAN RUG ─────────────────────────────────────────────────────────
+  let rugTex = null;
+  if(typeof BABYLON.DynamicTexture !== 'undefined'){
+    const dt=new BABYLON.DynamicTexture('entr_rugTex',{width:256,height:352},scene,false);
+    const rc=dt.getContext();
+    rc.fillStyle='#4a0a0e'; rc.fillRect(0,0,256,352);
+    rc.strokeStyle='#c89632'; rc.lineWidth=8; rc.strokeRect(10,10,236,332);
+    rc.strokeStyle='#7a1a20'; rc.lineWidth=4; rc.strokeRect(20,20,216,312);
+    rc.strokeStyle='#d4a242'; rc.lineWidth=3;
+    rc.beginPath(); rc.moveTo(128,70); rc.lineTo(196,176); rc.lineTo(128,282); rc.lineTo(60,176); rc.closePath(); rc.stroke();
+    rc.beginPath(); rc.arc(128,176,34,0,Math.PI*2); rc.stroke();
+    rc.fillStyle='#3a080c'; rc.fill();
+    rc.fillStyle='rgba(212,162,66,0.35)';
+    for(let d=0;d<90;d++){ rc.beginPath(); rc.arc(28+Math.random()*200,28+Math.random()*296,1.6,0,Math.PI*2); rc.fill(); }
+    rc.strokeStyle='rgba(0,0,0,0.10)'; rc.lineWidth=1;
+    for(let ry=0;ry<352;ry+=3){ rc.beginPath(); rc.moveTo(0,ry); rc.lineTo(256,ry); rc.stroke(); }
+    dt.update(); rugTex=dt;
+  }
   const rugM = mat('rugM');
-  rugM.diffuseColor = new BABYLON.Color3(0.30, 0.06, 0.04);
+  if(rugTex){ rugM.diffuseTexture = rugTex; rugM.emissiveColor=new BABYLON.Color3(0.20,0.16,0.12); }
+  else { rugM.diffuseColor = new BABYLON.Color3(0.30, 0.06, 0.04); }
   rugM.specularColor = new BABYLON.Color3(0.05, 0.02, 0.01);
   const rug = BABYLON.MeshBuilder.CreateGround('rug', {width:4.0, height:5.5, subdivisions:2}, scene);
   rug.position.set(0, 0.01, 0.5); rug.material = rugM;
@@ -388,6 +518,33 @@ function buildEntranceHall(){
     const dbgEl=document.createElement('div'); dbgEl.id='dbgLoad';
     dbgEl.style.cssText='position:fixed;top:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#0f0;font:11px monospace;padding:4px 8px;z-index:9999;max-width:90%;pointer-events:none';
     document.body.appendChild(dbgEl);
+  }
+
+  // ── WAINSCOT PANELING (dado rail + raised panels, front + left walls) ─────
+  const entrPanelM = pbr('entrPanelM', TEX.darkwood_d, TEX.darkwood_n, 2, 1, new BABYLON.Color3(0.38, 0.28, 0.16));
+  const entrRailM = mat('entrRailM'); entrRailM.diffuseColor=new BABYLON.Color3(0.16,0.10,0.05);
+  const frtRail=BABYLON.MeshBuilder.CreateBox('entrRailF',{width:W,height:0.1,depth:0.12},scene);
+  frtRail.position.set(0,1.22,D/2-0.05); frtRail.material=entrRailM; frtRail.isPickable=false;
+  const frtBase=BABYLON.MeshBuilder.CreateBox('entrBaseF',{width:W,height:0.16,depth:0.1},scene);
+  frtBase.position.set(0,0.08,D/2-0.05); frtBase.material=entrRailM; frtBase.isPickable=false;
+  for(let pi=0;pi<13;pi++){
+    const px=-7.5+pi*1.25;
+    const pn=BABYLON.MeshBuilder.CreateBox('entrFPanel'+pi,{width:0.95,height:0.72,depth:0.035},scene);
+    pn.position.set(px,0.62,D/2-0.06); pn.material=entrPanelM; pn.isPickable=false;
+    const bd=BABYLON.MeshBuilder.CreateBox('entrFBead'+pi,{width:0.81,height:0.58,depth:0.02},scene);
+    bd.position.set(px,0.62,D/2-0.048); bd.material=entrPanelM; bd.isPickable=false;
+  }
+  // Left wall run (clear of the living-room door at z 2.25..3.75 and the corner mirror)
+  const lwRail=BABYLON.MeshBuilder.CreateBox('entrRailL',{width:0.12,height:0.1,depth:8.1},scene);
+  lwRail.position.set(-W/2+0.05,1.22,-1.85); lwRail.material=entrRailM; lwRail.isPickable=false;
+  const lwBase=BABYLON.MeshBuilder.CreateBox('entrBaseL',{width:0.1,height:0.16,depth:8.1},scene);
+  lwBase.position.set(-W/2+0.05,0.08,-1.85); lwBase.material=entrRailM; lwBase.isPickable=false;
+  for(let pi=0;pi<7;pi++){
+    const pz=-5.4+pi*1.25;
+    const pn=BABYLON.MeshBuilder.CreateBox('entrLPanel'+pi,{width:0.035,height:0.72,depth:0.95},scene);
+    pn.position.set(-W/2+0.07,0.62,pz); pn.material=entrPanelM; pn.isPickable=false;
+    const bd=BABYLON.MeshBuilder.CreateBox('entrLBead'+pi,{width:0.02,height:0.58,depth:0.81},scene);
+    bd.position.set(-W/2+0.052,0.62,pz); bd.material=entrPanelM; bd.isPickable=false;
   }
 
   // ── LIGHTS ──────────────────────────────────────────────────────────────────
