@@ -157,7 +157,7 @@ if (new URLSearchParams(location.search).has('qa')) {
           if(ray){
             const aim=Array.isArray(ray)?new BABYLON.Vector3(ray[0],ray[1],ray[2]):em.getHierarchyBoundingVectors().min.add(em.getHierarchyBoundingVectors().max).scale(0.5);
             camera.setTarget(aim); scene.render();
-            const pick=scene.pick(scene.getEngine().getRenderWidth()/2, scene.getEngine().getRenderHeight()/2);
+            const pick=scene.pick(scene.getEngine().getRenderWidth()/2, scene.getEngine().getRenderHeight()/2,m=>m.isPickable&&m.isVisible&&m.isEnabled()&&!m.name.startsWith('app_'));
             const ok=pick.hit&&(pick.pickedMesh&&(pick.pickedMesh.name===mn||pick.pickedMesh.name.startsWith(mn+'_')||interactables.get(pick.pickedMesh.name)===key));
             check(ok, roomId+' element '+mn+' ray hit '+(pick.hit&&pick.pickedMesh?pick.pickedMesh.name.slice(0,28):'NOTHING'));
           }
