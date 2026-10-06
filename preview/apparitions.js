@@ -5,6 +5,7 @@
 // The cat lives in the kitchen. Sometimes you catch her sitting there.
 
 const APP_TEX = 'textures/helga_apparition.png?v=20260928a6';
+const HANS_TEX = 'textures/hans_apparition.png?v=20261006a1';
 
 // Spots are inset from the walls, near furniture lines, facing the room centre.
 const HELGA_SPOTS = {   // where the sighting can stand in each room
@@ -151,107 +152,58 @@ function helgaSighting(roomId){
   };
 }
 
-// ── THE CAT — a proper sitting silhouette: haunches, chest, paws, wrapped tail.
-// She watches you (head tracks the camera), blinks, twitches an ear — and is
-// still gone the moment you try to examine her.
+// ── THE CAT — Hans: a painted sprite, self-lit, two-sided alpha art.
+// He breathes where the hearth can catch his edges — and is still gone the
+// moment you try to examine him.
 function spawnCat(roomId){
   const spots = CAT_SPOTS[roomId]; if (!spots || !spots.length) return;
   const [sx,sz] = (window.HEXQA_SPAWN || window.HEXAPP_FORCE) ? spots[0] : spots[(Math.random()*spots.length)|0];   // demo/QA: always the first spot
   const sc = scene;
-  const root = new BABYLON.TransformNode('app_cat',sc);
-  const fur = new BABYLON.StandardMaterial('app_catM',sc);
-  fur.diffuseColor = new BABYLON.Color3(0.025,0.025,0.032);
-  fur.specularColor = new BABYLON.Color3(0.05,0.05,0.06);
-  const eyeM = new BABYLON.StandardMaterial('app_catEyeM',sc);
-  eyeM.emissiveColor = new BABYLON.Color3(0.25,0.95,0.45);
-  eyeM.diffuseColor = new BABYLON.Color3(0,0,0);
-  eyeM.specularColor = new BABYLON.Color3(0,0,0);
+  // painted sprite — the same recipe that made Helga work: lossless PNG alpha,
+  // self-lit emissive, two-sided, no backface hole
+  const tex = new BABYLON.Texture(HANS_TEX, sc, true);
+  tex.hasAlpha = true;
+  const AW=460, AH=645;                       // art aspect
+  const hH = 0.52, hW = hH * AW/AH;           // a real sitting cat is about half a metre tall
+  const plane = BABYLON.MeshBuilder.CreatePlane('app_cat_body',{width:hW,height:hH},sc);
+  plane.position.set(sx, hH/2 + 0.015, sz);
+  const m = new BABYLON.StandardMaterial('app_catM',sc);
+  m.diffuseTexture = tex;
+  m.useAlphaFromDiffuseTexture = true;
+  m.emissiveTexture = tex;
+  m.emissiveColor = new BABYLON.Color3(0.62,0.56,0.46);   // dim candle-warm self-light — he is a shadow, not a lamp
+  m.specularColor = new BABYLON.Color3(0,0,0);
+  m.backFaceCulling = false;
+  m.alpha = 1;
+  plane.material = m;
+  plane.rotation.y = Math.atan2(-sx,-sz) + Math.PI;       // face the room centre
 
-  const parts=[];
-  const mk=(n,fn)=>{const me=fn(n);me.parent=root;me.material=fur;parts.push(me);return me;};
-  // haunches + chest: the sitting pear
-  const body=mk('app_cat_body',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameterX:0.34,diameterY:0.36,diameterZ:0.3},sc));
-  body.position.set(-0.07,0.18,0);
-  const chest=mk('app_cat_chest',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameterX:0.24,diameterY:0.3,diameterZ:0.22},sc));
-  chest.position.set(0.08,0.2,0);
-  // front legs, straight and prim
-  for(const z of [-0.055,0.055]){
-    const leg=mk('app_cat_leg'+(z<0?'l':'r'),n=>BABYLON.MeshBuilder.CreateCylinder(n,{diameter:0.045,height:0.34},sc));
-    leg.position.set(0.14,0.17,z);
-    const paw=mk('app_cat_paw'+(z<0?'l':'r'),n=>BABYLON.MeshBuilder.CreateSphere(n,{diameter:0.075},sc));
-    paw.position.set(0.15,0.035,z); paw.scaling.y=0.55;
-  }
-  // head with a muzzle; eyes ride on the head so they follow her gaze
-  const head=mk('app_cat_head',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameter:0.15},sc));
-  head.position.set(0.17,0.42,0); head.scaling.set(1,0.92,0.95);
-  const muzzle=mk('app_cat_muzzle',n=>BABYLON.MeshBuilder.CreateSphere(n,{diameter:0.07},sc));
-  muzzle.parent=head; muzzle.position.set(0.05,-0.012,0); muzzle.scaling.set(0.9,0.7,1);
-  const e1=BABYLON.MeshBuilder.CreateSphere('app_cat_e1',{diameter:0.027},sc);
-  const e2=BABYLON.MeshBuilder.CreateSphere('app_cat_e2',{diameter:0.027},sc);
-  for(const e of [e1,e2]){ e.parent=head; e.material=eyeM; parts.push(e); }
-  e1.position.set(0.072,0.028,0.04); e2.position.set(0.072,0.028,-0.04);
-  // cone ears
-  const ear1=mk('app_cat_ear1',n=>BABYLON.MeshBuilder.CreateCylinder(n,{diameterTop:0.004,diameterBottom:0.045,height:0.078},sc));
-  ear1.parent=head; ear1.position.set(-0.005,0.083,0.048); ear1.rotation.x=-0.22;
-  const ear2=mk('app_cat_ear2',n=>BABYLON.MeshBuilder.CreateCylinder(n,{diameterTop:0.004,diameterBottom:0.045,height:0.078},sc));
-  ear2.parent=head; ear2.position.set(-0.005,0.083,-0.048); ear2.rotation.x=0.22;
-  // tail: a tube that curls from her haunches around the front paws
-  const tp=[[-0.19,0.05,0.12],[-0.235,0.04,0.0],[-0.18,0.035,-0.13],[-0.05,0.03,-0.21],[0.09,0.03,-0.215],[0.16,0.035,-0.14],[0.19,0.055,-0.05]]
-    .map(v=>new BABYLON.Vector3(v[0],v[1],v[2]));
-  const tail=mk('app_cat_tail',n=>BABYLON.MeshBuilder.CreateTube(n,{path:tp,radius:0.017,tessellation:8,cap:BABYLON.Mesh.CAP_ALL},sc));
+  // the eyes carry a faint green cast onto the floor in front of him
+  const glow = new BABYLON.PointLight('app_catL', new BABYLON.Vector3(sx,0.42,sz+0.35), sc);
+  glow.diffuse = new BABYLON.Color3(0.30,0.75,0.42);
+  glow.specular = new BABYLON.Color3(0.05,0.12,0.07);
+  glow.intensity = 0.22; glow.range = 3.2;
 
-  root.position.set(sx,0,sz);
-  root.rotation.y = Math.atan2(-sx,-sz);          // facing the room centre
-
-  // a faint hearth-glow so her silhouette reads against the dark kitchen
-  const glow = new BABYLON.PointLight('app_catL', new BABYLON.Vector3(sx,0.75,sz+0.45), sc);
-  glow.diffuse = new BABYLON.Color3(0.72,0.55,0.32);
-  glow.specular = new BABYLON.Color3(0.15,0.1,0.06);
-  glow.intensity = 0.35; glow.range = 5;
-
-  const t0=performance.now();
-  let nextBlink=t0+2500+(Math.random()*3000), blinkT=0;
-  let nextTwitch=t0+3500+(Math.random()*4500), twitchT=0;
-  const obs=sc.onBeforeRenderObservable.add(()=>{
-    const t=performance.now()-t0;
-    // tail sway
-    tail.rotation.y=Math.sin(t/650)*0.07;
-    // breathing
-    chest.scaling.y=1+Math.sin(t/1100)*0.035;
-    // she watches you: head turns toward the camera (clamped, smoothed)
-    try{
-      const inv=root.getWorldMatrix().clone().invert();
-      const local=BABYLON.Vector3.TransformCoordinates(camera.position,inv);
-      const yaw=Math.max(-0.85,Math.min(0.85,Math.atan2(-local.z,Math.max(0.05,local.x))));
-      const pitch=Math.max(-0.3,Math.min(0.45,Math.atan2(local.y-0.42,Math.hypot(local.x,local.z))));
-      head.rotation.y+=(yaw-head.rotation.y)*0.06;
-      head.rotation.z+=(pitch-head.rotation.z)*0.06;
-    }catch(e){}
-    // blink
-    if(t+ t0>nextBlink){ blinkT=performance.now(); nextBlink=performance.now()+2800+Math.random()*4200; }
-    const bo=performance.now()-(blinkT||-1e9);
-    const es=(bo>=0&&bo<140)?0.1:1;
-    e1.scaling.y=es; e2.scaling.y=es;
-    // ear twitch
-    if(performance.now()>nextTwitch){ twitchT=performance.now(); nextTwitch=performance.now()+4000+Math.random()*6000; }
-    const wo=performance.now()-(twitchT||-1e9);
-    if(wo>=0&&wo<220){ ear1.rotation.x=-0.22+Math.sin(wo/35)*0.3; }
-    else ear1.rotation.x=-0.22;
+  const t0 = performance.now();
+  const obs = sc.onBeforeRenderObservable.add(()=>{
+    const t = (performance.now()-t0)/1000;
+    plane.position.y = hH/2 + 0.015 + Math.sin(t*1.35)*0.006;   // he breathes
   });
-  parts.forEach(p=>interactables.set(p.name,'helga_cat'));
+  interactables.set('app_cat_body','helga_cat');
 
   // Examined or ignored too long: one dash, and it is not there at all.
   let dashed = false;
   const dash = ()=>{
     if (dashed) return; dashed = true;
-    const dir = root.rotation.y + Math.PI/2;
+    const dir = plane.rotation.y + Math.PI/2;
     const dx = Math.sin(dir), dz = Math.cos(dir);
     const start = {x:sx, z:sz}; const d0 = performance.now();
     const o2 = sc.onBeforeRenderObservable.add(()=>{
       const k = Math.min(1,(performance.now()-d0)/650);
-      root.position.x = start.x + dx*3.2*k;
-      root.position.z = start.z + dz*3.2*k;
-      if (k>=1){ parts.forEach(p=>p.setEnabled(false)); sc.onBeforeRenderObservable.remove(o2); }
+      plane.position.x = start.x + dx*3.2*k;
+      plane.position.z = start.z + dz*3.2*k;
+      m.alpha = 1-k;                                   // he thins out as he goes
+      if (k>=1){ plane.setEnabled(false); sc.onBeforeRenderObservable.remove(o2); }
     });
   };
   const timer = setTimeout(dash, window.HEXQA_SPAWN ? 150000 : 30000);   // QA dwell cat lingers for visual inspection
@@ -262,6 +214,6 @@ function spawnCat(roomId){
 
   appCleanup = ()=>{
     clearTimeout(timer); clearInterval(watch);
-    if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); parts.forEach(p=>p.dispose()); glow.dispose(); root.dispose(); }
+    if (!sc.isDisposed) { sc.onBeforeRenderObservable.remove(obs); plane.dispose(); glow.dispose(); }
   };
 }
