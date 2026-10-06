@@ -7,6 +7,10 @@
 Object.assign(ITEMS,{
   witchhat:   { name:"Witch's Hat",       icon:'🎩', collectible:false, desc:'Slouched, patched, still warm. It hangs at exactly the height of a standing woman. You check the hook. The hook is lower than the hat.' },
   potions:    { name:'Green Potions',      icon:'🧪', collectible:false, desc:'Three flasks, thick as syrup, lit from inside. The labels are centuries of the same word in three different dead languages. The colour is not a colour you should drink.' },
+  greatcauldron:{ name:"Helga's Great Cauldron", icon:'🫕', collectible:false, desc:'Big enough to bathe in. She does not bathe in it. The brew has been simmering longer than anyone can remember and, by the smell of it, it still needs three more days.' },
+  grimoire:   { name:"Helga's Grimoire",      icon:'📖', collectible:false, desc:'Open on a page of measurements. Not the cooking kind. One line is underlined twice in a steady, patient hand: never on the first frost.' },
+  specimens:  { name:'Specimen Jars',         icon:'🫙', collectible:false, desc:'Preserved in brine and patience, each labelled in the same small neat hand. None of the labels are names you would use. One label bears tomorrow\'s date.' },
+  bsworkbench:{ name:'Preparation Table',    icon:'⚗️', collectible:false, desc:'Mortar still faintly warm. The pouch is labelled with a knot code you almost recognise. Whatever gets ground here gets ground at night.' },
   sigils:     { name:'Chalk Sigils',      icon:'🌀', collectible:false, desc:'A circle, half-scrubbed away, as if someone started removing it and lost their nerve. Inside it the floor is clean. The chalk dust outside it is not.' },
   saltline:   { name:'Salt Line',          icon:'🧂', collectible:false, desc:'A thick white line across the threshold. Nothing has crossed it. The salt is fresh. Whatever it keeps out has not tested it recently.' },
   gramophone: { name:'The Gramophone',     icon:'📻', collectible:false, desc:'The horn is warm. The crank turns one way only. There is no record on it, and nothing is playing, and yet the room is quieter when you are next to it.' },
