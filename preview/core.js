@@ -151,7 +151,7 @@ function doorwayWall(baseName, wallW, wallH, wx, wz, rotY, baseMat, doors){
   const fills=[]; let prev=-half;
   for(const o of offs){
     fills.push([prev,o.off-o.dw/2,wallH,0]);          // fill from the previous edge to this opening
-    fills.push([o.off,o.off+o.dw,wallH-o.dh,o.dh]);   // header above the opening
+    fills.push([o.off-o.dw/2,o.off+o.dw/2,wallH-o.dh,o.dh]);   // header above the opening, centered on it like the side fills
     prev=o.off+o.dw/2;
   }
   fills.push([prev,half,wallH,0]);
