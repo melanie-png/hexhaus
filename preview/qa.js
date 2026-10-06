@@ -249,8 +249,10 @@ if (new URLSearchParams(location.search).has('qa')) {
             check(!!catB,'the cat spawns on demand');
             if(catB){
               check(interactables.get('app_cat_body')==='helga_cat','the cat is examineable');
-              const ec=scene.getMeshByName('app_cat_e1').material.emissiveColor;
-              check(ec.g>0.5&&ec.g>ec.r,'the cat has green eyes');
+              const cm=catB.material;
+              check(/hans/.test(cm.emissiveTexture?.url||''),'the cat is the painted hans sprite');
+              check(cm.useAlphaFromDiffuseTexture===true,'hans sprite alpha comes from the art');
+              check(cm.backFaceCulling===false,'hans sprite is two-sided');
             }
             // ── sound + animation pass ──
             // light switch pass: every dark room gets a working switch
@@ -306,7 +308,7 @@ if (new URLSearchParams(location.search).has('qa')) {
                   if(cb2){
                     const cp=cb2.getAbsolutePosition();
                     camera.position.set(cp.x-2.1, 1.05, cp.z+2.3);
-                    camera.setTarget(new BABYLON.Vector3(cp.x, 0.45, cp.z));
+                    camera.setTarget(new BABYLON.Vector3(cp.x, 0.28, cp.z));
                     scene.render();
                   }
                 },700);
