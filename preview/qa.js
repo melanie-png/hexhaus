@@ -71,7 +71,7 @@ if (new URLSearchParams(location.search).has('qa')) {
         check(state.currentRoom===roomId,roomId+' builds');
         check(camera.position.x===0&&camera.position.z===0,roomId+' centered camera');
         if(roomId==='pantry'){
-          for(const name of ['p_jarFill00','p_label02','p_wax00','p_corbel0_40','p_hangRail1','p_herbStr3','p_sack_neck','p_sack2_neck','p_produceCrate0','p_potato3','p_onion1','p_squash','p_basketFill0_1','p_chestBand8','p_chestSeam','p_shelfLip2'])check(!!scene.getMeshByName(name),'pantry furnishing '+name+' built');
+          for(const name of ['p_jarFill00','p_label02','p_wax00','p_corbel0_40','p_hangRail1','p_herbStr3','p_sack_neck','p_sack2_neck','p_produceCrate0_bottom','p_produceCrate1_bottom','p_potato3','p_onion1','p_squash','p_basketFill0_1','p_chestBand8','p_chestSeam','p_shelfLip2'])check(!!scene.getMeshByName(name),'pantry furnishing '+name+' built');
           check(scene.meshes.filter(m=>m.name.startsWith('p_jar')&&/^p_jar\d\d$/.test(m.name)).length===18,'pantry keeps its 18 named jars');
           for(const [name,key] of [['door_kitchen','door_kitchen'],['door_basement','door_basement'],['sw_plate_pantry','lightswitch_pantry'],['p_jar00','jars'],['p_jar11','jars'],['p_glow','crystalball']]){
             const m=scene.getMeshByName(name);m.computeWorldMatrix(true);const aim=m.getBoundingInfo().boundingSphere.centerWorld;
